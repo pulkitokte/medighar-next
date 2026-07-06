@@ -4,14 +4,7 @@ import Section from "@/shared/components/ui/Section.jsx";
 import Container from "@/shared/components/ui/Container.jsx";
 import Button from "@/shared/components/ui/Button.jsx";
 import { cn } from "@/shared/lib/cn.js";
-
-const QUICK_ACTIONS = ["Doctors", "Medicines", "Diseases", "Pharmacy"];
-
-const STATS = [
-  { value: "1000+", label: "Doctors" },
-  { value: "500+", label: "Medicines" },
-  { value: "4", label: "Healthcare Systems" },
-];
+import { QUICK_ACTIONS, STATS } from "@/data/home/hero.js";
 
 function QuickActionPill({ label }) {
   return (

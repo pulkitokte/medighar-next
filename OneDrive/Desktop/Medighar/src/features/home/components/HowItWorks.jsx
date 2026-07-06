@@ -1,35 +1,8 @@
-import { Search, Scale, Users, CheckCircle2 } from "lucide-react";
 import Section from "@/shared/components/ui/Section.jsx";
 import Container from "@/shared/components/ui/Container.jsx";
 import PageHeading from "@/shared/components/ui/PageHeading.jsx";
 import { cn } from "@/shared/lib/cn.js";
-
-const STEPS = [
-  {
-    number: 1,
-    title: "Search",
-    description: "Search doctors, medicines or diseases.",
-    icon: Search,
-  },
-  {
-    number: 2,
-    title: "Compare",
-    description: "Compare treatment approaches and healthcare systems.",
-    icon: Scale,
-  },
-  {
-    number: 3,
-    title: "Connect",
-    description: "Find doctors and nearby pharmacies.",
-    icon: Users,
-  },
-  {
-    number: 4,
-    title: "Take Action",
-    description: "Book appointments or continue your healthcare journey.",
-    icon: CheckCircle2,
-  },
-];
+import { STEPS } from "@/data/home/howItWorks.js";
 
 function StepCard({ step, isLast }) {
   const Icon = step.icon;
