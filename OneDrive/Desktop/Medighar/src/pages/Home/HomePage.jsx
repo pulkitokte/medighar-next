@@ -1,8 +1,14 @@
+import Section from "@/shared/components/ui/Section.jsx";
+import Container from "@/shared/components/ui/Container.jsx";
+import PageHeading from "@/shared/components/ui/PageHeading.jsx";
+
 function HomePage() {
   return (
-    <div className="flex min-h-screen items-center justify-center">
-      <h1>Medighar</h1>
-    </div>
+    <Section>
+      <Container>
+        <PageHeading title="Medighar" subtitle="Healthcare made simpler." />
+      </Container>
+    </Section>
   );
 }
 
