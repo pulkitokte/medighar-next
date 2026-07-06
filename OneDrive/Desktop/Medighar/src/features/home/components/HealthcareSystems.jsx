@@ -10,30 +10,35 @@ function HealthcareSystemCard({ system }) {
   return (
     <div
       className={cn(
-        'flex h-full flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition',
-        'hover:-translate-y-1 hover:shadow-lg',
+        "flex h-full flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition",
+        "hover:-translate-y-1 hover:shadow-lg",
         system.accent.hoverBorder,
       )}
     >
       <span
         className={cn(
-          'flex h-12 w-12 items-center justify-center rounded-xl',
+          "flex h-12 w-12 items-center justify-center rounded-xl",
           system.accent.iconBg,
         )}
       >
-        <Icon className={cn('h-6 w-6', system.accent.iconText)} aria-hidden="true" />
+        <Icon
+          className={cn("h-6 w-6", system.accent.iconText)}
+          aria-hidden="true"
+        />
       </span>
 
       <h3 className="text-lg font-semibold text-slate-900">{system.name}</h3>
 
-      <p className="line-clamp-2 flex-1 text-sm text-slate-600">{system.description}</p>
+      <p className="line-clamp-2 flex-1 text-sm text-slate-600">
+        {system.description}
+      </p>
 
       <div className="flex flex-wrap gap-2">
         {system.tags.map((tag) => (
           <span
             key={tag}
             className={cn(
-              'rounded-full px-3 py-1 text-xs font-medium',
+              "rounded-full px-3 py-1 text-xs font-medium",
               system.accent.tagBg,
               system.accent.tagText,
             )}
@@ -43,14 +48,17 @@ function HealthcareSystemCard({ system }) {
         ))}
       </div>
 
-      
+      <a
         href="#"
-        className={cn('inline-flex items-center text-sm font-medium', system.accent.link)}
+        className={cn(
+          "inline-flex items-center text-sm font-medium",
+          system.accent.link,
+        )}
       >
         Learn More <span aria-hidden="true">&nbsp;&rarr;</span>
       </a>
     </div>
-  )
+  );
 }
 
 function HealthcareSystems() {

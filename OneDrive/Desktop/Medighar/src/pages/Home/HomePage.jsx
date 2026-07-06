@@ -4,6 +4,9 @@ import HowItWorks from "@/features/home/components/HowItWorks.jsx";
 import WhyChooseMedighar from "@/features/home/components/WhyChooseMedighar.jsx";
 import FeaturedServices from "@/features/home/components/FeaturedServices.jsx";
 import Testimonials from "@/features/home/components/Testimonials.jsx";
+import FAQ from "@/features/home/components/FAQ.jsx";
+import CTA from "@/features/home/components/CTA.jsx";
+import Footer from "@/features/home/components/Footer.jsx";
 
 function HomePage() {
   return (
@@ -14,6 +17,9 @@ function HomePage() {
       <WhyChooseMedighar />
       <FeaturedServices />
       <Testimonials />
+      <FAQ />
+      <CTA />
+      <Footer />
     </>
   );
 }
