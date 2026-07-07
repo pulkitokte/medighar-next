@@ -1,15 +1,14 @@
-import { useState } from "react";
 import { Search, X } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/shared/lib/cn.js";
 
 function SearchBar({
+  value,
+  onChange,
   placeholder = "Search doctors, medicines, diseases...",
   className,
 }) {
-  const [value, setValue] = useState("");
-
-  const handleClear = () => setValue("");
+  const handleClear = () => onChange("");
 
   return (
     <div
@@ -26,7 +25,7 @@ function SearchBar({
       <input
         type="text"
         value={value}
-        onChange={(event) => setValue(event.target.value)}
+        onChange={(event) => onChange(event.target.value)}
         aria-label="Search Medighar"
         placeholder={placeholder}
         className="h-12 w-full min-w-0 bg-transparent text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none sm:text-base"

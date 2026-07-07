@@ -7,6 +7,7 @@ import SearchBar from "@/features/search/components/SearchBar.jsx";
 import SearchCategoryTabs from "@/features/search/components/SearchCategoryTabs.jsx";
 import SearchFilters from "@/features/search/components/SearchFilters.jsx";
 import EmptySearchState from "@/features/search/components/EmptySearchState.jsx";
+import SearchResults from "@/features/search/components/SearchResults.jsx";
 import { SEARCH_CATEGORIES } from "@/data/search/categories.js";
 import { SEARCH_FILTERS } from "@/data/search/filters.js";
 
@@ -16,6 +17,7 @@ const fadeUp = {
 };
 
 function SearchPage() {
+  const [query, setQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState(
     SEARCH_CATEGORIES[0].key,
   );
@@ -25,6 +27,8 @@ function SearchPage() {
     () => SEARCH_CATEGORIES.find((category) => category.key === activeCategory),
     [activeCategory],
   );
+
+  const hasQuery = query.length > 0;
 
   return (
     <Section paddingY="py-16 sm:py-20">
@@ -46,7 +50,11 @@ function SearchPage() {
           transition={{ duration: 0.4, ease: "easeOut", delay: 0.05 }}
           className="w-full max-w-2xl"
         >
-          <SearchBar placeholder={activeCategoryData?.placeholder} />
+          <SearchBar
+            value={query}
+            onChange={setQuery}
+            placeholder={activeCategoryData?.placeholder}
+          />
         </motion.div>
 
         <motion.div
@@ -76,7 +84,7 @@ function SearchPage() {
           transition={{ duration: 0.4, ease: "easeOut", delay: 0.2 }}
           className="w-full"
         >
-          <EmptySearchState />
+          {hasQuery ? <SearchResults /> : <EmptySearchState />}
         </motion.div>
       </Container>
     </Section>
