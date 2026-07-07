@@ -1,7 +1,10 @@
-import { SearchX } from "lucide-react";
+import { Search, SearchX } from "lucide-react";
 import { motion } from "framer-motion";
 
-function EmptySearchState() {
+function EmptySearchState({ query = "" }) {
+  const hasQuery = query.trim().length > 0;
+  const Icon = hasQuery ? SearchX : Search;
+
   return (
     <div className="flex flex-col items-center gap-6 py-16 text-center">
       <motion.div
@@ -14,17 +17,20 @@ function EmptySearchState() {
         <div className="absolute -right-2 bottom-3 h-6 w-6 rounded-full bg-cyan-100 shadow-sm" />
 
         <div className="relative flex h-20 w-20 items-center justify-center rounded-3xl border border-slate-200 bg-white shadow-md">
-          <SearchX className="h-9 w-9 text-blue-500" aria-hidden="true" />
+          <Icon className="h-9 w-9 text-blue-500" aria-hidden="true" />
         </div>
       </motion.div>
 
       <div className="flex flex-col items-center gap-1">
         <p className="text-base font-medium text-slate-900 sm:text-lg">
-          Nothing to show yet
+          {hasQuery ? "No results found" : "Nothing to show yet"}
         </p>
         <p className="max-w-md text-sm text-slate-600 sm:text-base">
-          Start searching to discover doctors, medicines, diseases and
-          healthcare services.
+          {hasQuery ? (
+            <>No results found for &ldquo;{query.trim()}&rdquo;</>
+          ) : (
+            "Start searching to discover doctors, medicines, diseases and healthcare services."
+          )}
         </p>
       </div>
     </div>

@@ -1,6 +1,7 @@
 import { cn } from "@/shared/lib/cn.js";
 import Button from "@/shared/components/ui/Button.jsx";
 import ResultBadge from "@/features/search/components/ResultBadge.jsx";
+import { highlightText } from "@/features/search/utils/highlightText.js";
 
 function ResultCard({
   icon: Icon,
@@ -9,6 +10,7 @@ function ResultCard({
   badge,
   metadata = [],
   cta,
+  query = "",
   className,
 }) {
   return (
@@ -32,8 +34,12 @@ function ResultCard({
       </div>
 
       <div className="flex flex-col gap-2">
-        <h3 className="text-lg font-semibold text-slate-900">{title}</h3>
-        <p className="text-sm text-slate-600">{description}</p>
+        <h3 className="text-lg font-semibold text-slate-900">
+          {highlightText(title, query)}
+        </h3>
+        <p className="text-sm text-slate-600">
+          {highlightText(description, query)}
+        </p>
       </div>
 
       {metadata.length > 0 && (

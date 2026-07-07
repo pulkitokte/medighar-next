@@ -8,8 +8,10 @@ import SearchCategoryTabs from "@/features/search/components/SearchCategoryTabs.
 import SearchFilters from "@/features/search/components/SearchFilters.jsx";
 import EmptySearchState from "@/features/search/components/EmptySearchState.jsx";
 import SearchResults from "@/features/search/components/SearchResults.jsx";
+import { filterSearchResults } from "@/features/search/utils/searchResults.js";
 import { SEARCH_CATEGORIES } from "@/data/search/categories.js";
 import { SEARCH_FILTERS } from "@/data/search/filters.js";
+import { MOCK_RESULTS } from "@/data/search/mockResults.js";
 
 const fadeUp = {
   initial: { opacity: 0, y: 16 },
@@ -18,9 +20,7 @@ const fadeUp = {
 
 function SearchPage() {
   const [query, setQuery] = useState("");
-  const [activeCategory, setActiveCategory] = useState(
-    SEARCH_CATEGORIES[0].key,
-  );
+  const [activeCategory, setActiveCategory] = useState("all");
   const [activeFilter, setActiveFilter] = useState(SEARCH_FILTERS[0].key);
 
   const activeCategoryData = useMemo(
@@ -28,7 +28,16 @@ function SearchPage() {
     [activeCategory],
   );
 
-  const hasQuery = query.length > 0;
+  const filteredResults = useMemo(
+    () =>
+      filterSearchResults({
+        query,
+        category: activeCategory,
+        filter: activeFilter,
+        results: MOCK_RESULTS,
+      }),
+    [query, activeCategory, activeFilter],
+  );
 
   return (
     <Section paddingY="py-16 sm:py-20">
@@ -84,7 +93,11 @@ function SearchPage() {
           transition={{ duration: 0.4, ease: "easeOut", delay: 0.2 }}
           className="w-full"
         >
-          {hasQuery ? <SearchResults /> : <EmptySearchState />}
+          {filteredResults.length === 0 ? (
+            <EmptySearchState query={query} />
+          ) : (
+            <SearchResults results={filteredResults} query={query} />
+          )}
         </motion.div>
       </Container>
     </Section>

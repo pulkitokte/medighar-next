@@ -1,12 +1,11 @@
 import { motion } from "framer-motion";
 import ResultCard from "@/features/search/components/ResultCard.jsx";
 import ResultSectionHeader from "@/features/search/components/ResultSectionHeader.jsx";
-import { MOCK_RESULTS } from "@/data/search/mockResults.js";
 
-function SearchResults({ results = MOCK_RESULTS }) {
+function SearchResults({ results, query = "" }) {
   return (
     <div className="flex w-full flex-col gap-6">
-      <ResultSectionHeader title="Showing Results" count={results.length} />
+      <ResultSectionHeader count={results.length} />
 
       <div className="grid w-full grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {results.map((result, index) => (
@@ -27,6 +26,7 @@ function SearchResults({ results = MOCK_RESULTS }) {
               badge={result.badge}
               metadata={result.metadata}
               cta={result.cta}
+              query={query}
             />
           </motion.div>
         ))}

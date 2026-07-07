@@ -10,6 +10,15 @@ function SearchBar({
 }) {
   const handleClear = () => onChange("");
 
+  const handleKeyDown = (event) => {
+    if (event.key === "Escape") {
+      onChange("");
+    }
+    if (event.key === "Enter") {
+      event.preventDefault();
+    }
+  };
+
   return (
     <div
       className={cn(
@@ -26,6 +35,7 @@ function SearchBar({
         type="text"
         value={value}
         onChange={(event) => onChange(event.target.value)}
+        onKeyDown={handleKeyDown}
         aria-label="Search Medighar"
         placeholder={placeholder}
         className="h-12 w-full min-w-0 bg-transparent text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none sm:text-base"

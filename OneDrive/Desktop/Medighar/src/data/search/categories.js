@@ -1,34 +1,47 @@
- import { Stethoscope, Pill, Activity, HeartPulse, Store } from 'lucide-react'
+import {
+  LayoutGrid,
+  Stethoscope,
+  Pill,
+  Activity,
+  HeartPulse,
+  Store,
+} from "lucide-react";
 
 export const SEARCH_CATEGORIES = [
   {
-    key: 'doctors',
-    label: 'Doctors',
+    key: "all",
+    label: "All",
+    icon: LayoutGrid,
+    placeholder: "Search doctors, medicines, diseases...",
+  },
+  {
+    key: "doctor",
+    label: "Doctors",
     icon: Stethoscope,
-    placeholder: 'Search doctors by name or specialty...',
+    placeholder: "Search doctors by name or specialty...",
   },
   {
-    key: 'medicines',
-    label: 'Medicines',
+    key: "medicine",
+    label: "Medicines",
     icon: Pill,
-    placeholder: 'Search medicines by name or use...',
+    placeholder: "Search medicines by name or use...",
   },
   {
-    key: 'diseases',
-    label: 'Diseases',
+    key: "disease",
+    label: "Diseases",
     icon: Activity,
-    placeholder: 'Search diseases by name or symptom...',
+    placeholder: "Search diseases by name or symptom...",
   },
   {
-    key: 'healthcare-systems',
-    label: 'Healthcare Systems',
+    key: "healthcare-system",
+    label: "Healthcare Systems",
     icon: HeartPulse,
-    placeholder: 'Search healthcare systems...',
+    placeholder: "Search healthcare systems...",
   },
   {
-    key: 'pharmacies',
-    label: 'Pharmacies',
+    key: "pharmacy",
+    label: "Pharmacies",
     icon: Store,
-    placeholder: 'Search pharmacies near you...',
+    placeholder: "Search pharmacies near you...",
   },
-]
+];
