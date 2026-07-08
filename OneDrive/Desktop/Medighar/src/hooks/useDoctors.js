@@ -29,9 +29,6 @@ export function useDoctors() {
   const [sortBy, setSortBy] = useState("newest");
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Data is synchronous today (mock source), but loading/error are exposed
-  // now so consuming UI never needs to change when the repository starts
-  // reading from an async source such as Firestore.
   const [loading] = useState(false);
   const [error] = useState(null);
 
