@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Section from "@/shared/components/ui/Section.jsx";
 import Container from "@/shared/components/ui/Container.jsx";
@@ -8,15 +7,7 @@ import DoctorFilters from "@/features/doctors/components/DoctorFilters.jsx";
 import DoctorSort from "@/features/doctors/components/DoctorSort.jsx";
 import DoctorGrid from "@/features/doctors/components/DoctorGrid.jsx";
 import DoctorEmptyState from "@/features/doctors/components/DoctorEmptyState.jsx";
-import { DOCTORS } from "@/data/doctors/doctors.js";
-
-const DEFAULT_FILTERS = {
-  specialty: "All",
-  experience: "All",
-  location: "All",
-  gender: "All",
-  verifiedOnly: false,
-};
+import { useDoctors } from "@/hooks/useDoctors.js";
 
 function PaginationPlaceholder() {
   const pages = [1, 2, 3];
@@ -63,10 +54,7 @@ function PaginationPlaceholder() {
 }
 
 function DoctorsPage() {
-  const [filters, setFilters] = useState(DEFAULT_FILTERS);
-  const [sortBy, setSortBy] = useState("newest");
-
-  const doctors = DOCTORS;
+  const { doctors, filters, setFilters, sortBy, setSortBy } = useDoctors();
 
   return (
     <Section paddingY="py-16 sm:py-20">
