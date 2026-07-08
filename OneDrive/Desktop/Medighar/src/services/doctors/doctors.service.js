@@ -82,3 +82,17 @@ export function getDoctors({
 export function getDoctorById(id) {
   return repositoryGetDoctorById(id);
 }
+
+/**
+ * Validates the given id and returns the matching doctor's details, or null
+ * if the id is invalid or no doctor is found.
+ * @param {string} id
+ * @returns {object|null}
+ */
+export function getDoctorDetails(id) {
+  if (typeof id !== "string" || id.trim().length === 0) {
+    return null;
+  }
+
+  return repositoryGetDoctorById(id);
+}

@@ -11,6 +11,11 @@ export const DOCTORS = [
     city: "Jaipur",
     gender: "female",
     verified: true,
+    healthcareSystem: "Allopathy",
+    languages: ["English", "Hindi"],
+    biography:
+      "Dr. Neha Kapoor is a cardiologist focused on preventive heart care, helping patients manage risk factors long before symptoms appear.",
+    availability: ["Mon - Fri, 10:00 AM - 4:00 PM", "Sat, 10:00 AM - 1:00 PM"],
   },
   {
     id: "doctor-2",
@@ -24,6 +29,11 @@ export const DOCTORS = [
     city: "Pune",
     gender: "male",
     verified: true,
+    healthcareSystem: "Allopathy",
+    languages: ["English", "Hindi", "Marathi"],
+    biography:
+      "Dr. Arjun Rao is a general physician experienced in family medicine, routine checkups, and everyday illness management.",
+    availability: ["Mon - Sat, 9:00 AM - 2:00 PM"],
   },
   {
     id: "doctor-3",
@@ -37,6 +47,11 @@ export const DOCTORS = [
     city: "Kochi",
     gender: "female",
     verified: true,
+    healthcareSystem: "Allopathy",
+    languages: ["English", "Malayalam"],
+    biography:
+      "Dr. Kavita Iyer treats a wide range of skin, hair, and nail conditions with a focus on long-term, evidence-based care.",
+    availability: ["Tue - Sat, 11:00 AM - 5:00 PM"],
   },
   {
     id: "doctor-4",
@@ -50,6 +65,11 @@ export const DOCTORS = [
     city: "Lucknow",
     gender: "male",
     verified: true,
+    healthcareSystem: "Allopathy",
+    languages: ["English", "Hindi", "Urdu"],
+    biography:
+      "Dr. Sameer Khan specializes in joint, bone, and sports injury care, with a strong focus on non-surgical recovery where possible.",
+    availability: ["Mon - Fri, 9:00 AM - 3:00 PM"],
   },
   {
     id: "doctor-5",
@@ -63,6 +83,11 @@ export const DOCTORS = [
     city: "Nagpur",
     gender: "female",
     verified: true,
+    healthcareSystem: "Allopathy",
+    languages: ["English", "Hindi", "Marathi"],
+    biography:
+      "Dr. Priyanka Deshmukh diagnoses and manages neurological conditions, from chronic migraines to complex nerve disorders.",
+    availability: ["Mon, Wed, Fri, 10:00 AM - 4:00 PM"],
   },
   {
     id: "doctor-6",
@@ -76,6 +101,11 @@ export const DOCTORS = [
     city: "Ahmedabad",
     gender: "male",
     verified: false,
+    healthcareSystem: "Allopathy",
+    languages: ["English", "Hindi", "Gujarati"],
+    biography:
+      "Dr. Rohan Mehta cares for infants, children, and adolescents, with a gentle approach to routine and urgent pediatric visits.",
+    availability: ["Mon - Sat, 9:00 AM - 1:00 PM"],
   },
   {
     id: "doctor-7",
@@ -89,6 +119,11 @@ export const DOCTORS = [
     city: "Hyderabad",
     gender: "female",
     verified: true,
+    healthcareSystem: "Allopathy",
+    languages: ["English", "Hindi", "Telugu"],
+    biography:
+      "Dr. Sunita Reddy provides comprehensive women's health care, from routine screenings to high-risk pregnancy management.",
+    availability: ["Mon - Fri, 11:00 AM - 5:00 PM"],
   },
   {
     id: "doctor-8",
@@ -102,6 +137,11 @@ export const DOCTORS = [
     city: "Bengaluru",
     gender: "male",
     verified: true,
+    healthcareSystem: "Allopathy",
+    languages: ["English", "Kannada"],
+    biography:
+      "Dr. Vikram Nair offers general and cosmetic dental care, with an emphasis on painless, patient-friendly procedures.",
+    availability: ["Tue - Sun, 10:00 AM - 6:00 PM"],
   },
   {
     id: "doctor-9",
@@ -115,6 +155,11 @@ export const DOCTORS = [
     city: "Indore",
     gender: "female",
     verified: false,
+    healthcareSystem: "Allopathy",
+    languages: ["English", "Hindi"],
+    biography:
+      "Dr. Anjali Verma treats ear, nose, and throat conditions, from routine infections to hearing and sinus concerns.",
+    availability: ["Mon - Fri, 10:00 AM - 3:00 PM"],
   },
   {
     id: "doctor-10",
@@ -128,6 +173,11 @@ export const DOCTORS = [
     city: "Mumbai",
     gender: "male",
     verified: true,
+    healthcareSystem: "Allopathy",
+    languages: ["English", "Hindi", "Marathi"],
+    biography:
+      "Dr. Karan Desai supports mental health through compassionate, judgment-free consultations for anxiety, mood, and stress-related concerns.",
+    availability: ["Mon - Sat, 12:00 PM - 6:00 PM"],
   },
   {
     id: "doctor-11",
@@ -141,6 +191,11 @@ export const DOCTORS = [
     city: "Chennai",
     gender: "female",
     verified: true,
+    healthcareSystem: "Allopathy",
+    languages: ["English", "Tamil"],
+    biography:
+      "Dr. Meera Pillai is a senior cardiologist with nearly two decades of experience in complex cardiac diagnosis and long-term care.",
+    availability: ["Mon - Fri, 9:00 AM - 1:00 PM"],
   },
   {
     id: "doctor-12",
@@ -154,6 +209,11 @@ export const DOCTORS = [
     city: "Delhi",
     gender: "male",
     verified: false,
+    healthcareSystem: "Allopathy",
+    languages: ["English", "Hindi"],
+    biography:
+      "Dr. Aditya Sharma is a general physician focused on accessible, everyday primary care for individuals and families.",
+    availability: ["Mon - Sat, 10:00 AM - 2:00 PM"],
   },
   {
     id: "doctor-13",
@@ -167,6 +227,11 @@ export const DOCTORS = [
     city: "Kolkata",
     gender: "female",
     verified: true,
+    healthcareSystem: "Allopathy",
+    languages: ["English", "Bengali"],
+    biography:
+      "Dr. Divya Menon specializes in joint replacement and sports injury rehabilitation, helping patients regain mobility safely.",
+    availability: ["Mon - Fri, 11:00 AM - 4:00 PM"],
   },
   {
     id: "doctor-14",
@@ -180,6 +245,11 @@ export const DOCTORS = [
     city: "Bhopal",
     gender: "male",
     verified: true,
+    healthcareSystem: "Allopathy",
+    languages: ["English", "Hindi"],
+    biography:
+      "Dr. Manish Gupta brings two decades of neurology experience to the diagnosis and management of complex nerve and brain conditions.",
+    availability: ["Mon, Tue, Thu, 9:00 AM - 3:00 PM"],
   },
   {
     id: "doctor-15",
@@ -193,5 +263,10 @@ export const DOCTORS = [
     city: "Surat",
     gender: "female",
     verified: false,
+    healthcareSystem: "Allopathy",
+    languages: ["English", "Hindi", "Gujarati"],
+    biography:
+      "Dr. Ritu Chawla focuses on everyday skin health, from acne and allergies to general dermatological consultations.",
+    availability: ["Tue - Sat, 10:00 AM - 4:00 PM"],
   },
 ];

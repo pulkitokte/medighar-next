@@ -1,8 +1,15 @@
+import { useNavigate } from "react-router-dom";
 import { BadgeCheck, Star, Clock, MapPin, IndianRupee } from "lucide-react";
 import { cn } from "@/shared/lib/cn.js";
 import Button from "@/shared/components/ui/Button.jsx";
 
 function DoctorCard({ doctor, className }) {
+  const navigate = useNavigate();
+
+  const handleViewProfile = () => {
+    navigate(`/doctors/${doctor.id}`);
+  };
+
   return (
     <div
       className={cn(
@@ -72,7 +79,12 @@ function DoctorCard({ doctor, className }) {
         <Button size="sm" fullWidth>
           Book Appointment
         </Button>
-        <Button variant="outline" size="sm" fullWidth>
+        <Button
+          variant="outline"
+          size="sm"
+          fullWidth
+          onClick={handleViewProfile}
+        >
           View Profile
         </Button>
       </div>
