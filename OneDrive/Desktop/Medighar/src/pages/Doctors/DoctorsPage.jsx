@@ -8,6 +8,8 @@ import DoctorFilters from "@/features/doctors/components/DoctorFilters.jsx";
 import DoctorSort from "@/features/doctors/components/DoctorSort.jsx";
 import DoctorGrid from "@/features/doctors/components/DoctorGrid.jsx";
 import DoctorEmptyState from "@/features/doctors/components/DoctorEmptyState.jsx";
+import LoadingState from "@/shared/components/ui/LoadingState.jsx";
+import ErrorState from "@/shared/components/ui/ErrorState.jsx";
 import { useDoctors } from "@/hooks/useDoctors.js";
 
 function Pagination({ currentPage, totalPages, onPageChange }) {
@@ -61,6 +63,9 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
 function DoctorsPage() {
   const {
     paginatedDoctors,
+    loading,
+    error,
+    refetch,
     filters,
     setFilters,
     sortBy,
@@ -90,7 +95,15 @@ function DoctorsPage() {
         <div className="flex flex-col gap-6">
           <DoctorSort value={sortBy} onChange={setSortBy} />
 
-          {paginatedDoctors.length === 0 ? (
+          {loading ? (
+            <LoadingState label="Loading doctors..." />
+          ) : error ? (
+            <ErrorState
+              title="Unable to load doctors"
+              description="Something went wrong while loading the doctor list."
+              retry={refetch}
+            />
+          ) : paginatedDoctors.length === 0 ? (
             <DoctorEmptyState />
           ) : (
             <DoctorGrid doctors={paginatedDoctors} />

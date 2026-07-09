@@ -1,5 +1,6 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
+import { useQuery } from "@/hooks/useQuery.js";
 import { getDoctors } from "@/services/doctors/doctors.service.js";
 
 const DEFAULT_FILTERS = {
@@ -36,12 +37,15 @@ function isDefaultValue(value) {
  * Loads and derives the doctor listing state for the Doctors page.
  * All filter, search, sort, and pagination state is persisted to the URL
  * so refreshing or sharing a link preserves the current view.
+ * Data loading goes through useQuery(), which will require no changes when
+ * the underlying service starts reading from a real backend.
  * UI components never touch the repository or service directly.
  * @returns {{
  *   doctors: Array<object>,
  *   paginatedDoctors: Array<object>,
  *   loading: boolean,
  *   error: unknown,
+ *   refetch: Function,
  *   filters: object,
  *   setFilters: Function,
  *   sortBy: string,
@@ -61,9 +65,6 @@ export function useDoctors() {
   const sortBy = searchParams.get("sort") || "newest";
   const rawPage = parseInt(searchParams.get("page") || "1", 10);
   const currentPage = Number.isFinite(rawPage) && rawPage > 0 ? rawPage : 1;
-
-  const [loading] = useState(false);
-  const [error] = useState(null);
 
   const updateParams = useCallback(
     (updates, { resetPage = false } = {}) => {
@@ -119,24 +120,32 @@ export function useDoctors() {
     [updateParams],
   );
 
-  const doctors = useMemo(
+  const {
+    data: doctors,
+    loading,
+    error,
+    refetch,
+  } = useQuery(
     () => getDoctors({ searchQuery, filters, sortBy }),
-    [searchQuery, filters, sortBy],
+    [searchQuery, JSON.stringify(filters), sortBy],
   );
 
-  const totalPages = Math.max(1, Math.ceil(doctors.length / PAGE_SIZE));
+  const resolvedDoctors = useMemo(() => doctors ?? [], [doctors]);
+
+  const totalPages = Math.max(1, Math.ceil(resolvedDoctors.length / PAGE_SIZE));
   const safeCurrentPage = Math.min(currentPage, totalPages);
 
   const paginatedDoctors = useMemo(() => {
     const start = (safeCurrentPage - 1) * PAGE_SIZE;
-    return doctors.slice(start, start + PAGE_SIZE);
-  }, [doctors, safeCurrentPage]);
+    return resolvedDoctors.slice(start, start + PAGE_SIZE);
+  }, [resolvedDoctors, safeCurrentPage]);
 
   return {
-    doctors,
+    doctors: resolvedDoctors,
     paginatedDoctors,
     loading,
     error,
+    refetch,
     filters,
     setFilters,
     sortBy,
