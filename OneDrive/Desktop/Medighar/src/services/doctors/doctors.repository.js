@@ -1,5 +1,9 @@
 import { DOCTORS } from "@/data/doctors/doctors.js";
 import { safeSearch } from "@/shared/lib/repositoryHelpers.js";
+import {
+  filterByEquality,
+  filterByBoolean,
+} from "@/shared/lib/filterHelpers.js";
 
 /**
  * Returns every doctor record.
@@ -43,19 +47,14 @@ export function searchDoctors(query, source = DOCTORS) {
 export function filterDoctors(filters = {}, source = DOCTORS) {
   const { specialty, gender, city, verified } = filters;
 
-  return source.filter((doctor) => {
-    if (specialty && specialty !== "All" && doctor.specialty !== specialty)
-      return false;
-    if (
-      gender &&
-      gender !== "All" &&
-      doctor.gender.toLowerCase() !== gender.toLowerCase()
-    ) {
-      return false;
-    }
-    if (city && city !== "All" && doctor.city !== city) return false;
-    if (verified && doctor.verified !== true) return false;
+  let result = [...source];
 
-    return true;
+  result = filterByEquality(result, "specialty", specialty);
+  result = filterByEquality(result, "gender", gender, {
+    transform: (value) => value?.toLowerCase(),
   });
+  result = filterByEquality(result, "city", city);
+  result = filterByBoolean(result, "verified", verified);
+
+  return result;
 }
