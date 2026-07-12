@@ -1,4 +1,5 @@
 import { DOCTORS } from "@/data/doctors/doctors.js";
+import { safeSearch } from "@/shared/lib/repositoryHelpers.js";
 
 /**
  * Returns every doctor record.
@@ -25,22 +26,12 @@ export function getDoctorById(id) {
  * @returns {Array<object>}
  */
 export function searchDoctors(query, source = DOCTORS) {
-  const normalizedQuery = query?.trim().toLowerCase();
-
-  if (!normalizedQuery) return [...source];
-
-  return source.filter((doctor) => {
-    const haystack = [
-      doctor.name,
-      doctor.specialty,
-      doctor.qualification,
-      doctor.city,
-    ]
-      .join(" ")
-      .toLowerCase();
-
-    return haystack.includes(normalizedQuery);
-  });
+  return safeSearch(source, query, [
+    "name",
+    "specialty",
+    "qualification",
+    "city",
+  ]);
 }
 
 /**

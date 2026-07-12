@@ -4,6 +4,14 @@ import {
   searchDoctors as repositorySearchDoctors,
   filterDoctors as repositoryFilterDoctors,
 } from "@/services/doctors/doctors.repository.js";
+import { applySorting } from "@/shared/lib/serviceHelpers.js";
+
+const SORT_COMPARATORS = {
+  "highest-rated": (a, b) => b.rating - a.rating,
+  "most-experienced": (a, b) => b.experienceYears - a.experienceYears,
+  "lowest-fee": (a, b) => a.fee - b.fee,
+  newest: () => 0,
+};
 
 function matchesExperience(doctor, experience) {
   if (!experience || experience === "All") return true;
@@ -12,22 +20,6 @@ function matchesExperience(doctor, experience) {
     return doctor.experienceYears > 5 && doctor.experienceYears <= 10;
   if (experience === "10+ yrs") return doctor.experienceYears > 10;
   return true;
-}
-
-function sortDoctors(doctors, sortBy) {
-  const sorted = [...doctors];
-
-  switch (sortBy) {
-    case "highest-rated":
-      return sorted.sort((a, b) => b.rating - a.rating);
-    case "most-experienced":
-      return sorted.sort((a, b) => b.experienceYears - a.experienceYears);
-    case "lowest-fee":
-      return sorted.sort((a, b) => a.fee - b.fee);
-    case "newest":
-    default:
-      return sorted;
-  }
 }
 
 /**
@@ -71,7 +63,9 @@ export function getDoctors({
     matchesExperience(doctor, filters.experience),
   );
 
-  return sortDoctors(doctors, sortBy);
+  return applySorting(doctors, sortBy, SORT_COMPARATORS, {
+    defaultSort: "newest",
+  });
 }
 
 /**
