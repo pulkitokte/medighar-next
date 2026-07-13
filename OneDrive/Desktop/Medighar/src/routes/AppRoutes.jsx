@@ -6,6 +6,8 @@ import DoctorsPage from "@/pages/Doctors/DoctorsPage.jsx";
 import DoctorDetailsPage from "@/pages/Doctors/DoctorDetailsPage.jsx";
 import MedicinesPage from "@/pages/Medicines/MedicinesPage.jsx";
 import MedicineDetailsPage from "@/pages/Medicines/MedicineDetailsPage.jsx";
+import DiseasesPage from "@/pages/Diseases/DiseasesPage.jsx";
+import DiseaseDetailsPage from "@/pages/Diseases/DiseaseDetailsPage.jsx";
 
 function AppRoutes() {
   return (
@@ -20,6 +22,8 @@ function AppRoutes() {
           path="/medicines/:medicineId"
           element={<MedicineDetailsPage />}
         />
+        <Route path="/diseases" element={<DiseasesPage />} />
+        <Route path="/diseases/:diseaseId" element={<DiseaseDetailsPage />} />
       </Route>
     </Routes>
   );
