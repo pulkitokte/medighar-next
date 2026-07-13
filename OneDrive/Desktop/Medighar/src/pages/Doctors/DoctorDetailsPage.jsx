@@ -8,12 +8,14 @@ import {
   Languages,
   CalendarClock,
   Share2,
+  Activity,
 } from "lucide-react";
 import Section from "@/shared/components/ui/Section.jsx";
 import Container from "@/shared/components/ui/Container.jsx";
 import Button from "@/shared/components/ui/Button.jsx";
 import { useDoctorDetails } from "@/hooks/useDoctorDetails.js";
 import DoctorNotFound from "@/features/doctors/components/DoctorNotFound.jsx";
+import DiseaseGrid from "@/features/diseases/components/DiseaseGrid.jsx";
 
 function InfoCard({ icon: Icon, label, value }) {
   return (
@@ -35,7 +37,7 @@ function handleShare() {
 }
 
 function DoctorDetailsPage() {
-  const { doctor, notFound } = useDoctorDetails();
+  const { doctor, treatsDiseases, notFound } = useDoctorDetails();
 
   if (notFound) {
     return (
@@ -143,6 +145,18 @@ function DoctorDetailsPage() {
             ))}
           </ul>
         </div>
+
+        {treatsDiseases.length > 0 && (
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center gap-2">
+              <Activity className="h-5 w-5 text-blue-600" aria-hidden="true" />
+              <h2 className="text-lg font-semibold text-slate-900">
+                Treats Diseases
+              </h2>
+            </div>
+            <DiseaseGrid diseases={treatsDiseases} />
+          </div>
+        )}
       </Container>
     </Section>
   );

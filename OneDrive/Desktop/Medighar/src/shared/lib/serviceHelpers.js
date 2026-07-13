@@ -1,8 +1,9 @@
 /**
  * Generic, entity-agnostic service-layer helpers. These express business
- * intent ("apply search", "apply sorting", "apply pagination") on top of the
- * generic repository helpers, so individual domain services can compose
- * consistent behavior without duplicating array logic.
+ * intent ("apply search", "apply sorting", "apply pagination", "resolve
+ * related records") on top of the generic repository helpers, so individual
+ * domain services can compose consistent behavior without duplicating array
+ * logic.
  *
  * Must never contain logic specific to any single domain.
  */
@@ -66,4 +67,20 @@ export function applySorting(
  */
 export function applyPagination(array, { page, pageSize } = {}) {
   return paginateArray(array, { page, pageSize });
+}
+
+/**
+ * Resolves an array of ids into an array of entity objects using a
+ * caller-supplied lookup function. Missing/unresolved ids are silently
+ * dropped rather than producing null entries. Used to turn relationship
+ * arrays (e.g. recommendedMedicineIds) stored on one entity into the
+ * actual related entities, without any domain-specific knowledge here.
+ * @param {Array<unknown>} ids
+ * @param {(id: unknown) => object|null} getByIdFn
+ * @returns {Array<object>}
+ */
+export function resolveByIds(ids, getByIdFn) {
+  if (!Array.isArray(ids) || typeof getByIdFn !== "function") return [];
+
+  return ids.map((id) => getByIdFn(id)).filter(Boolean);
 }

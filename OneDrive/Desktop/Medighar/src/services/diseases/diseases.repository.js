@@ -3,6 +3,7 @@ import { safeSearch, findById } from "@/shared/lib/repositoryHelpers.js";
 import {
   filterByEquality,
   filterByBoolean,
+  filterByPredicate,
 } from "@/shared/lib/filterHelpers.js";
 
 /**
@@ -57,4 +58,38 @@ export function filterDiseases(filters = {}, source = DISEASES) {
   result = filterByBoolean(result, "contagious", contagious);
 
   return result;
+}
+
+/**
+ * Returns every disease whose recommendedMedicineIds includes the given
+ * medicine id. Used to power a medicine's "Used For Diseases" section
+ * without duplicating the relationship on the medicine record itself.
+ * @param {string} medicineId
+ * @param {Array<object>} [source]
+ * @returns {Array<object>}
+ */
+export function getDiseasesByMedicineId(medicineId, source = DISEASES) {
+  return filterByPredicate(
+    source,
+    (disease) =>
+      Array.isArray(disease.recommendedMedicineIds) &&
+      disease.recommendedMedicineIds.includes(medicineId),
+  );
+}
+
+/**
+ * Returns every disease whose recommendedDoctorIds includes the given
+ * doctor id. Used to power a doctor's "Treats Diseases" section without
+ * duplicating the relationship on the doctor record itself.
+ * @param {string} doctorId
+ * @param {Array<object>} [source]
+ * @returns {Array<object>}
+ */
+export function getDiseasesByDoctorId(doctorId, source = DISEASES) {
+  return filterByPredicate(
+    source,
+    (disease) =>
+      Array.isArray(disease.recommendedDoctorIds) &&
+      disease.recommendedDoctorIds.includes(doctorId),
+  );
 }

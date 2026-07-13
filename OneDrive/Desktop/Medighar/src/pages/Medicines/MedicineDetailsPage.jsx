@@ -8,11 +8,13 @@ import {
   ListChecks,
   AlertTriangle,
   ShieldAlert,
+  Activity,
 } from "lucide-react";
 import Section from "@/shared/components/ui/Section.jsx";
 import Container from "@/shared/components/ui/Container.jsx";
 import { useMedicineDetails } from "@/hooks/useMedicineDetails.js";
 import MedicineNotFound from "@/features/medicine/components/MedicineNotFound.jsx";
+import DiseaseGrid from "@/features/diseases/components/DiseaseGrid.jsx";
 
 function InfoCard({ icon: Icon, label, value }) {
   return (
@@ -47,7 +49,7 @@ function ListSection({ icon: Icon, title, items }) {
 }
 
 function MedicineDetailsPage() {
-  const { medicine, notFound } = useMedicineDetails();
+  const { medicine, usedForDiseases, notFound } = useMedicineDetails();
 
   if (notFound) {
     return (
@@ -132,6 +134,18 @@ function MedicineDetailsPage() {
           title="Precautions"
           items={medicine.precautions}
         />
+
+        {usedForDiseases.length > 0 && (
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center gap-2">
+              <Activity className="h-5 w-5 text-blue-600" aria-hidden="true" />
+              <h2 className="text-lg font-semibold text-slate-900">
+                Used For Diseases
+              </h2>
+            </div>
+            <DiseaseGrid diseases={usedForDiseases} />
+          </div>
+        )}
       </Container>
     </Section>
   );

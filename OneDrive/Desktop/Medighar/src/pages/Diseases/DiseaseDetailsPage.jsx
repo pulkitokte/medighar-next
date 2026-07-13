@@ -12,11 +12,16 @@ import {
   ClipboardList,
   Pill,
   Link2,
+  Store,
 } from "lucide-react";
 import Section from "@/shared/components/ui/Section.jsx";
 import Container from "@/shared/components/ui/Container.jsx";
 import { useDiseaseDetails } from "@/hooks/useDiseaseDetails.js";
 import DiseaseNotFound from "@/features/diseases/components/DiseaseNotFound.jsx";
+import DiseaseGrid from "@/features/diseases/components/DiseaseGrid.jsx";
+import MedicineGrid from "@/features/medicine/components/MedicineGrid.jsx";
+import DoctorGrid from "@/features/doctors/components/DoctorGrid.jsx";
+import PharmacyGrid from "@/features/pharmacy/components/PharmacyGrid.jsx";
 
 const SEVERITY_CLASSES = {
   Mild: "bg-green-50 text-green-700",
@@ -56,8 +61,27 @@ function ListSection({ icon: Icon, title, items }) {
   );
 }
 
+function RelationSection({ icon: Icon, title, children }) {
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex items-center gap-2">
+        <Icon className="h-5 w-5 text-blue-600" aria-hidden="true" />
+        <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
+      </div>
+      {children}
+    </div>
+  );
+}
+
 function DiseaseDetailsPage() {
-  const { disease, notFound } = useDiseaseDetails();
+  const {
+    disease,
+    recommendedMedicines,
+    relatedDiseases,
+    recommendedDoctors,
+    recommendedPharmacies,
+    notFound,
+  } = useDiseaseDetails();
 
   if (notFound) {
     return (
@@ -159,16 +183,29 @@ function DiseaseDetailsPage() {
           </p>
         </div>
 
-        <ListSection
-          icon={Pill}
-          title="Common Medicines"
-          items={disease.commonMedicines}
-        />
-        <ListSection
-          icon={Link2}
-          title="Related Diseases"
-          items={disease.relatedDiseases}
-        />
+        {recommendedMedicines.length > 0 && (
+          <RelationSection icon={Pill} title="Recommended Medicines">
+            <MedicineGrid medicines={recommendedMedicines} />
+          </RelationSection>
+        )}
+
+        {recommendedDoctors.length > 0 && (
+          <RelationSection icon={Stethoscope} title="Recommended Doctors">
+            <DoctorGrid doctors={recommendedDoctors} />
+          </RelationSection>
+        )}
+
+        {recommendedPharmacies.length > 0 && (
+          <RelationSection icon={Store} title="Nearby Pharmacies">
+            <PharmacyGrid pharmacies={recommendedPharmacies} />
+          </RelationSection>
+        )}
+
+        {relatedDiseases.length > 0 && (
+          <RelationSection icon={Link2} title="Related Diseases">
+            <DiseaseGrid diseases={relatedDiseases} />
+          </RelationSection>
+        )}
       </Container>
     </Section>
   );

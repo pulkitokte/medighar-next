@@ -3,6 +3,8 @@ import {
   getDiseaseById as repositoryGetDiseaseById,
   searchDiseases as repositorySearchDiseases,
   filterDiseases as repositoryFilterDiseases,
+  getDiseasesByMedicineId as repositoryGetDiseasesByMedicineId,
+  getDiseasesByDoctorId as repositoryGetDiseasesByDoctorId,
 } from "@/services/diseases/diseases.repository.js";
 import { applySorting } from "@/shared/lib/serviceHelpers.js";
 
@@ -78,4 +80,26 @@ export function getDiseaseDetails(id) {
   }
 
   return repositoryGetDiseaseById(id);
+}
+
+/**
+ * Returns every disease that recommends the given medicine. Powers the
+ * Medicines module's "Used For Diseases" section without Medicines owning
+ * any part of this relationship.
+ * @param {string} medicineId
+ * @returns {Array<object>}
+ */
+export function getDiseasesUsingMedicine(medicineId) {
+  return repositoryGetDiseasesByMedicineId(medicineId);
+}
+
+/**
+ * Returns every disease that recommends the given doctor. Powers the
+ * Doctors module's "Treats Diseases" section without Doctors owning any
+ * part of this relationship.
+ * @param {string} doctorId
+ * @returns {Array<object>}
+ */
+export function getDiseasesTreatedByDoctor(doctorId) {
+  return repositoryGetDiseasesByDoctorId(doctorId);
 }
