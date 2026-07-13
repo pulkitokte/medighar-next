@@ -8,6 +8,8 @@ import MedicinesPage from "@/pages/Medicines/MedicinesPage.jsx";
 import MedicineDetailsPage from "@/pages/Medicines/MedicineDetailsPage.jsx";
 import DiseasesPage from "@/pages/Diseases/DiseasesPage.jsx";
 import DiseaseDetailsPage from "@/pages/Diseases/DiseaseDetailsPage.jsx";
+import PharmaciesPage from "@/pages/Pharmacy/PharmaciesPage.jsx";
+import PharmacyDetailsPage from "@/pages/Pharmacy/PharmacyDetailsPage.jsx";
 
 function AppRoutes() {
   return (
@@ -24,6 +26,8 @@ function AppRoutes() {
         />
         <Route path="/diseases" element={<DiseasesPage />} />
         <Route path="/diseases/:diseaseId" element={<DiseaseDetailsPage />} />
+        <Route path="/pharmacy" element={<PharmaciesPage />} />
+        <Route path="/pharmacy/:pharmacyId" element={<PharmacyDetailsPage />} />
       </Route>
     </Routes>
   );
