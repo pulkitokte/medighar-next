@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { ShieldCheck, Layers, Tag, Building2 } from "lucide-react";
+import { ShieldCheck, Layers, Tag, Building2, Beaker } from "lucide-react";
 import { cn } from "@/shared/lib/cn.js";
 import Button from "@/shared/components/ui/Button.jsx";
 
@@ -61,7 +61,13 @@ function MedicineCard({ medicine, className }) {
           />
           {medicine.manufacturer}
         </div>
-        <div className="flex items-center gap-1.5">{medicine.strength}</div>
+        <div className="flex items-center gap-1.5">
+          <Beaker
+            className="h-4 w-4 shrink-0 text-slate-400"
+            aria-hidden="true"
+          />
+          {medicine.strength}
+        </div>
       </div>
 
       <div className="mt-auto pt-2">

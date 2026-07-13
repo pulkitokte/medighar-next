@@ -14,7 +14,7 @@ const PAGE_SIZE = 6;
 function readFilters(searchParams) {
   return {
     category: searchParams.get("category") || DEFAULT_FILTERS.category,
-    dosageForm: searchParams.get("dosageForm") || DEFAULT_FILTERS.dosageForm,
+    dosageForm: searchParams.get("dosage") || DEFAULT_FILTERS.dosageForm,
     prescriptionOnly: searchParams.get("prescription") === "true",
   };
 }
@@ -95,7 +95,7 @@ export function useMedicines() {
       updateParams(
         {
           category: nextFilters.category,
-          dosageForm: nextFilters.dosageForm,
+          dosage: nextFilters.dosageForm,
           prescription: nextFilters.prescriptionOnly,
         },
         { resetPage: true },
