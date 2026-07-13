@@ -1,5 +1,5 @@
 import { DOCTORS } from "@/data/doctors/doctors.js";
-import { safeSearch } from "@/shared/lib/repositoryHelpers.js";
+import { safeSearch, findById } from "@/shared/lib/repositoryHelpers.js";
 import {
   filterByEquality,
   filterByBoolean,
@@ -20,7 +20,7 @@ export function getAllDoctors() {
  * @returns {object|null}
  */
 export function getDoctorById(id) {
-  return DOCTORS.find((doctor) => doctor.id === id) ?? null;
+  return findById(DOCTORS, id);
 }
 
 /**
