@@ -12,6 +12,8 @@ import {
 } from "lucide-react";
 import Section from "@/shared/components/ui/Section.jsx";
 import Container from "@/shared/components/ui/Container.jsx";
+import Breadcrumb from "@/shared/components/ui/Breadcrumb.jsx";
+import RelationSection from "@/shared/components/ui/RelationSection.jsx";
 import { useMedicineDetails } from "@/hooks/useMedicineDetails.js";
 import MedicineNotFound from "@/features/medicine/components/MedicineNotFound.jsx";
 import DiseaseGrid from "@/features/diseases/components/DiseaseGrid.jsx";
@@ -66,6 +68,14 @@ function MedicineDetailsPage() {
   return (
     <Section paddingY="py-16 sm:py-20">
       <Container className="flex flex-col gap-10">
+        <Breadcrumb
+          items={[
+            { label: "Home", to: "/" },
+            { label: "Medicines", to: "/medicines" },
+            { label: medicine.name },
+          ]}
+        />
+
         <div className="flex flex-col items-center gap-6 text-center sm:flex-row sm:items-start sm:text-left">
           <span
             className="flex h-24 w-24 shrink-0 items-center justify-center rounded-full bg-blue-100 text-xl font-semibold text-blue-700"
@@ -135,17 +145,14 @@ function MedicineDetailsPage() {
           items={medicine.precautions}
         />
 
-        {usedForDiseases.length > 0 && (
-          <div className="flex flex-col gap-4">
-            <div className="flex items-center gap-2">
-              <Activity className="h-5 w-5 text-blue-600" aria-hidden="true" />
-              <h2 className="text-lg font-semibold text-slate-900">
-                Used For Diseases
-              </h2>
-            </div>
-            <DiseaseGrid diseases={usedForDiseases} />
-          </div>
-        )}
+        <RelationSection
+          icon={Activity}
+          title="Used For Diseases"
+          items={usedForDiseases}
+          emptyMessage="No related diseases found."
+          viewAllHref="/diseases"
+          renderGrid={(diseases) => <DiseaseGrid diseases={diseases} />}
+        />
       </Container>
     </Section>
   );

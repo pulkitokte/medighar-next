@@ -13,6 +13,8 @@ import {
 import Section from "@/shared/components/ui/Section.jsx";
 import Container from "@/shared/components/ui/Container.jsx";
 import Button from "@/shared/components/ui/Button.jsx";
+import Breadcrumb from "@/shared/components/ui/Breadcrumb.jsx";
+import RelationSection from "@/shared/components/ui/RelationSection.jsx";
 import { useDoctorDetails } from "@/hooks/useDoctorDetails.js";
 import DoctorNotFound from "@/features/doctors/components/DoctorNotFound.jsx";
 import DiseaseGrid from "@/features/diseases/components/DiseaseGrid.jsx";
@@ -54,6 +56,14 @@ function DoctorDetailsPage() {
   return (
     <Section paddingY="py-16 sm:py-20">
       <Container className="flex flex-col gap-10">
+        <Breadcrumb
+          items={[
+            { label: "Home", to: "/" },
+            { label: "Doctors", to: "/doctors" },
+            { label: doctor.name },
+          ]}
+        />
+
         <div className="flex flex-col items-center gap-6 text-center sm:flex-row sm:items-start sm:text-left">
           <span
             className="flex h-24 w-24 shrink-0 items-center justify-center rounded-full bg-blue-100 text-2xl font-semibold text-blue-700"
@@ -146,17 +156,14 @@ function DoctorDetailsPage() {
           </ul>
         </div>
 
-        {treatsDiseases.length > 0 && (
-          <div className="flex flex-col gap-4">
-            <div className="flex items-center gap-2">
-              <Activity className="h-5 w-5 text-blue-600" aria-hidden="true" />
-              <h2 className="text-lg font-semibold text-slate-900">
-                Treats Diseases
-              </h2>
-            </div>
-            <DiseaseGrid diseases={treatsDiseases} />
-          </div>
-        )}
+        <RelationSection
+          icon={Activity}
+          title="Treats Diseases"
+          items={treatsDiseases}
+          emptyMessage="No related diseases found."
+          viewAllHref="/diseases"
+          renderGrid={(diseases) => <DiseaseGrid diseases={diseases} />}
+        />
       </Container>
     </Section>
   );

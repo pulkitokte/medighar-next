@@ -13,6 +13,7 @@ import {
 import Section from "@/shared/components/ui/Section.jsx";
 import Container from "@/shared/components/ui/Container.jsx";
 import Button from "@/shared/components/ui/Button.jsx";
+import Breadcrumb from "@/shared/components/ui/Breadcrumb.jsx";
 import { usePharmacyDetails } from "@/hooks/usePharmacyDetails.js";
 import PharmacyNotFound from "@/features/pharmacy/components/PharmacyNotFound.jsx";
 
@@ -66,6 +67,14 @@ function PharmacyDetailsPage() {
   return (
     <Section paddingY="py-16 sm:py-20">
       <Container className="flex flex-col gap-10">
+        <Breadcrumb
+          items={[
+            { label: "Home", to: "/" },
+            { label: "Pharmacy", to: "/pharmacy" },
+            { label: pharmacy.name },
+          ]}
+        />
+
         <div className="flex flex-col items-center gap-6 text-center sm:flex-row sm:items-start sm:text-left">
           <span
             className="flex h-24 w-24 shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-700"

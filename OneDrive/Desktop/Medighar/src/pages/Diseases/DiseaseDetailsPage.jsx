@@ -16,6 +16,8 @@ import {
 } from "lucide-react";
 import Section from "@/shared/components/ui/Section.jsx";
 import Container from "@/shared/components/ui/Container.jsx";
+import Breadcrumb from "@/shared/components/ui/Breadcrumb.jsx";
+import RelationSection from "@/shared/components/ui/RelationSection.jsx";
 import { useDiseaseDetails } from "@/hooks/useDiseaseDetails.js";
 import DiseaseNotFound from "@/features/diseases/components/DiseaseNotFound.jsx";
 import DiseaseGrid from "@/features/diseases/components/DiseaseGrid.jsx";
@@ -61,18 +63,6 @@ function ListSection({ icon: Icon, title, items }) {
   );
 }
 
-function RelationSection({ icon: Icon, title, children }) {
-  return (
-    <div className="flex flex-col gap-4">
-      <div className="flex items-center gap-2">
-        <Icon className="h-5 w-5 text-blue-600" aria-hidden="true" />
-        <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
-      </div>
-      {children}
-    </div>
-  );
-}
-
 function DiseaseDetailsPage() {
   const {
     disease,
@@ -98,6 +88,14 @@ function DiseaseDetailsPage() {
   return (
     <Section paddingY="py-16 sm:py-20">
       <Container className="flex flex-col gap-10">
+        <Breadcrumb
+          items={[
+            { label: "Home", to: "/" },
+            { label: "Diseases", to: "/diseases" },
+            { label: disease.name },
+          ]}
+        />
+
         <div className="flex flex-col items-center gap-6 text-center sm:flex-row sm:items-start sm:text-left">
           <span
             className="flex h-24 w-24 shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-700"
@@ -183,29 +181,41 @@ function DiseaseDetailsPage() {
           </p>
         </div>
 
-        {recommendedMedicines.length > 0 && (
-          <RelationSection icon={Pill} title="Recommended Medicines">
-            <MedicineGrid medicines={recommendedMedicines} />
-          </RelationSection>
-        )}
+        <RelationSection
+          icon={Pill}
+          title="Recommended Medicines"
+          items={recommendedMedicines}
+          emptyMessage="No related medicines found."
+          viewAllHref="/medicines"
+          renderGrid={(medicines) => <MedicineGrid medicines={medicines} />}
+        />
 
-        {recommendedDoctors.length > 0 && (
-          <RelationSection icon={Stethoscope} title="Recommended Doctors">
-            <DoctorGrid doctors={recommendedDoctors} />
-          </RelationSection>
-        )}
+        <RelationSection
+          icon={Stethoscope}
+          title="Recommended Doctors"
+          items={recommendedDoctors}
+          emptyMessage="No related doctors found."
+          viewAllHref="/doctors"
+          renderGrid={(doctors) => <DoctorGrid doctors={doctors} />}
+        />
 
-        {recommendedPharmacies.length > 0 && (
-          <RelationSection icon={Store} title="Nearby Pharmacies">
-            <PharmacyGrid pharmacies={recommendedPharmacies} />
-          </RelationSection>
-        )}
+        <RelationSection
+          icon={Store}
+          title="Nearby Pharmacies"
+          items={recommendedPharmacies}
+          emptyMessage="No nearby pharmacies found."
+          viewAllHref="/pharmacy"
+          renderGrid={(pharmacies) => <PharmacyGrid pharmacies={pharmacies} />}
+        />
 
-        {relatedDiseases.length > 0 && (
-          <RelationSection icon={Link2} title="Related Diseases">
-            <DiseaseGrid diseases={relatedDiseases} />
-          </RelationSection>
-        )}
+        <RelationSection
+          icon={Link2}
+          title="Related Diseases"
+          items={relatedDiseases}
+          emptyMessage="No related diseases found."
+          viewAllHref="/diseases"
+          renderGrid={(diseases) => <DiseaseGrid diseases={diseases} />}
+        />
       </Container>
     </Section>
   );
