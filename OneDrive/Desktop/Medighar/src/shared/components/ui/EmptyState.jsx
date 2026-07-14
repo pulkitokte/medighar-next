@@ -1,34 +1,48 @@
-function EmptyState({ icon: Icon, title, description, action, children }) {
+import { AlertTriangle } from "lucide-react";
+import Button from "@/shared/components/ui/Button.jsx";
+
+/**
+ * Reusable error state. Reuses the shared Button for the retry action.
+ * @param {{
+ *   title?: string,
+ *   message?: string,
+ *   onRetry?: () => void,
+ *   retryLabel?: string,
+ * }} props
+ */
+function ErrorState({
+  title = "Something went wrong",
+  message,
+  onRetry,
+  retryLabel = "Try Again",
+}) {
   return (
-    <div className="flex flex-col items-center gap-6 py-16 text-center">
-      {Icon && (
-        <div className="relative flex h-32 w-32 items-center justify-center">
-          <div className="absolute h-32 w-32 rounded-full bg-gradient-to-br from-blue-100 via-cyan-50 to-transparent blur-xl" />
-          <div className="relative flex h-20 w-20 items-center justify-center rounded-3xl border border-slate-200 bg-white shadow-md">
-            <Icon className="h-9 w-9 text-blue-500" aria-hidden="true" />
-          </div>
-        </div>
-      )}
+    <div
+      role="alert"
+      className="flex flex-col items-center gap-4 py-16 text-center"
+    >
+      <span className="flex h-16 w-16 items-center justify-center rounded-full bg-red-50">
+        <AlertTriangle className="h-8 w-8 text-red-500" aria-hidden="true" />
+      </span>
 
-      {(title || description) && (
-        <div className="flex flex-col items-center gap-1">
-          {title && (
-            <p className="text-base font-medium text-slate-900 sm:text-lg">
-              {title}
-            </p>
-          )}
-          {description && (
-            <p className="max-w-md text-sm text-slate-600 sm:text-base">
-              {description}
-            </p>
-          )}
-        </div>
-      )}
+      <div className="flex flex-col items-center gap-1">
+        <p className="text-base font-medium text-slate-900 sm:text-lg">
+          {title}
+        </p>
+        {message && (
+          <p className="max-w-md text-sm text-slate-600 sm:text-base">
+            {message}
+          </p>
+        )}
+      </div>
 
-      {children}
-      {action}
+      {onRetry && (
+        <Button variant="outline" onClick={onRetry}>
+          {retryLabel}
+        </Button>
+      )}
     </div>
   );
 }
 
-export default EmptyState;
+export default ErrorState;

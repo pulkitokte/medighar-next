@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Store } from "lucide-react";
 import Section from "@/shared/components/ui/Section.jsx";
 import Container from "@/shared/components/ui/Container.jsx";
 import PageHeading from "@/shared/components/ui/PageHeading.jsx";
@@ -7,9 +7,9 @@ import PharmacySearchBar from "@/features/pharmacy/components/PharmacySearchBar.
 import PharmacyFilters from "@/features/pharmacy/components/PharmacyFilters.jsx";
 import PharmacySort from "@/features/pharmacy/components/PharmacySort.jsx";
 import PharmacyGrid from "@/features/pharmacy/components/PharmacyGrid.jsx";
-import PharmacyEmptyState from "@/features/pharmacy/components/PharmacyEmptyState.jsx";
 import LoadingState from "@/shared/components/ui/LoadingState.jsx";
 import ErrorState from "@/shared/components/ui/ErrorState.jsx";
+import EmptyState from "@/shared/components/ui/EmptyState.jsx";
 import { usePharmacies } from "@/hooks/usePharmacies.js";
 
 function Pagination({ currentPage, totalPages, onPageChange }) {
@@ -96,15 +96,22 @@ function PharmaciesPage() {
           <PharmacySort value={sortBy} onChange={setSortBy} />
 
           {loading ? (
-            <LoadingState label="Loading pharmacies..." />
+            <LoadingState
+              title="Loading pharmacies..."
+              description="Finding the best matches for you."
+            />
           ) : error ? (
             <ErrorState
               title="Unable to load pharmacies"
-              description="Something went wrong while loading the pharmacy list."
-              retry={refetch}
+              message="Something went wrong while loading the pharmacy list."
+              onRetry={refetch}
             />
           ) : paginatedPharmacies.length === 0 ? (
-            <PharmacyEmptyState />
+            <EmptyState
+              icon={Store}
+              title="No pharmacies found."
+              description="Try adjusting your filters to find a pharmacy near you."
+            />
           ) : (
             <PharmacyGrid pharmacies={paginatedPharmacies} />
           )}

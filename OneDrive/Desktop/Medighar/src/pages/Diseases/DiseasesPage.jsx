@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Activity } from "lucide-react";
 import Section from "@/shared/components/ui/Section.jsx";
 import Container from "@/shared/components/ui/Container.jsx";
 import PageHeading from "@/shared/components/ui/PageHeading.jsx";
@@ -7,9 +7,9 @@ import DiseaseSearchBar from "@/features/diseases/components/DiseaseSearchBar.js
 import DiseaseFilters from "@/features/diseases/components/DiseaseFilters.jsx";
 import DiseaseSort from "@/features/diseases/components/DiseaseSort.jsx";
 import DiseaseGrid from "@/features/diseases/components/DiseaseGrid.jsx";
-import DiseaseEmptyState from "@/features/diseases/components/DiseaseEmptyState.jsx";
 import LoadingState from "@/shared/components/ui/LoadingState.jsx";
 import ErrorState from "@/shared/components/ui/ErrorState.jsx";
+import EmptyState from "@/shared/components/ui/EmptyState.jsx";
 import { useDiseases } from "@/hooks/useDiseases.js";
 
 function Pagination({ currentPage, totalPages, onPageChange }) {
@@ -96,15 +96,22 @@ function DiseasesPage() {
           <DiseaseSort value={sortBy} onChange={setSortBy} />
 
           {loading ? (
-            <LoadingState label="Loading diseases..." />
+            <LoadingState
+              title="Loading diseases..."
+              description="Finding the best matches for you."
+            />
           ) : error ? (
             <ErrorState
               title="Unable to load diseases"
-              description="Something went wrong while loading the disease list."
-              retry={refetch}
+              message="Something went wrong while loading the disease list."
+              onRetry={refetch}
             />
           ) : paginatedDiseases.length === 0 ? (
-            <DiseaseEmptyState />
+            <EmptyState
+              icon={Activity}
+              title="No diseases found."
+              description="Try adjusting your filters to find the condition you're looking for."
+            />
           ) : (
             <DiseaseGrid diseases={paginatedDiseases} />
           )}

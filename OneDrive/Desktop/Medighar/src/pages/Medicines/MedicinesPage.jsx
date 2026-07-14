@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Pill } from "lucide-react";
 import Section from "@/shared/components/ui/Section.jsx";
 import Container from "@/shared/components/ui/Container.jsx";
 import PageHeading from "@/shared/components/ui/PageHeading.jsx";
@@ -7,9 +7,9 @@ import MedicineSearchBar from "@/features/medicine/components/MedicineSearchBar.
 import MedicineFilters from "@/features/medicine/components/MedicineFilters.jsx";
 import MedicineSort from "@/features/medicine/components/MedicineSort.jsx";
 import MedicineGrid from "@/features/medicine/components/MedicineGrid.jsx";
-import MedicineEmptyState from "@/features/medicine/components/MedicineEmptyState.jsx";
 import LoadingState from "@/shared/components/ui/LoadingState.jsx";
 import ErrorState from "@/shared/components/ui/ErrorState.jsx";
+import EmptyState from "@/shared/components/ui/EmptyState.jsx";
 import { useMedicines } from "@/hooks/useMedicines.js";
 
 function Pagination({ currentPage, totalPages, onPageChange }) {
@@ -96,15 +96,22 @@ function MedicinesPage() {
           <MedicineSort value={sortBy} onChange={setSortBy} />
 
           {loading ? (
-            <LoadingState label="Loading medicines..." />
+            <LoadingState
+              title="Loading medicines..."
+              description="Finding the best matches for you."
+            />
           ) : error ? (
             <ErrorState
               title="Unable to load medicines"
-              description="Something went wrong while loading the medicine list."
-              retry={refetch}
+              message="Something went wrong while loading the medicine list."
+              onRetry={refetch}
             />
           ) : paginatedMedicines.length === 0 ? (
-            <MedicineEmptyState />
+            <EmptyState
+              icon={Pill}
+              title="No medicines found."
+              description="Try adjusting your filters to find the medicine you're looking for."
+            />
           ) : (
             <MedicineGrid medicines={paginatedMedicines} />
           )}

@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Stethoscope } from "lucide-react";
 import Section from "@/shared/components/ui/Section.jsx";
 import Container from "@/shared/components/ui/Container.jsx";
 import PageHeading from "@/shared/components/ui/PageHeading.jsx";
@@ -7,9 +7,9 @@ import DoctorSearchBar from "@/features/doctors/components/DoctorSearchBar.jsx";
 import DoctorFilters from "@/features/doctors/components/DoctorFilters.jsx";
 import DoctorSort from "@/features/doctors/components/DoctorSort.jsx";
 import DoctorGrid from "@/features/doctors/components/DoctorGrid.jsx";
-import DoctorEmptyState from "@/features/doctors/components/DoctorEmptyState.jsx";
 import LoadingState from "@/shared/components/ui/LoadingState.jsx";
 import ErrorState from "@/shared/components/ui/ErrorState.jsx";
+import EmptyState from "@/shared/components/ui/EmptyState.jsx";
 import { useDoctors } from "@/hooks/useDoctors.js";
 
 function Pagination({ currentPage, totalPages, onPageChange }) {
@@ -96,15 +96,22 @@ function DoctorsPage() {
           <DoctorSort value={sortBy} onChange={setSortBy} />
 
           {loading ? (
-            <LoadingState label="Loading doctors..." />
+            <LoadingState
+              title="Loading doctors..."
+              description="Finding the best matches for you."
+            />
           ) : error ? (
             <ErrorState
               title="Unable to load doctors"
-              description="Something went wrong while loading the doctor list."
-              retry={refetch}
+              message="Something went wrong while loading the doctor list."
+              onRetry={refetch}
             />
           ) : paginatedDoctors.length === 0 ? (
-            <DoctorEmptyState />
+            <EmptyState
+              icon={Stethoscope}
+              title="No doctors found."
+              description="Try adjusting your filters to find the right doctor for your needs."
+            />
           ) : (
             <DoctorGrid doctors={paginatedDoctors} />
           )}
