@@ -1,5 +1,6 @@
 import { DOCTORS } from "@/data/doctors/doctors.js";
-import { safeSearch, findById } from "@/shared/lib/repositoryHelpers.js";
+import { findById } from "@/shared/lib/repositoryHelpers.js";
+import { safeSearch } from "@/shared/lib/search.js";
 import {
   filterByEquality,
   filterByBoolean,
@@ -35,6 +36,7 @@ export function searchDoctors(query, source = DOCTORS) {
     "specialty",
     "qualification",
     "city",
+    "languages",
   ]);
 }
 

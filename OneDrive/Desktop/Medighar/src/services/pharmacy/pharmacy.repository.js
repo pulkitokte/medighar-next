@@ -1,5 +1,6 @@
 import { PHARMACIES } from "@/data/pharmacy/pharmacies.js";
-import { safeSearch, findById } from "@/shared/lib/repositoryHelpers.js";
+import { findById } from "@/shared/lib/repositoryHelpers.js";
+import { safeSearch } from "@/shared/lib/search.js";
 import {
   filterByEquality,
   filterByBoolean,
@@ -30,7 +31,13 @@ export function getPharmacyById(id) {
  * @returns {Array<object>}
  */
 export function searchPharmacies(query, source = PHARMACIES) {
-  return safeSearch(source, query, ["name", "city", "address", "type"]);
+  return safeSearch(source, query, [
+    "name",
+    "city",
+    "address",
+    "type",
+    "services",
+  ]);
 }
 
 /**

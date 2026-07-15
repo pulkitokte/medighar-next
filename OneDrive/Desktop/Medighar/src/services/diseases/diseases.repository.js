@@ -1,5 +1,6 @@
 import { DISEASES } from "@/data/diseases/diseases.js";
-import { safeSearch, findById } from "@/shared/lib/repositoryHelpers.js";
+import { findById } from "@/shared/lib/repositoryHelpers.js";
+import { safeSearch } from "@/shared/lib/search.js";
 import {
   filterByEquality,
   filterByBoolean,
@@ -31,15 +32,12 @@ export function getDiseaseById(id) {
  * @returns {Array<object>}
  */
 export function searchDiseases(query, source = DISEASES) {
-  return safeSearch(
-    source,
-    query,
-    ["name", "category", "overview", "symptoms"],
-    {
-      transform: (item, field) =>
-        field === "symptoms" ? item.symptoms.join(" ") : item[field],
-    },
-  );
+  return safeSearch(source, query, [
+    "name",
+    "category",
+    "overview",
+    "symptoms",
+  ]);
 }
 
 /**

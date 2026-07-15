@@ -1,5 +1,6 @@
 import { MEDICINES } from "@/data/medicines/medicines.js";
-import { safeSearch, findById } from "@/shared/lib/repositoryHelpers.js";
+import { findById } from "@/shared/lib/repositoryHelpers.js";
+import { safeSearch } from "@/shared/lib/search.js";
 import {
   filterByEquality,
   filterByBoolean,
@@ -35,6 +36,7 @@ export function searchMedicines(query, source = MEDICINES) {
     "genericName",
     "brand",
     "category",
+    "uses",
   ]);
 }
 
