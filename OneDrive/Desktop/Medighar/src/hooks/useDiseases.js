@@ -2,6 +2,7 @@ import { useCallback, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useQuery } from "@/hooks/useQuery.js";
 import { getDiseases } from "@/services/diseases/diseases.service.js";
+import { parsePageParam, withUpdatedParams } from "@/shared/lib/queryParams.js";
 
 const DEFAULT_FILTERS = {
   category: "All",
@@ -19,23 +20,10 @@ function readFilters(searchParams) {
   };
 }
 
-function isDefaultValue(value) {
-  return (
-    value === undefined ||
-    value === null ||
-    value === "" ||
-    value === "All" ||
-    value === false
-  );
-}
-
 /**
  * Loads and derives the disease listing state for the Diseases page.
  * All filter, search, sort, and pagination state is persisted to the URL
  * so refreshing or sharing a link preserves the current view.
- * Data loading goes through useQuery(), which will require no changes when
- * the underlying service starts reading from a real backend.
- * UI components never touch the repository or service directly.
  * @returns {{
  *   diseases: Array<object>,
  *   paginatedDiseases: Array<object>,
@@ -59,28 +47,13 @@ export function useDiseases() {
   const searchQuery = searchParams.get("search") || "";
   const filters = useMemo(() => readFilters(searchParams), [searchParams]);
   const sortBy = searchParams.get("sort") || "newest";
-  const rawPage = parseInt(searchParams.get("page") || "1", 10);
-  const currentPage = Number.isFinite(rawPage) && rawPage > 0 ? rawPage : 1;
+  const currentPage = parsePageParam(searchParams);
 
   const updateParams = useCallback(
-    (updates, { resetPage = false } = {}) => {
-      setSearchParams((previous) => {
-        const next = new URLSearchParams(previous);
-
-        Object.entries(updates).forEach(([key, value]) => {
-          if (isDefaultValue(value)) {
-            next.delete(key);
-          } else {
-            next.set(key, String(value));
-          }
-        });
-
-        if (resetPage) {
-          next.delete("page");
-        }
-
-        return next;
-      });
+    (updates, options) => {
+      setSearchParams((previous) =>
+        withUpdatedParams(previous, updates, options),
+      );
     },
     [setSearchParams],
   );

@@ -13,42 +13,12 @@ import {
 import Section from "@/shared/components/ui/Section.jsx";
 import Container from "@/shared/components/ui/Container.jsx";
 import Breadcrumb from "@/shared/components/ui/Breadcrumb.jsx";
+import InfoCard from "@/shared/components/ui/InfoCard.jsx";
+import ListSection from "@/shared/components/ui/ListSection.jsx";
 import RelationSection from "@/shared/components/ui/RelationSection.jsx";
 import { useMedicineDetails } from "@/hooks/useMedicineDetails.js";
 import MedicineNotFound from "@/features/medicine/components/MedicineNotFound.jsx";
 import DiseaseGrid from "@/features/diseases/components/DiseaseGrid.jsx";
-
-function InfoCard({ icon: Icon, label, value }) {
-  return (
-    <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4">
-      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50">
-        <Icon className="h-5 w-5 text-blue-600" aria-hidden="true" />
-      </span>
-      <div className="flex flex-col">
-        <span className="text-xs text-slate-500">{label}</span>
-        <span className="text-sm font-medium text-slate-900">{value}</span>
-      </div>
-    </div>
-  );
-}
-
-function ListSection({ icon: Icon, title, items }) {
-  return (
-    <div className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-6">
-      <div className="flex items-center gap-2">
-        <Icon className="h-5 w-5 text-blue-600" aria-hidden="true" />
-        <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
-      </div>
-      <ul className="flex flex-col gap-2">
-        {items.map((item) => (
-          <li key={item} className="text-sm text-slate-600 sm:text-base">
-            {item}
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
 
 function MedicineDetailsPage() {
   const { medicine, usedForDiseases, notFound } = useMedicineDetails();

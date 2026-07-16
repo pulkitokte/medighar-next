@@ -1,5 +1,6 @@
 import { ShieldCheck } from "lucide-react";
 import { cn } from "@/shared/lib/cn.js";
+import FilterSelect from "@/shared/components/ui/FilterSelect.jsx";
 import { MEDICINE_CATEGORIES } from "@/data/medicines/categories.js";
 import { MEDICINES } from "@/data/medicines/medicines.js";
 
@@ -7,25 +8,6 @@ const DOSAGE_FORM_OPTIONS = [
   "All",
   ...new Set(MEDICINES.map((medicine) => medicine.dosageForm)),
 ];
-
-function FilterSelect({ label, value, options, onChange }) {
-  return (
-    <label className="flex flex-col gap-1.5 text-sm">
-      <span className="font-medium text-slate-700">{label}</span>
-      <select
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:border-blue-400 focus:outline-none"
-      >
-        {options.map((option) => (
-          <option key={option} value={option}>
-            {option}
-          </option>
-        ))}
-      </select>
-    </label>
-  );
-}
 
 function MedicineFilters({ value, onChange }) {
   const handleFieldChange = (field) => (fieldValue) => {

@@ -1,5 +1,6 @@
 import { Truck } from "lucide-react";
 import { cn } from "@/shared/lib/cn.js";
+import FilterSelect from "@/shared/components/ui/FilterSelect.jsx";
 import { PHARMACY_TYPES } from "@/data/pharmacy/services.js";
 import { PHARMACIES } from "@/data/pharmacy/pharmacies.js";
 
@@ -7,25 +8,6 @@ const CITY_OPTIONS = [
   "All",
   ...new Set(PHARMACIES.map((pharmacy) => pharmacy.city)),
 ];
-
-function FilterSelect({ label, value, options, onChange }) {
-  return (
-    <label className="flex flex-col gap-1.5 text-sm">
-      <span className="font-medium text-slate-700">{label}</span>
-      <select
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:border-blue-400 focus:outline-none"
-      >
-        {options.map((option) => (
-          <option key={option} value={option}>
-            {option}
-          </option>
-        ))}
-      </select>
-    </label>
-  );
-}
 
 function PharmacyFilters({ value, onChange }) {
   const handleFieldChange = (field) => (fieldValue) => {

@@ -1,30 +1,12 @@
 import { BadgeCheck } from "lucide-react";
 import { cn } from "@/shared/lib/cn.js";
+import FilterSelect from "@/shared/components/ui/FilterSelect.jsx";
 import { SPECIALTIES } from "@/data/doctors/specialties.js";
 import { DOCTORS } from "@/data/doctors/doctors.js";
 
 const EXPERIENCE_OPTIONS = ["All", "0-5 yrs", "5-10 yrs", "10+ yrs"];
 const GENDER_OPTIONS = ["All", "Male", "Female"];
 const CITY_OPTIONS = ["All", ...new Set(DOCTORS.map((doctor) => doctor.city))];
-
-function FilterSelect({ label, value, options, onChange }) {
-  return (
-    <label className="flex flex-col gap-1.5 text-sm">
-      <span className="font-medium text-slate-700">{label}</span>
-      <select
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:border-blue-400 focus:outline-none"
-      >
-        {options.map((option) => (
-          <option key={option} value={option}>
-            {option}
-          </option>
-        ))}
-      </select>
-    </label>
-  );
-}
 
 function DoctorFilters({ value, onChange }) {
   const handleFieldChange = (field) => (fieldValue) => {

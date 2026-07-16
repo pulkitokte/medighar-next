@@ -14,24 +14,12 @@ import Section from "@/shared/components/ui/Section.jsx";
 import Container from "@/shared/components/ui/Container.jsx";
 import Button from "@/shared/components/ui/Button.jsx";
 import Breadcrumb from "@/shared/components/ui/Breadcrumb.jsx";
+import InfoCard from "@/shared/components/ui/InfoCard.jsx";
+import ListSection from "@/shared/components/ui/ListSection.jsx";
 import RelationSection from "@/shared/components/ui/RelationSection.jsx";
 import { useDoctorDetails } from "@/hooks/useDoctorDetails.js";
 import DoctorNotFound from "@/features/doctors/components/DoctorNotFound.jsx";
 import DiseaseGrid from "@/features/diseases/components/DiseaseGrid.jsx";
-
-function InfoCard({ icon: Icon, label, value }) {
-  return (
-    <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4">
-      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50">
-        <Icon className="h-5 w-5 text-blue-600" aria-hidden="true" />
-      </span>
-      <div className="flex flex-col">
-        <span className="text-xs text-slate-500">{label}</span>
-        <span className="text-sm font-medium text-slate-900">{value}</span>
-      </div>
-    </div>
-  );
-}
 
 function handleShare() {
   if (typeof navigator === "undefined" || !navigator.clipboard) return;
@@ -137,24 +125,11 @@ function DoctorDetailsPage() {
           </p>
         </div>
 
-        <div className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-6">
-          <div className="flex items-center gap-2">
-            <CalendarClock
-              className="h-5 w-5 text-blue-600"
-              aria-hidden="true"
-            />
-            <h2 className="text-lg font-semibold text-slate-900">
-              Availability
-            </h2>
-          </div>
-          <ul className="flex flex-col gap-2">
-            {doctor.availability.map((slot) => (
-              <li key={slot} className="text-sm text-slate-600 sm:text-base">
-                {slot}
-              </li>
-            ))}
-          </ul>
-        </div>
+        <ListSection
+          icon={CalendarClock}
+          title="Availability"
+          items={doctor.availability}
+        />
 
         <RelationSection
           icon={Activity}
