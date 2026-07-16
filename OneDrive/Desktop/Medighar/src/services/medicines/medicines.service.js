@@ -4,7 +4,7 @@ import {
   searchMedicines as repositorySearchMedicines,
   filterMedicines as repositoryFilterMedicines,
 } from "@/services/medicines/medicines.repository.js";
-import { applySorting } from "@/shared/lib/serviceHelpers.js";
+import { sortItems } from "@/shared/lib/sort.js";
 
 const SORT_COMPARATORS = {
   newest: () => 0,
@@ -49,9 +49,7 @@ export function getMedicines({
     medicines,
   );
 
-  return applySorting(medicines, sortBy, SORT_COMPARATORS, {
-    defaultSort: "newest",
-  });
+  return sortItems(medicines, sortBy, SORT_COMPARATORS);
 }
 
 /**

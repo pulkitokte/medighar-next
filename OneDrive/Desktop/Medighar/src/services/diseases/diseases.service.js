@@ -6,7 +6,7 @@ import {
   getDiseasesByMedicineId as repositoryGetDiseasesByMedicineId,
   getDiseasesByDoctorId as repositoryGetDiseasesByDoctorId,
 } from "@/services/diseases/diseases.repository.js";
-import { applySorting } from "@/shared/lib/serviceHelpers.js";
+import { sortItems } from "@/shared/lib/sort.js";
 
 const SEVERITY_RANK = { Mild: 0, Moderate: 1, Severe: 2 };
 
@@ -54,9 +54,7 @@ export function getDiseases({
     diseases,
   );
 
-  return applySorting(diseases, sortBy, SORT_COMPARATORS, {
-    defaultSort: "newest",
-  });
+  return sortItems(diseases, sortBy, SORT_COMPARATORS);
 }
 
 /**

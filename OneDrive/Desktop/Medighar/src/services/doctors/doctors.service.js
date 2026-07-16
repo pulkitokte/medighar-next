@@ -4,7 +4,7 @@ import {
   searchDoctors as repositorySearchDoctors,
   filterDoctors as repositoryFilterDoctors,
 } from "@/services/doctors/doctors.repository.js";
-import { applySorting } from "@/shared/lib/serviceHelpers.js";
+import { sortItems } from "@/shared/lib/sort.js";
 
 const SORT_COMPARATORS = {
   "highest-rated": (a, b) => b.rating - a.rating,
@@ -63,9 +63,7 @@ export function getDoctors({
     matchesExperience(doctor, filters.experience),
   );
 
-  return applySorting(doctors, sortBy, SORT_COMPARATORS, {
-    defaultSort: "newest",
-  });
+  return sortItems(doctors, sortBy, SORT_COMPARATORS);
 }
 
 /**
