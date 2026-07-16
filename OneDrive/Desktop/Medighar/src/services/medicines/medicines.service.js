@@ -5,6 +5,7 @@ import {
   filterMedicines as repositoryFilterMedicines,
 } from "@/services/medicines/medicines.repository.js";
 import { sortItems } from "@/shared/lib/sort.js";
+import { isValidId } from "@/shared/lib/validation.js";
 
 const SORT_COMPARATORS = {
   newest: () => 0,
@@ -68,7 +69,7 @@ export function getMedicineById(id) {
  * @returns {object|null}
  */
 export function getMedicineDetails(id) {
-  if (typeof id !== "string" || id.trim().length === 0) {
+  if (!isValidId(id)) {
     return null;
   }
 

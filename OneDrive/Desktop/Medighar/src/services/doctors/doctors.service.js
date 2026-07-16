@@ -5,6 +5,7 @@ import {
   filterDoctors as repositoryFilterDoctors,
 } from "@/services/doctors/doctors.repository.js";
 import { sortItems } from "@/shared/lib/sort.js";
+import { isValidId } from "@/shared/lib/validation.js";
 
 const SORT_COMPARATORS = {
   "highest-rated": (a, b) => b.rating - a.rating,
@@ -82,7 +83,7 @@ export function getDoctorById(id) {
  * @returns {object|null}
  */
 export function getDoctorDetails(id) {
-  if (typeof id !== "string" || id.trim().length === 0) {
+  if (!isValidId(id)) {
     return null;
   }
 
