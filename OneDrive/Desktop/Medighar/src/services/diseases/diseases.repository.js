@@ -4,8 +4,8 @@ import { safeSearch } from "@/shared/lib/search.js";
 import {
   filterByEquality,
   filterByBoolean,
-  filterByPredicate,
 } from "@/shared/lib/filterHelpers.js";
+import { filterByRelationId } from "@/shared/lib/relationships.js";
 
 /**
  * Returns every disease record.
@@ -67,12 +67,7 @@ export function filterDiseases(filters = {}, source = DISEASES) {
  * @returns {Array<object>}
  */
 export function getDiseasesByMedicineId(medicineId, source = DISEASES) {
-  return filterByPredicate(
-    source,
-    (disease) =>
-      Array.isArray(disease.recommendedMedicineIds) &&
-      disease.recommendedMedicineIds.includes(medicineId),
-  );
+  return filterByRelationId(source, "recommendedMedicineIds", medicineId);
 }
 
 /**
@@ -84,10 +79,5 @@ export function getDiseasesByMedicineId(medicineId, source = DISEASES) {
  * @returns {Array<object>}
  */
 export function getDiseasesByDoctorId(doctorId, source = DISEASES) {
-  return filterByPredicate(
-    source,
-    (disease) =>
-      Array.isArray(disease.recommendedDoctorIds) &&
-      disease.recommendedDoctorIds.includes(doctorId),
-  );
+  return filterByRelationId(source, "recommendedDoctorIds", doctorId);
 }
