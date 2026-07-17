@@ -3,6 +3,7 @@ import { ShieldCheck, Layers, Tag, Building2, Beaker } from "lucide-react";
 import { cn } from "@/shared/lib/cn.js";
 import Button from "@/shared/components/ui/Button.jsx";
 import SaveButton from "@/shared/components/ui/SaveButton.jsx";
+import CompareButton from "@/features/medicine/components/CompareButton.jsx";
 
 function MedicineCard({ medicine, className }) {
   const navigate = useNavigate();
@@ -77,7 +78,8 @@ function MedicineCard({ medicine, className }) {
         </div>
       </div>
 
-      <div className="mt-auto pt-2">
+      <div className="mt-auto flex flex-col gap-2 pt-2 sm:flex-row">
+        <CompareButton medicineId={medicine.id} />
         <Button
           variant="outline"
           size="sm"

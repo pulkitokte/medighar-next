@@ -11,6 +11,7 @@ const NAV_LINKS = [
   { label: "Pharmacy", to: "/pharmacy" },
   { label: "Saved", to: "/saved" },
   { label: "Recent", to: "/recent" },
+  { label: "Compare", to: "/compare" },
 ];
 
 function Navbar() {
