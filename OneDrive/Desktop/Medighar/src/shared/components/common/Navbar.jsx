@@ -9,6 +9,7 @@ const NAV_LINKS = [
   { label: "Medicines", to: "/medicines" },
   { label: "Diseases", to: "/diseases" },
   { label: "Pharmacy", to: "/pharmacy" },
+  { label: "Saved", to: "/saved" },
 ];
 
 function Navbar() {

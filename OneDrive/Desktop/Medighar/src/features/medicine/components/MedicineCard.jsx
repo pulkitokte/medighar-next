@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { ShieldCheck, Layers, Tag, Building2, Beaker } from "lucide-react";
 import { cn } from "@/shared/lib/cn.js";
 import Button from "@/shared/components/ui/Button.jsx";
+import SaveButton from "@/shared/components/ui/SaveButton.jsx";
 
 function MedicineCard({ medicine, className }) {
   const navigate = useNavigate();
@@ -13,12 +14,18 @@ function MedicineCard({ medicine, className }) {
   return (
     <div
       className={cn(
-        "flex h-full flex-col gap-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition",
+        "relative flex h-full flex-col gap-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition",
         "hover:-translate-y-1 hover:shadow-lg",
         className,
       )}
     >
-      <div className="flex items-start justify-between gap-3">
+      <SaveButton
+        type="medicine"
+        id={medicine.id}
+        className="absolute right-4 top-4"
+      />
+
+      <div className="flex items-start justify-between gap-3 pr-10">
         <div className="flex min-w-0 flex-1 flex-col gap-1">
           <h3 className="truncate text-base font-semibold text-slate-900 sm:text-lg">
             {medicine.name}
