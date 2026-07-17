@@ -8,13 +8,15 @@ import { getMedicineById } from "@/services/medicines/medicines.service.js";
 import { getDoctorById } from "@/services/doctors/doctors.service.js";
 import { getPharmacyById } from "@/services/pharmacy/pharmacy.service.js";
 import { resolveByIds } from "@/shared/lib/serviceHelpers.js";
+import { useRecordRecentView } from "@/hooks/useRecordRecentView.js";
 
 /**
  * Loads a single disease's details for the Disease Details page, along with
  * its related medicines, doctors, pharmacies, and other diseases. Each
  * relationship is resolved from the disease's own id arrays by calling the
  * relevant module's existing service — no cross-domain service imports
- * anywhere except here, at the hook layer.
+ * anywhere except here, at the hook layer. Also registers this disease as
+ * recently viewed automatically.
  * @returns {{
  *   disease: object|null,
  *   recommendedMedicines: Array<object>,
@@ -55,6 +57,8 @@ export function useDiseaseDetails() {
   );
 
   const notFound = !loading && !error && disease === null;
+
+  useRecordRecentView("disease", disease ? diseaseId : null);
 
   return {
     disease,

@@ -10,6 +10,7 @@ const NAV_LINKS = [
   { label: "Diseases", to: "/diseases" },
   { label: "Pharmacy", to: "/pharmacy" },
   { label: "Saved", to: "/saved" },
+  { label: "Recent", to: "/recent" },
 ];
 
 function Navbar() {

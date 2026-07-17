@@ -11,6 +11,7 @@ import DiseaseDetailsPage from "@/pages/Diseases/DiseaseDetailsPage.jsx";
 import PharmaciesPage from "@/pages/Pharmacy/PharmaciesPage.jsx";
 import PharmacyDetailsPage from "@/pages/Pharmacy/PharmacyDetailsPage.jsx";
 import SavedPage from "@/pages/Saved/SavedPage.jsx";
+import RecentPage from "@/pages/Recent/RecentPage.jsx";
 
 function AppRoutes() {
   return (
@@ -30,6 +31,7 @@ function AppRoutes() {
         <Route path="/pharmacy" element={<PharmaciesPage />} />
         <Route path="/pharmacy/:pharmacyId" element={<PharmacyDetailsPage />} />
         <Route path="/saved" element={<SavedPage />} />
+        <Route path="/recent" element={<RecentPage />} />
       </Route>
     </Routes>
   );
