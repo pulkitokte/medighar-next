@@ -18,6 +18,7 @@ import Section from "@/shared/components/ui/Section.jsx";
 import Container from "@/shared/components/ui/Container.jsx";
 import Breadcrumb from "@/shared/components/ui/Breadcrumb.jsx";
 import InfoCard from "@/shared/components/ui/InfoCard.jsx";
+import TextSection from "@/shared/components/ui/TextSection.jsx";
 import ListSection from "@/shared/components/ui/ListSection.jsx";
 import RelationSection from "@/shared/components/ui/RelationSection.jsx";
 import { useDiseaseDetails } from "@/hooks/useDiseaseDetails.js";
@@ -136,20 +137,11 @@ function DiseaseDetailsPage() {
           items={disease.diagnosis}
         />
 
-        <div className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-6">
-          <div className="flex items-center gap-2">
-            <ClipboardList
-              className="h-5 w-5 text-blue-600"
-              aria-hidden="true"
-            />
-            <h2 className="text-lg font-semibold text-slate-900">
-              Treatment Summary
-            </h2>
-          </div>
-          <p className="text-sm text-slate-600 sm:text-base">
-            {disease.treatmentSummary}
-          </p>
-        </div>
+        <TextSection
+          icon={ClipboardList}
+          title="Treatment Summary"
+          content={disease.treatmentSummary}
+        />
 
         <RelationSection
           icon={Pill}

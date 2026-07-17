@@ -15,6 +15,7 @@ import Container from "@/shared/components/ui/Container.jsx";
 import Button from "@/shared/components/ui/Button.jsx";
 import Breadcrumb from "@/shared/components/ui/Breadcrumb.jsx";
 import InfoCard from "@/shared/components/ui/InfoCard.jsx";
+import TextSection from "@/shared/components/ui/TextSection.jsx";
 import ListSection from "@/shared/components/ui/ListSection.jsx";
 import { usePharmacyDetails } from "@/hooks/usePharmacyDetails.js";
 import PharmacyNotFound from "@/features/pharmacy/components/PharmacyNotFound.jsx";
@@ -100,12 +101,7 @@ function PharmacyDetailsPage() {
           />
         </div>
 
-        <div className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-6">
-          <h2 className="text-lg font-semibold text-slate-900">About</h2>
-          <p className="text-sm text-slate-600 sm:text-base">
-            {pharmacy.description}
-          </p>
-        </div>
+        <TextSection title="About" content={pharmacy.description} />
 
         <ListSection
           icon={ListChecks}

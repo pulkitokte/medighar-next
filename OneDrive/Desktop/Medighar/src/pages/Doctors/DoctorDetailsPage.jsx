@@ -15,6 +15,7 @@ import Container from "@/shared/components/ui/Container.jsx";
 import Button from "@/shared/components/ui/Button.jsx";
 import Breadcrumb from "@/shared/components/ui/Breadcrumb.jsx";
 import InfoCard from "@/shared/components/ui/InfoCard.jsx";
+import TextSection from "@/shared/components/ui/TextSection.jsx";
 import ListSection from "@/shared/components/ui/ListSection.jsx";
 import RelationSection from "@/shared/components/ui/RelationSection.jsx";
 import { useDoctorDetails } from "@/hooks/useDoctorDetails.js";
@@ -118,12 +119,7 @@ function DoctorDetailsPage() {
           />
         </div>
 
-        <div className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-6">
-          <h2 className="text-lg font-semibold text-slate-900">Biography</h2>
-          <p className="text-sm text-slate-600 sm:text-base">
-            {doctor.biography}
-          </p>
-        </div>
+        <TextSection title="Biography" content={doctor.biography} />
 
         <ListSection
           icon={CalendarClock}
