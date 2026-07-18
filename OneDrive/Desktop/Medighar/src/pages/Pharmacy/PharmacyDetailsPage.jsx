@@ -9,6 +9,7 @@ import {
   ShieldCheck,
   ListChecks,
   Wrench,
+  Pill,
 } from "lucide-react";
 import Section from "@/shared/components/ui/Section.jsx";
 import Container from "@/shared/components/ui/Container.jsx";
@@ -17,11 +18,15 @@ import Breadcrumb from "@/shared/components/ui/Breadcrumb.jsx";
 import InfoCard from "@/shared/components/ui/InfoCard.jsx";
 import TextSection from "@/shared/components/ui/TextSection.jsx";
 import ListSection from "@/shared/components/ui/ListSection.jsx";
+import EmptyRelationship from "@/shared/components/ui/EmptyRelationship.jsx";
 import { usePharmacyDetails } from "@/hooks/usePharmacyDetails.js";
+import { usePharmacyAvailability } from "@/hooks/usePharmacyAvailability.js";
 import PharmacyNotFound from "@/features/pharmacy/components/PharmacyNotFound.jsx";
+import MedicineAvailabilityCard from "@/features/medicine/components/MedicineAvailabilityCard.jsx";
 
 function PharmacyDetailsPage() {
   const { pharmacy, notFound } = usePharmacyDetails();
+  const { entries } = usePharmacyAvailability(pharmacy?.id);
 
   if (notFound) {
     return (
@@ -118,6 +123,28 @@ function PharmacyDetailsPage() {
           title="Specialties"
           items={pharmacy.specialties}
         />
+
+        <section className="flex flex-col gap-4">
+          <h2 className="flex items-center gap-2 text-lg font-semibold text-slate-900">
+            <Pill className="h-5 w-5 text-blue-600" aria-hidden="true" />
+            Available Medicines
+          </h2>
+
+          {entries.length === 0 ? (
+            <EmptyRelationship message="No medicine availability listed for this pharmacy." />
+          ) : (
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {entries.map((entry) => (
+                <MedicineAvailabilityCard
+                  key={entry.medicine.id}
+                  medicine={entry.medicine}
+                  status={entry.status}
+                  stockLevel={entry.stockLevel}
+                />
+              ))}
+            </div>
+          )}
+        </section>
       </Container>
     </Section>
   );
