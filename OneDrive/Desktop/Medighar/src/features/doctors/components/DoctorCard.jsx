@@ -3,13 +3,20 @@ import { BadgeCheck, Star, Clock, MapPin, IndianRupee } from "lucide-react";
 import { cn } from "@/shared/lib/cn.js";
 import Button from "@/shared/components/ui/Button.jsx";
 import SaveButton from "@/shared/components/ui/SaveButton.jsx";
+import { useDoctorReviews } from "@/hooks/useDoctorReviews.js";
 
 function DoctorCard({ doctor, className }) {
   const navigate = useNavigate();
+  const { stats } = useDoctorReviews(doctor.id);
 
   const handleViewProfile = () => {
     navigate(`/doctors/${doctor.id}`);
   };
+
+  const ratingLabel =
+    stats.total > 0
+      ? `${stats.average.toFixed(1)} (${stats.total} review${stats.total === 1 ? "" : "s"})`
+      : `${doctor.rating.toFixed(1)} rating`;
 
   return (
     <div
@@ -64,7 +71,7 @@ function DoctorCard({ doctor, className }) {
             className="h-4 w-4 shrink-0 fill-amber-400 text-amber-400"
             aria-hidden="true"
           />
-          {doctor.rating.toFixed(1)} rating
+          {ratingLabel}
         </div>
         <div className="flex items-center gap-1.5">
           <IndianRupee
