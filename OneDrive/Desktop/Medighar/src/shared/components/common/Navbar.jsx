@@ -12,6 +12,7 @@ const NAV_LINKS = [
   { label: "Saved", to: "/saved" },
   { label: "Recent", to: "/recent" },
   { label: "Compare", to: "/compare" },
+  { label: "Appointments", to: "/appointments" },
 ];
 
 function Navbar() {

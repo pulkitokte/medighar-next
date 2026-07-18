@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import {
   BadgeCheck,
   Star,
@@ -29,6 +30,7 @@ function handleShare() {
 
 function DoctorDetailsPage() {
   const { doctor, treatsDiseases, notFound } = useDoctorDetails();
+  const navigate = useNavigate();
 
   if (notFound) {
     return (
@@ -81,7 +83,11 @@ function DoctorDetailsPage() {
             </p>
 
             <div className="flex flex-wrap items-center justify-center gap-4 pt-2 sm:justify-start">
-              <Button>Book Appointment</Button>
+              <Button
+                onClick={() => navigate(`/appointments/book/${doctor.id}`)}
+              >
+                Book Appointment
+              </Button>
               <Button variant="outline" onClick={handleShare}>
                 <Share2 className="h-4 w-4" aria-hidden="true" />
                 Share Profile
