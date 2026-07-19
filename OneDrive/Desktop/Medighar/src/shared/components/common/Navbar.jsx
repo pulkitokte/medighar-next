@@ -17,6 +17,7 @@ const NAV_LINKS = [
   { label: "Medical Records", to: "/medical-records" },
   { label: "Dashboard", to: "/dashboard" },
   { label: "Calendar", to: "/calendar" },
+  { label: "Insights", to: "/insights" },
 ];
 
 function Navbar() {
