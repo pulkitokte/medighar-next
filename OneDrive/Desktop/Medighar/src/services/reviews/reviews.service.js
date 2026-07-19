@@ -121,3 +121,18 @@ export function computeRatingStats(reviews = []) {
 
   return { average, total, distribution };
 }
+
+/**
+ * Returns every review across all doctors as a flat list, each annotated
+ * with its doctorId. Used by the Dashboard's activity timeline, which
+ * needs cross-doctor review activity rather than a single doctor's reviews
+ * (as getReviewsForDoctor provides). Reads through the same repository
+ * getAllReviews() already used elsewhere in this file — no new storage.
+ * @returns {Array<object>}
+ */
+export function getAllReviewsFlat() {
+  const grouped = getAllReviews();
+  return Object.entries(grouped).flatMap(([doctorId, reviews]) =>
+    reviews.map((review) => ({ ...review, doctorId })),
+  );
+}

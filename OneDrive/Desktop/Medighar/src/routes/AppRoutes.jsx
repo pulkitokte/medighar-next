@@ -17,6 +17,7 @@ import BookAppointmentPage from "@/pages/Appointments/BookAppointmentPage.jsx";
 import AppointmentsPage from "@/pages/Appointments/AppointmentsPage.jsx";
 import RemindersPage from "@/pages/Reminders/RemindersPage.jsx";
 import MedicalRecordsPage from "@/pages/MedicalRecords/MedicalRecordsPage.jsx";
+import DashboardPage from "@/pages/Dashboard/DashboardPage.jsx";
 
 function AppRoutes() {
   return (
@@ -45,6 +46,7 @@ function AppRoutes() {
         <Route path="/appointments" element={<AppointmentsPage />} />
         <Route path="/reminders" element={<RemindersPage />} />
         <Route path="/medical-records" element={<MedicalRecordsPage />} />
+        <Route path="/dashboard" element={<DashboardPage />} />
       </Route>
     </Routes>
   );
