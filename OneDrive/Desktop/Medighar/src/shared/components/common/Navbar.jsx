@@ -14,6 +14,7 @@ const NAV_LINKS = [
   { label: "Compare", to: "/compare" },
   { label: "Appointments", to: "/appointments" },
   { label: "Reminders", to: "/reminders" },
+  { label: "Medical Records", to: "/medical-records" },
 ];
 
 function Navbar() {

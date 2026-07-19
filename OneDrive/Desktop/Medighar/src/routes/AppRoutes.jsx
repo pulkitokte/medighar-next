@@ -16,6 +16,7 @@ import CompareMedicinesPage from "@/pages/CompareMedicines/CompareMedicinesPage.
 import BookAppointmentPage from "@/pages/Appointments/BookAppointmentPage.jsx";
 import AppointmentsPage from "@/pages/Appointments/AppointmentsPage.jsx";
 import RemindersPage from "@/pages/Reminders/RemindersPage.jsx";
+import MedicalRecordsPage from "@/pages/MedicalRecords/MedicalRecordsPage.jsx";
 
 function AppRoutes() {
   return (
@@ -43,6 +44,7 @@ function AppRoutes() {
         />
         <Route path="/appointments" element={<AppointmentsPage />} />
         <Route path="/reminders" element={<RemindersPage />} />
+        <Route path="/medical-records" element={<MedicalRecordsPage />} />
       </Route>
     </Routes>
   );
