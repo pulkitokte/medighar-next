@@ -3,6 +3,7 @@ import { useSavedItems } from "@/hooks/useSavedItems.js";
 import { useAppointments } from "@/hooks/useAppointments.js";
 import { useReminders } from "@/hooks/useReminders.js";
 import { useMedicalRecords } from "@/hooks/useMedicalRecords.js";
+import { useMedicalProfile } from "@/hooks/useMedicalProfile.js";
 import {
   getAllRecentEntries,
   subscribeToRecent,
@@ -25,26 +26,11 @@ const REMINDER_PREVIEW_LIMIT = 5;
 
 /**
  * Aggregates data from every existing module (Saved, Recently Viewed,
- * Appointments, Reminders, Medical Records, Reviews) for the Personal
- * Health Dashboard. Reuses each module's existing hooks/services directly
- * — this hook creates no storage of its own and duplicates no business
- * logic; it only composes and derives display-ready summaries.
- * @returns {{
- *   overview: {
- *     savedCount: number,
- *     recentCount: number,
- *     upcomingAppointmentsCount: number,
- *     activeRemindersCount: number,
- *     recordsCount: number,
- *   },
- *   saved: object,
- *   upcomingAppointments: Array<object>,
- *   activeReminders: Array<object>,
- *   recentRecords: Array<object>,
- *   recentEntries: Array<object>,
- *   timeline: Array<object>,
- *   quickActions: Array<object>,
- * }}
+ * Appointments, Reminders, Medical Records, Reviews, Medical Profile) for
+ * the Personal Health Dashboard. Reuses each module's existing
+ * hooks/services directly — this hook creates no storage of its own and
+ * duplicates no business logic; it only composes and derives summaries.
+ * @returns {object}
  */
 export function useDashboard() {
   const saved = useSavedItems();
@@ -56,6 +42,7 @@ export function useDashboard() {
     disabled: disabledReminders,
   } = useReminders();
   const { recentRecords, totalCount: recordsCount } = useMedicalRecords();
+  const { completion: profileCompletion } = useMedicalProfile();
 
   const recentSnapshot = useSyncExternalStore(
     subscribeToRecent,
@@ -125,5 +112,6 @@ export function useDashboard() {
     recentEntries,
     timeline,
     quickActions: QUICK_ACTIONS,
+    profileCompletion,
   };
 }

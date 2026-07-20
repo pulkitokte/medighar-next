@@ -11,6 +11,7 @@ import {
   Activity,
   Store,
   Star,
+  IdCard,
 } from "lucide-react";
 import Section from "@/shared/components/ui/Section.jsx";
 import Container from "@/shared/components/ui/Container.jsx";
@@ -151,6 +152,7 @@ function DashboardPage() {
     recentEntries,
     timeline,
     quickActions,
+    profileCompletion,
   } = useDashboard();
 
   return (
@@ -162,7 +164,7 @@ function DashboardPage() {
           center
         />
 
-        <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-6">
           <StatTile
             icon={Bookmark}
             label="Saved Items"
@@ -192,6 +194,12 @@ function DashboardPage() {
             label="Medical Records"
             value={overview.recordsCount}
             to="/medical-records"
+          />
+          <StatTile
+            icon={IdCard}
+            label="Medical ID Complete"
+            value={`${profileCompletion}%`}
+            to="/medical-profile"
           />
         </section>
 

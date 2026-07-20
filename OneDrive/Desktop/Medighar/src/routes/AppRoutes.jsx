@@ -20,6 +20,7 @@ import MedicalRecordsPage from "@/pages/MedicalRecords/MedicalRecordsPage.jsx";
 import DashboardPage from "@/pages/Dashboard/DashboardPage.jsx";
 import HealthCalendarPage from "@/pages/HealthCalendar/HealthCalendarPage.jsx";
 import HealthInsightsPage from "@/pages/HealthInsights/HealthInsightsPage.jsx";
+import MedicalProfilePage from "@/pages/MedicalProfile/MedicalProfilePage.jsx";
 
 function AppRoutes() {
   return (
@@ -51,6 +52,7 @@ function AppRoutes() {
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/calendar" element={<HealthCalendarPage />} />
         <Route path="/insights" element={<HealthInsightsPage />} />
+        <Route path="/medical-profile" element={<MedicalProfilePage />} />
       </Route>
     </Routes>
   );

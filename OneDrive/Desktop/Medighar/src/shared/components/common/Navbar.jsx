@@ -18,6 +18,7 @@ const NAV_LINKS = [
   { label: "Dashboard", to: "/dashboard" },
   { label: "Calendar", to: "/calendar" },
   { label: "Insights", to: "/insights" },
+  { label: "Medical ID", to: "/medical-profile" },
 ];
 
 function Navbar() {

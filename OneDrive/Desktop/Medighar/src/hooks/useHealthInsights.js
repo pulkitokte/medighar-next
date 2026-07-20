@@ -3,6 +3,7 @@ import { useAppointments } from "@/hooks/useAppointments.js";
 import { useReminders } from "@/hooks/useReminders.js";
 import { useMedicalRecords } from "@/hooks/useMedicalRecords.js";
 import { useSavedItems } from "@/hooks/useSavedItems.js";
+import { useMedicalProfile } from "@/hooks/useMedicalProfile.js";
 import {
   getAllRecentEntries,
   subscribeToRecent,
@@ -18,10 +19,11 @@ const EMPTY_SNAPSHOT = "[]";
 
 /**
  * Aggregates data from every existing module (Appointments, Reminders,
- * Medical Records, Saved, Recently Viewed, Reviews) into the Health
- * Insights & Statistics view. Reuses each module's existing hooks/services
- * directly — creates no storage of its own and duplicates no business
- * logic beyond composing already-exported aggregation functions.
+ * Medical Records, Saved, Recently Viewed, Reviews, Medical Profile) into
+ * the Health Insights & Statistics view. Reuses each module's existing
+ * hooks/services directly — creates no storage of its own and duplicates
+ * no business logic beyond composing already-exported aggregation
+ * functions.
  * @returns {object}
  */
 export function useHealthInsights() {
@@ -29,6 +31,7 @@ export function useHealthInsights() {
   const reminders = useReminders();
   const { filteredRecords } = useMedicalRecords();
   const saved = useSavedItems();
+  const { completion: profileCompletion } = useMedicalProfile();
 
   const recentSnapshot = useSyncExternalStore(
     subscribeToRecent,
@@ -108,5 +111,5 @@ export function useHealthInsights() {
     ],
   );
 
-  return insights;
+  return { ...insights, profileCompletion };
 }

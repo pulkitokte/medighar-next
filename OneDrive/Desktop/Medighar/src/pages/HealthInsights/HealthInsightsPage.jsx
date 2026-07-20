@@ -9,6 +9,7 @@ import {
   Activity,
   Trophy,
   Lock,
+  IdCard,
 } from "lucide-react";
 import { cn } from "@/shared/lib/cn.js";
 import Section from "@/shared/components/ui/Section.jsx";
@@ -342,6 +343,24 @@ function HealthInsightsPage() {
               icon={Activity}
               label="Timeline Activity"
               value={insights.timelineActivityCount}
+            />
+          </div>
+        </section>
+
+        <section className="flex flex-col gap-4">
+          <h2 className="text-lg font-semibold text-slate-900">
+            Emergency Medical Profile
+          </h2>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <StatCard
+              icon={IdCard}
+              label="Profile Completeness"
+              value={`${insights.profileCompletion}%`}
+            />
+            <CircularStat
+              label="Medical ID Completeness"
+              value={insights.profileCompletion}
+              total={100}
             />
           </div>
         </section>
