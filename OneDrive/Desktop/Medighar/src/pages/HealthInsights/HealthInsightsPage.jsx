@@ -10,6 +10,7 @@ import {
   Trophy,
   Lock,
   IdCard,
+  Users,
 } from "lucide-react";
 import { cn } from "@/shared/lib/cn.js";
 import Section from "@/shared/components/ui/Section.jsx";
@@ -70,9 +71,7 @@ function BarRow({ label, count, max }) {
 }
 
 function BarList({ items, labelKey, countKey, emptyMessage }) {
-  if (items.length === 0) {
-    return <EmptyRelationship message={emptyMessage} />;
-  }
+  if (items.length === 0) return <EmptyRelationship message={emptyMessage} />;
 
   const max = Math.max(...items.map((item) => item[countKey]), 1);
 
@@ -362,6 +361,30 @@ function HealthInsightsPage() {
               value={insights.profileCompletion}
               total={100}
             />
+          </div>
+        </section>
+
+        <section className="flex flex-col gap-4">
+          <h2 className="text-lg font-semibold text-slate-900">
+            Family Health
+          </h2>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <StatCard
+              icon={Users}
+              label="Family Members"
+              value={insights.familyStats.count}
+            />
+            <div className="flex flex-col gap-2">
+              <p className="text-sm font-medium text-slate-700">
+                Blood Group Distribution
+              </p>
+              <BarList
+                items={insights.familyStats.bloodGroupDistribution}
+                labelKey="bloodGroup"
+                countKey="count"
+                emptyMessage="No blood group data yet."
+              />
+            </div>
           </div>
         </section>
 

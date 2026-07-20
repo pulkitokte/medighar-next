@@ -1,32 +1,18 @@
 import { useCallback, useMemo, useSyncExternalStore } from "react";
 import {
   getAllReminders,
-  subscribeToReminders,
   deriveReminderStatus,
   enableReminder,
   disableReminder,
   deleteReminder,
+  subscribeToReminders,
 } from "@/services/reminders/reminders.service.js";
 import { getMedicineById } from "@/services/medicines/medicines.service.js";
+import { getMemberById } from "@/services/family/family.service.js";
 import { useAppointments } from "@/hooks/useAppointments.js";
 
 const EMPTY_SNAPSHOT = "[]";
 
-/**
- * Loads every reminder, enriched with its resolved medicine or appointment
- * and derived status, split into upcoming / completed / disabled. Reuses
- * useAppointments() to resolve appointment-linked reminders rather than
- * re-deriving appointment data here.
- * @returns {{
- *   upcoming: Array<object>,
- *   completed: Array<object>,
- *   disabled: Array<object>,
- *   totalCount: number,
- *   enable: (id: string) => void,
- *   disable: (id: string) => void,
- *   remove: (id: string) => void,
- * }}
- */
 export function useReminders() {
   const snapshot = useSyncExternalStore(
     subscribeToReminders,
@@ -47,11 +33,15 @@ export function useReminders() {
   const enriched = useMemo(
     () =>
       reminders.map((reminder) => {
+        const memberId = reminder.memberId ?? "me";
+
         if (reminder.type === "medicine") {
           const medicine = getMedicineById(reminder.medicineId);
           return {
             ...reminder,
+            memberId,
             medicine,
+            member: getMemberById(memberId),
             status: deriveReminderStatus(reminder),
           };
         }
@@ -63,7 +53,9 @@ export function useReminders() {
 
         return {
           ...reminder,
+          memberId,
           appointment,
+          member: getMemberById(memberId),
           status: deriveReminderStatus(reminder, { appointment }),
         };
       }),

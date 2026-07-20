@@ -4,6 +4,7 @@ import { useAppointments } from "@/hooks/useAppointments.js";
 import { useReminders } from "@/hooks/useReminders.js";
 import { useMedicalRecords } from "@/hooks/useMedicalRecords.js";
 import { useMedicalProfile } from "@/hooks/useMedicalProfile.js";
+import { useFamilyProfiles } from "@/hooks/useFamilyProfiles.js";
 import {
   getAllRecentEntries,
   subscribeToRecent,
@@ -23,15 +24,8 @@ const EMPTY_SNAPSHOT = "[]";
 const RECENT_PREVIEW_LIMIT = 5;
 const APPOINTMENT_PREVIEW_LIMIT = 3;
 const REMINDER_PREVIEW_LIMIT = 5;
+const FAMILY_PREVIEW_LIMIT = 5;
 
-/**
- * Aggregates data from every existing module (Saved, Recently Viewed,
- * Appointments, Reminders, Medical Records, Reviews, Medical Profile) for
- * the Personal Health Dashboard. Reuses each module's existing
- * hooks/services directly — this hook creates no storage of its own and
- * duplicates no business logic; it only composes and derives summaries.
- * @returns {object}
- */
 export function useDashboard() {
   const saved = useSavedItems();
   const { upcoming: upcomingAppointments, past: pastAppointments } =
@@ -43,6 +37,7 @@ export function useDashboard() {
   } = useReminders();
   const { recentRecords, totalCount: recordsCount } = useMedicalRecords();
   const { completion: profileCompletion } = useMedicalProfile();
+  const { members: familyMembers } = useFamilyProfiles();
 
   const recentSnapshot = useSyncExternalStore(
     subscribeToRecent,
@@ -98,6 +93,7 @@ export function useDashboard() {
     upcomingAppointmentsCount: upcomingAppointments.length,
     activeRemindersCount: upcomingReminders.length,
     recordsCount,
+    familyMembersCount: familyMembers.length,
   };
 
   return {
@@ -113,5 +109,6 @@ export function useDashboard() {
     timeline,
     quickActions: QUICK_ACTIONS,
     profileCompletion,
+    familyMembers: familyMembers.slice(0, FAMILY_PREVIEW_LIMIT),
   };
 }

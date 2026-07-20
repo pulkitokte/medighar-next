@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import {
   IdCard,
   HeartPulse,
@@ -14,6 +15,7 @@ import Container from "@/shared/components/ui/Container.jsx";
 import PageHeading from "@/shared/components/ui/PageHeading.jsx";
 import Button from "@/shared/components/ui/Button.jsx";
 import { useMedicalProfile } from "@/hooks/useMedicalProfile.js";
+import { useFamilyProfiles } from "@/hooks/useFamilyProfiles.js";
 import {
   BLOOD_GROUPS,
   GENDER_OPTIONS,
@@ -237,17 +239,22 @@ function MedicalIdCard({ profile, completion }) {
 }
 
 function MedicalProfilePage() {
-  const { profile, completion, save, remove, reset } = useMedicalProfile();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { members } = useFamilyProfiles();
+  const selectedMemberId = searchParams.get("member") || "me";
+
+  const { profile, completion, save, remove, reset } =
+    useMedicalProfile(selectedMemberId);
 
   const [isEditing, setIsEditing] = useState(!profile);
   const [values, setValues] = useState(EMPTY_VALUES);
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
-    if (profile) {
-      setValues({ ...EMPTY_VALUES, ...profile });
-    }
-  }, [profile]);
+    setValues(profile ? { ...EMPTY_VALUES, ...profile } : EMPTY_VALUES);
+    setIsEditing(!profile);
+    setErrors({});
+  }, [profile, selectedMemberId]);
 
   const updateField = (field, value) => {
     setValues((previous) => ({ ...previous, [field]: value }));
@@ -306,6 +313,25 @@ function MedicalProfilePage() {
           subtitle="Keep your critical medical information ready for emergencies."
           center
         />
+
+        <div className="mx-auto flex w-full max-w-xl flex-col gap-1.5 text-sm print:hidden">
+          <span className="font-medium text-slate-700">
+            Viewing profile for
+          </span>
+          <select
+            value={selectedMemberId}
+            onChange={(event) =>
+              setSearchParams({ member: event.target.value })
+            }
+            className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:border-blue-400 focus:outline-none"
+          >
+            {members.map((member) => (
+              <option key={member.id} value={member.id}>
+                {member.fullName}
+              </option>
+            ))}
+          </select>
+        </div>
 
         <MedicalIdCard profile={profile} completion={completion} />
 

@@ -8,28 +8,11 @@ import {
   groupRecordsByYear,
   deleteRecord,
 } from "@/services/records/records.service.js";
+import { getMemberById } from "@/services/family/family.service.js";
 
 const EMPTY_SNAPSHOT = "[]";
 const RECENT_LIMIT = 5;
 
-/**
- * Loads every medical record, with local (non-URL-synced) search, type
- * filter, and sort state, plus a "recent" slice and a year-grouped view.
- * @returns {{
- *   filteredRecords: Array<object>,
- *   recentRecords: Array<object>,
- *   groupedByYear: Record<string, Array<object>>,
- *   sortedYears: Array<string>,
- *   totalCount: number,
- *   searchQuery: string,
- *   setSearchQuery: Function,
- *   typeFilter: string,
- *   setTypeFilter: Function,
- *   sortBy: string,
- *   setSortBy: Function,
- *   remove: (id: string) => void,
- * }}
- */
 export function useMedicalRecords() {
   const snapshot = useSyncExternalStore(
     subscribeToRecords,
@@ -37,7 +20,13 @@ export function useMedicalRecords() {
     () => EMPTY_SNAPSHOT,
   );
 
-  const allRecords = useMemo(() => JSON.parse(snapshot), [snapshot]);
+  const allRecords = useMemo(() => {
+    const records = JSON.parse(snapshot);
+    return records.map((record) => {
+      const memberId = record.memberId ?? "me";
+      return { ...record, memberId, member: getMemberById(memberId) };
+    });
+  }, [snapshot]);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState("All");

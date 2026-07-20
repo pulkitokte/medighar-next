@@ -1,14 +1,6 @@
 import { CalendarClock, Pill, FileText } from "lucide-react";
 import { groupByField } from "@/shared/lib/repositoryHelpers.js";
 
-/**
- * Pure aggregation logic for the Health Calendar & Timeline. This service
- * owns no storage of its own — every event is built from already-resolved
- * data supplied by useAppointments, useReminders, and useMedicalRecords.
- * Its only job is to normalize that data into a common event shape and
- * perform date-range math and grouping.
- */
-
 export const EVENT_TYPES = {
   APPOINTMENT: "appointment",
   MEDICINE_REMINDER: "medicine-reminder",
@@ -33,27 +25,13 @@ export const EVENT_TYPE_META = {
   },
 };
 
-/**
- * Parses a "YYYY-MM-DD" date-only string (or a Date instance) into a local
- * Date object without the UTC/local timezone drift that
- * `new Date(dateOnlyString)` introduces.
- * @param {string|Date} value
- * @returns {Date}
- */
 function parseDateOnly(value) {
   if (value instanceof Date) return value;
-
   const [year, month, day] = String(value).split("-").map(Number);
   if (!year || !month || !day) return new Date(value);
-
   return new Date(year, month - 1, day);
 }
 
-/**
- * Formats a date as a "YYYY-MM-DD" key using local date components.
- * @param {string|Date} value
- * @returns {string}
- */
 export function toDateKey(value) {
   const date = parseDateOnly(value);
   const year = date.getFullYear();
@@ -71,15 +49,12 @@ export function addDays(date, amount) {
 export function startOfMonth(date) {
   return new Date(date.getFullYear(), date.getMonth(), 1);
 }
-
 export function endOfMonth(date) {
   return new Date(date.getFullYear(), date.getMonth() + 1, 0);
 }
-
 export function startOfWeek(date) {
   return addDays(date, -date.getDay());
 }
-
 export function endOfWeek(date) {
   return addDays(startOfWeek(date), 6);
 }
@@ -88,13 +63,6 @@ function isWithinRange(dateKey, startKey, endKey) {
   return dateKey >= startKey && dateKey <= endKey;
 }
 
-/**
- * Builds calendar events from appointments falling within the given range.
- * @param {Array<object>} appointments
- * @param {Date} rangeStart
- * @param {Date} rangeEnd
- * @returns {Array<object>}
- */
 export function buildAppointmentEvents(appointments, rangeStart, rangeEnd) {
   const startKey = toDateKey(rangeStart);
   const endKey = toDateKey(rangeEnd);
@@ -111,19 +79,11 @@ export function buildAppointmentEvents(appointments, rangeStart, rangeEnd) {
         : "Appointment",
       date: toDateKey(appointment.date),
       time: appointment.timeSlot,
+      memberId: appointment.memberId ?? "me",
       to: EVENT_TYPE_META[EVENT_TYPES.APPOINTMENT].to,
     }));
 }
 
-/**
- * Builds one recurring calendar event per active day for every enabled
- * medicine reminder, bounded strictly to the given range so navigating
- * between calendar views never generates an unbounded series.
- * @param {Array<object>} reminders
- * @param {Date} rangeStart
- * @param {Date} rangeEnd
- * @returns {Array<object>}
- */
 export function buildMedicineReminderEvents(reminders, rangeStart, rangeEnd) {
   const startKey = toDateKey(rangeStart);
   const endKey = toDateKey(rangeEnd);
@@ -156,6 +116,7 @@ export function buildMedicineReminderEvents(reminders, rangeStart, rangeEnd) {
             : "Medicine reminder",
           date: toDateKey(cursor),
           time: reminder.reminderTime,
+          memberId: reminder.memberId ?? "me",
           to: EVENT_TYPE_META[EVENT_TYPES.MEDICINE_REMINDER].to,
         });
         cursor = addDays(cursor, 1);
@@ -165,14 +126,6 @@ export function buildMedicineReminderEvents(reminders, rangeStart, rangeEnd) {
   return events;
 }
 
-/**
- * Builds calendar events from medical records falling within the given
- * range.
- * @param {Array<object>} records
- * @param {Date} rangeStart
- * @param {Date} rangeEnd
- * @returns {Array<object>}
- */
 export function buildMedicalRecordEvents(records, rangeStart, rangeEnd) {
   const startKey = toDateKey(rangeStart);
   const endKey = toDateKey(rangeEnd);
@@ -185,18 +138,11 @@ export function buildMedicalRecordEvents(records, rangeStart, rangeEnd) {
       title: record.title,
       date: toDateKey(record.date),
       time: null,
+      memberId: record.memberId ?? "me",
       to: EVENT_TYPE_META[EVENT_TYPES.MEDICAL_RECORD].to,
     }));
 }
 
-/**
- * Builds every calendar event within a date range from already-resolved
- * appointments, reminders, and records, sorted by date then time.
- * @param {{ appointments?: Array<object>, reminders?: Array<object>, records?: Array<object> }} sources
- * @param {Date} rangeStart
- * @param {Date} rangeEnd
- * @returns {Array<object>}
- */
 export function buildCalendarEvents(
   { appointments = [], reminders = [], records = [] },
   rangeStart,
@@ -212,13 +158,6 @@ export function buildCalendarEvents(
   });
 }
 
-/**
- * Filters events to only the visible types, per the calendar's filter
- * toggles.
- * @param {Array<object>} events
- * @param {{ showAppointments: boolean, showReminders: boolean, showRecords: boolean }} visibility
- * @returns {Array<object>}
- */
 export function filterEventsByVisibility(events, visibility) {
   return events.filter((event) => {
     if (event.type === EVENT_TYPES.APPOINTMENT)
@@ -232,45 +171,31 @@ export function filterEventsByVisibility(events, visibility) {
 }
 
 /**
- * Groups events by their date key, for month/week grid rendering. Reuses
- * the existing generic groupByField helper rather than a bespoke reducer.
+ * Filters events to a single family member, or returns every event when
+ * "all" is passed.
  * @param {Array<object>} events
- * @returns {Record<string, Array<object>>}
+ * @param {string} memberFilter
+ * @returns {Array<object>}
  */
+export function filterEventsByMember(events, memberFilter) {
+  if (!memberFilter || memberFilter === "all") return events;
+  return events.filter((event) => event.memberId === memberFilter);
+}
+
 export function groupEventsByDate(events) {
   return groupByField(events, "date");
 }
 
-/**
- * Returns the next `limit` upcoming events from today onward.
- * @param {Array<object>} events
- * @param {Date} today
- * @param {number} [limit]
- * @returns {Array<object>}
- */
 export function getUpcomingEvents(events, today, limit = 7) {
   const todayKey = toDateKey(today);
   return events.filter((event) => event.date >= todayKey).slice(0, limit);
 }
 
-/**
- * Returns only today's events.
- * @param {Array<object>} events
- * @param {Date} today
- * @returns {Array<object>}
- */
 export function getTodayEvents(events, today) {
   const todayKey = toDateKey(today);
   return events.filter((event) => event.date === todayKey);
 }
 
-/**
- * Groups upcoming events into Today / Tomorrow / This Week / Later
- * buckets, for the timeline view.
- * @param {Array<object>} events
- * @param {Date} today
- * @returns {{ Today: Array<object>, Tomorrow: Array<object>, "This Week": Array<object>, Later: Array<object> }}
- */
 export function buildTimelineGroups(events, today) {
   const todayKey = toDateKey(today);
   const tomorrowKey = toDateKey(addDays(today, 1));
@@ -281,15 +206,10 @@ export function buildTimelineGroups(events, today) {
   events
     .filter((event) => event.date >= todayKey)
     .forEach((event) => {
-      if (event.date === todayKey) {
-        groups.Today.push(event);
-      } else if (event.date === tomorrowKey) {
-        groups.Tomorrow.push(event);
-      } else if (event.date <= weekEndKey) {
-        groups["This Week"].push(event);
-      } else {
-        groups.Later.push(event);
-      }
+      if (event.date === todayKey) groups.Today.push(event);
+      else if (event.date === tomorrowKey) groups.Tomorrow.push(event);
+      else if (event.date <= weekEndKey) groups["This Week"].push(event);
+      else groups.Later.push(event);
     });
 
   return groups;

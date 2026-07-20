@@ -16,6 +16,7 @@ import EmptyRelationship from "@/shared/components/ui/EmptyRelationship.jsx";
 import { useReminders } from "@/hooks/useReminders.js";
 import { useReminderForm } from "@/hooks/useReminderForm.js";
 import { useAppointments } from "@/hooks/useAppointments.js";
+import { useFamilyProfiles } from "@/hooks/useFamilyProfiles.js";
 import {
   FREQUENCY_OPTIONS,
   LEAD_TIME_OPTIONS,
@@ -37,6 +38,26 @@ const STATUS_LABELS = {
 function FieldError({ message }) {
   if (!message) return null;
   return <p className="mt-1 text-xs text-red-600">{message}</p>;
+}
+
+function MemberSelect({ values, errors, onChange, members }) {
+  return (
+    <label className="flex flex-col gap-1.5 text-sm">
+      <span className="font-medium text-slate-700">Family Member</span>
+      <select
+        value={values.memberId}
+        onChange={(event) => onChange("memberId", event.target.value)}
+        className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:border-blue-400 focus:outline-none"
+      >
+        {members.map((member) => (
+          <option key={member.id} value={member.id}>
+            {member.fullName}
+          </option>
+        ))}
+      </select>
+      <FieldError message={errors.memberId} />
+    </label>
+  );
 }
 
 function TypeToggle({ type, onChange }) {
@@ -75,9 +96,16 @@ function TypeToggle({ type, onChange }) {
   );
 }
 
-function MedicineReminderFields({ values, errors, onChange }) {
+function MedicineReminderFields({ values, errors, onChange, members }) {
   return (
     <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+      <MemberSelect
+        values={values}
+        errors={errors}
+        onChange={onChange}
+        members={members}
+      />
+
       <label className="flex flex-col gap-1.5 text-sm">
         <span className="font-medium text-slate-700">Medicine</span>
         <select
@@ -159,11 +187,18 @@ function MedicineReminderFields({ values, errors, onChange }) {
   );
 }
 
-function AppointmentReminderFields({ values, errors, onChange }) {
+function AppointmentReminderFields({ values, errors, onChange, members }) {
   const { upcoming } = useAppointments();
 
   return (
     <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+      <MemberSelect
+        values={values}
+        errors={errors}
+        onChange={onChange}
+        members={members}
+      />
+
       <label className="flex flex-col gap-1.5 text-sm sm:col-span-2">
         <span className="font-medium text-slate-700">Appointment</span>
         <select
@@ -246,6 +281,10 @@ function ReminderCard({ reminder, onEnable, onDisable, onDelete }) {
           {STATUS_LABELS[reminder.status]}
         </span>
       </div>
+
+      {reminder.member && !reminder.member.isSelf && (
+        <p className="text-xs text-slate-500">For {reminder.member.fullName}</p>
+      )}
 
       {isAppointment ? (
         <div className="flex flex-col gap-1 text-sm text-slate-600">
@@ -349,6 +388,7 @@ function ReminderSection({
 function RemindersPage() {
   const { upcoming, completed, disabled, totalCount, enable, disable, remove } =
     useReminders();
+  const { members } = useFamilyProfiles();
   const {
     type,
     setType,
@@ -384,12 +424,14 @@ function RemindersPage() {
               values={medicineValues}
               errors={errors}
               onChange={updateMedicineField}
+              members={members}
             />
           ) : (
             <AppointmentReminderFields
               values={appointmentValues}
               errors={errors}
               onChange={updateAppointmentField}
+              members={members}
             />
           )}
 

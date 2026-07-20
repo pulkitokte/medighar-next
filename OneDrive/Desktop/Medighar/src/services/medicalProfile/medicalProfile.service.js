@@ -11,11 +11,6 @@ export const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 export const GENDER_OPTIONS = ["Male", "Female", "Other"];
 export const ORGAN_DONOR_OPTIONS = ["Yes", "No"];
 
-/**
- * Every profile field, in form order. Used both for form rendering context
- * and for computing profile completion percentage — one source of truth,
- * reused rather than re-listed anywhere else.
- */
 export const PROFILE_FIELDS = [
   "fullName",
   "dob",
@@ -33,19 +28,12 @@ export const PROFILE_FIELDS = [
   "notes",
 ];
 
-const REQUIRED_FIELDS = [
-  "fullName",
-  "bloodGroup",
-  "emergencyContactName",
-  "emergencyContactNumber",
-];
-
 function isFilled(value) {
   return typeof value === "string" ? value.trim().length > 0 : Boolean(value);
 }
 
 /**
- * Validates the minimum fields needed for the profile to be useful in an
+ * Validates the minimum fields needed for a profile to be useful in an
  * emergency. Every other field is optional and only affects completion.
  * @param {object} values
  * @returns {{ errors: Record<string, string>, isValid: boolean }}
@@ -67,12 +55,12 @@ export function validateProfile(values = {}) {
 }
 
 /**
- * Validates and saves the medical profile, creating or overwriting the
- * single stored record.
+ * Validates and saves a member's medical profile.
+ * @param {string} memberId
  * @param {object} values
  * @returns {{ success: boolean, errors?: Record<string, string>, profile?: object }}
  */
-export function saveProfile(values) {
+export function saveProfile(memberId, values) {
   const { errors, isValid } = validateProfile(values);
 
   if (!isValid) {
@@ -88,30 +76,30 @@ export function saveProfile(values) {
   });
   record.updatedAt = Date.now();
 
-  setProfile(record);
+  setProfile(memberId, record);
 
   return { success: true, profile: record };
 }
 
 /**
- * Deletes the medical profile entirely, using local state only.
+ * Deletes a member's medical profile entirely, using local state only.
+ * @param {string} memberId
  */
-export function deleteProfile() {
-  clearProfile();
+export function deleteProfile(memberId) {
+  clearProfile(memberId);
 }
 
 /**
  * Alias for deleteProfile — "Reset" clears the stored profile back to
- * empty, same underlying operation as delete.
+ * empty for the given member.
+ * @param {string} memberId
  */
-export function resetProfile() {
-  clearProfile();
+export function resetProfile(memberId) {
+  clearProfile(memberId);
 }
 
 /**
  * Computes the percentage of profile fields that have been filled in.
- * Reused by both the Medical Profile page itself and the Dashboard /
- * Insights integrations, so completion logic exists in exactly one place.
  * @param {object|null} profile
  * @returns {number}
  */

@@ -2,9 +2,11 @@ import { useCallback, useMemo, useState } from "react";
 import { useAppointments } from "@/hooks/useAppointments.js";
 import { useReminders } from "@/hooks/useReminders.js";
 import { useMedicalRecords } from "@/hooks/useMedicalRecords.js";
+import { useFamilyProfiles } from "@/hooks/useFamilyProfiles.js";
 import {
   buildCalendarEvents,
   filterEventsByVisibility,
+  filterEventsByMember,
   groupEventsByDate,
   getUpcomingEvents,
   getTodayEvents,
@@ -18,13 +20,6 @@ import {
 
 const LOOKAHEAD_DAYS = 60;
 
-/**
- * Aggregates data from the existing Appointments, Reminders, and Medical
- * Records modules into a unified calendar/timeline view. Reuses each
- * module's existing hook directly — creates no new storage and duplicates
- * no business logic; it only composes and derives calendar-ready views.
- * @returns {object}
- */
 export function useHealthCalendar() {
   const today = useMemo(() => {
     const now = new Date();
@@ -40,6 +35,7 @@ export function useHealthCalendar() {
     disabled: disabledReminders,
   } = useReminders();
   const { filteredRecords } = useMedicalRecords();
+  const { members } = useFamilyProfiles();
 
   const allAppointments = useMemo(
     () => [...upcomingAppointments, ...pastAppointments],
@@ -55,6 +51,7 @@ export function useHealthCalendar() {
   const [showAppointments, setShowAppointments] = useState(true);
   const [showReminders, setShowReminders] = useState(true);
   const [showRecords, setShowRecords] = useState(true);
+  const [memberFilter, setMemberFilter] = useState("all");
 
   const visibility = { showAppointments, showReminders, showRecords };
 
@@ -94,7 +91,8 @@ export function useHealthCalendar() {
       viewRange.start,
       viewRange.end,
     );
-    return filterEventsByVisibility(events, visibility);
+    const visible = filterEventsByVisibility(events, visibility);
+    return filterEventsByMember(visible, memberFilter);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     allAppointments,
@@ -104,6 +102,7 @@ export function useHealthCalendar() {
     showAppointments,
     showReminders,
     showRecords,
+    memberFilter,
   ]);
 
   const eventsByDate = useMemo(
@@ -126,7 +125,8 @@ export function useHealthCalendar() {
       lookaheadRange.start,
       lookaheadRange.end,
     );
-    return filterEventsByVisibility(events, visibility);
+    const visible = filterEventsByVisibility(events, visibility);
+    return filterEventsByMember(visible, memberFilter);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     allAppointments,
@@ -136,18 +136,17 @@ export function useHealthCalendar() {
     showAppointments,
     showReminders,
     showRecords,
+    memberFilter,
   ]);
 
   const upcomingEvents = useMemo(
     () => getUpcomingEvents(lookaheadEvents, today, 7),
     [lookaheadEvents, today],
   );
-
   const todayEvents = useMemo(
     () => getTodayEvents(lookaheadEvents, today),
     [lookaheadEvents, today],
   );
-
   const timelineGroups = useMemo(
     () => buildTimelineGroups(lookaheadEvents, today),
     [lookaheadEvents, today],
@@ -165,6 +164,9 @@ export function useHealthCalendar() {
     setShowAppointments,
     setShowReminders,
     setShowRecords,
+    memberFilter,
+    setMemberFilter,
+    familyMembers: members,
     viewRange,
     eventsByDate,
     upcomingEvents,

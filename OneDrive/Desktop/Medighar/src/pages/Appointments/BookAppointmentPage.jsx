@@ -6,6 +6,7 @@ import Button from "@/shared/components/ui/Button.jsx";
 import InfoCard from "@/shared/components/ui/InfoCard.jsx";
 import DoctorNotFound from "@/features/doctors/components/DoctorNotFound.jsx";
 import { useBookAppointment } from "@/hooks/useBookAppointment.js";
+import { useFamilyProfiles } from "@/hooks/useFamilyProfiles.js";
 import {
   TIME_SLOTS,
   CONSULTATION_TYPES,
@@ -81,6 +82,7 @@ function TextAreaField({ label, field, values, errors, onChange }) {
 function BookAppointmentPage() {
   const { doctor, notFound, values, errors, updateField, handleSubmit } =
     useBookAppointment();
+  const { members } = useFamilyProfiles();
 
   if (notFound) {
     return (
@@ -149,6 +151,17 @@ function BookAppointmentPage() {
           className="mx-auto flex w-full max-w-3xl flex-col gap-6 rounded-2xl border border-slate-200 bg-white p-6"
         >
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <SelectField
+              label="Family Member"
+              field="memberId"
+              values={values}
+              errors={errors}
+              onChange={updateField}
+              options={members.map((member) => ({
+                key: member.id,
+                label: member.fullName,
+              }))}
+            />
             <TextField
               label="Patient Name"
               field="patientName"

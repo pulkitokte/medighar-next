@@ -1,3 +1,4 @@
+import { getDoctorById } from "@/services/doctors/doctors.service.js";
 import {
   getAppointments,
   setAppointments,
@@ -31,21 +32,6 @@ export const CONSULTATION_TYPES = [
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_PATTERN = /^[0-9]{10}$/;
 
-/**
- * Validates appointment booking form values.
- * @param {{
- *   patientName?: string,
- *   age?: string|number,
- *   gender?: string,
- *   phone?: string,
- *   email?: string,
- *   date?: string,
- *   timeSlot?: string,
- *   consultationType?: string,
- *   reason?: string,
- * }} values
- * @returns {{ errors: Record<string, string>, isValid: boolean }}
- */
 export function validateAppointmentForm(values = {}) {
   const errors = {};
 
@@ -106,12 +92,6 @@ export function validateAppointmentForm(values = {}) {
   return { errors, isValid: Object.keys(errors).length === 0 };
 }
 
-/**
- * Derives an appointment's current status from its stored date. A manually
- * cancelled appointment always reports "cancelled" regardless of date.
- * @param {{ date: string, status?: string|null }} appointment
- * @returns {"upcoming"|"completed"|"cancelled"}
- */
 export function deriveAppointmentStatus(appointment) {
   if (appointment.status === "cancelled") return "cancelled";
 
@@ -123,27 +103,11 @@ export function deriveAppointmentStatus(appointment) {
   return appointmentDate >= today ? "upcoming" : "completed";
 }
 
-/**
- * Creates and persists a new appointment. Assumes the given data has
- * already been validated via validateAppointmentForm.
- * @param {{
- *   doctorId: string,
- *   patientName: string,
- *   age: string|number,
- *   gender: string,
- *   phone: string,
- *   email: string,
- *   date: string,
- *   timeSlot: string,
- *   consultationType: string,
- *   reason: string,
- * }} data
- * @returns {object} the created appointment record
- */
 export function createAppointment(data) {
   const record = {
     id: `appointment-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     doctorId: data.doctorId,
+    memberId: data.memberId || "me",
     patientName: data.patientName.trim(),
     age: Number(data.age),
     gender: data.gender,
@@ -162,10 +126,6 @@ export function createAppointment(data) {
   return record;
 }
 
-/**
- * Cancels an appointment by id, using local state only.
- * @param {string} id
- */
 export function cancelAppointment(id) {
   const next = getAppointments().map((appointment) =>
     appointment.id === id
@@ -176,10 +136,6 @@ export function cancelAppointment(id) {
   setAppointments(next);
 }
 
-/**
- * Returns every stored appointment record.
- * @returns {Array<object>}
- */
 export function getAllAppointments() {
   return getAppointments();
 }

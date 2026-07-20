@@ -39,50 +39,26 @@ function buildAttachment(values) {
   };
 }
 
-/**
- * Returns every stored medical record.
- * @returns {Array<object>}
- */
 export function getAllRecords() {
   return getRecords();
 }
 
-/**
- * Validates medical record form values.
- * @param {object} values
- * @returns {{ errors: Record<string, string>, isValid: boolean }}
- */
 export function validateRecordForm(values = {}) {
   const errors = {};
 
-  if (!values.title || !values.title.trim()) {
+  if (!values.title || !values.title.trim())
     errors.title = "Record title is required.";
-  }
-
-  if (!values.type || !RECORD_TYPES.includes(values.type)) {
+  if (!values.type || !RECORD_TYPES.includes(values.type))
     errors.type = "Please select a record type.";
-  }
-
-  if (!values.doctorName || !values.doctorName.trim()) {
+  if (!values.doctorName || !values.doctorName.trim())
     errors.doctorName = "Doctor name is required.";
-  }
-
-  if (!values.hospital || !values.hospital.trim()) {
+  if (!values.hospital || !values.hospital.trim())
     errors.hospital = "Hospital / Clinic is required.";
-  }
-
-  if (!values.date) {
-    errors.date = "Record date is required.";
-  }
+  if (!values.date) errors.date = "Record date is required.";
 
   return { errors, isValid: Object.keys(errors).length === 0 };
 }
 
-/**
- * Validates and creates a new medical record.
- * @param {object} values
- * @returns {{ success: boolean, errors?: Record<string, string>, record?: object }}
- */
 export function createRecord(values) {
   const { errors, isValid } = validateRecordForm(values);
 
@@ -92,6 +68,7 @@ export function createRecord(values) {
 
   const record = {
     id: generateId(),
+    memberId: values.memberId || "me",
     title: values.title.trim(),
     type: values.type,
     doctorName: values.doctorName.trim(),
@@ -107,12 +84,6 @@ export function createRecord(values) {
   return { success: true, record };
 }
 
-/**
- * Validates and updates an existing medical record.
- * @param {string} id
- * @param {object} values
- * @returns {{ success: boolean, errors?: Record<string, string>, record?: object }}
- */
 export function updateRecord(id, values) {
   const { errors, isValid } = validateRecordForm(values);
 
@@ -127,6 +98,7 @@ export function updateRecord(id, values) {
 
     updated = {
       ...record,
+      memberId: values.memberId || "me",
       title: values.title.trim(),
       type: values.type,
       doctorName: values.doctorName.trim(),
@@ -144,49 +116,22 @@ export function updateRecord(id, values) {
   return { success: true, record: updated };
 }
 
-/**
- * Deletes a medical record by id, using local state only.
- * @param {string} id
- */
 export function deleteRecord(id) {
   setRecords(getRecords().filter((record) => record.id !== id));
 }
 
-/**
- * Performs a text search against record title and doctor name.
- * @param {Array<object>} records
- * @param {string} query
- * @returns {Array<object>}
- */
 export function searchRecords(records, query) {
   return safeSearch(records, query, ["title", "doctorName"]);
 }
 
-/**
- * Filters records by type, "All" (or empty) returns every record.
- * @param {Array<object>} records
- * @param {string} type
- * @returns {Array<object>}
- */
 export function filterRecordsByType(records, type) {
   return filterByEquality(records, "type", type);
 }
 
-/**
- * Sorts records by date, newest or oldest first.
- * @param {Array<object>} records
- * @param {"newest"|"oldest"} sortBy
- * @returns {Array<object>}
- */
 export function sortRecords(records, sortBy) {
   return sortItems(records, sortBy, SORT_COMPARATORS);
 }
 
-/**
- * Groups records by the year of their record date.
- * @param {Array<object>} records
- * @returns {Record<string, Array<object>>}
- */
 export function groupRecordsByYear(records) {
   return groupByField(records, (record) => new Date(record.date).getFullYear());
 }

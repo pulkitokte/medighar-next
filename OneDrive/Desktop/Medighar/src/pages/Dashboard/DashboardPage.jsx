@@ -12,6 +12,7 @@ import {
   Store,
   Star,
   IdCard,
+  Users,
 } from "lucide-react";
 import Section from "@/shared/components/ui/Section.jsx";
 import Container from "@/shared/components/ui/Container.jsx";
@@ -26,7 +27,6 @@ const RECENT_TYPE_ICONS = {
   disease: Activity,
   pharmacy: Store,
 };
-
 const TIMELINE_TYPE_ICONS = {
   appointment: CalendarClock,
   reminder: Bell,
@@ -55,7 +55,6 @@ function formatDateTime(timestamp) {
 
 function StatTile({ icon: Icon, label, value, to }) {
   const navigate = useNavigate();
-
   return (
     <button
       type="button"
@@ -74,7 +73,6 @@ function StatTile({ icon: Icon, label, value, to }) {
 function QuickActionCard({ action }) {
   const navigate = useNavigate();
   const Icon = action.icon;
-
   return (
     <button
       type="button"
@@ -102,7 +100,6 @@ function QuickActionCard({ action }) {
 
 function ListRow({ icon: Icon, title, subtitle, to, actionLabel = "View" }) {
   const navigate = useNavigate();
-
   return (
     <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-4">
       <div className="flex min-w-0 items-center gap-3">
@@ -116,7 +113,6 @@ function ListRow({ icon: Icon, title, subtitle, to, actionLabel = "View" }) {
           )}
         </div>
       </div>
-
       <Button variant="outline" size="sm" onClick={() => navigate(to)}>
         {actionLabel}
       </Button>
@@ -126,7 +122,6 @@ function ListRow({ icon: Icon, title, subtitle, to, actionLabel = "View" }) {
 
 function TimelineRow({ event }) {
   const Icon = TIMELINE_TYPE_ICONS[event.type] ?? History;
-
   return (
     <div className="flex items-start gap-3 rounded-xl border border-slate-200 bg-white p-4">
       <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50">
@@ -153,6 +148,7 @@ function DashboardPage() {
     timeline,
     quickActions,
     profileCompletion,
+    familyMembers,
   } = useDashboard();
 
   return (
@@ -164,7 +160,7 @@ function DashboardPage() {
           center
         />
 
-        <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-6">
+        <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-7">
           <StatTile
             icon={Bookmark}
             label="Saved Items"
@@ -200,6 +196,12 @@ function DashboardPage() {
             label="Medical ID Complete"
             value={`${profileCompletion}%`}
             to="/medical-profile"
+          />
+          <StatTile
+            icon={Users}
+            label="Family Members"
+            value={overview.familyMembersCount}
+            to="/family"
           />
         </section>
 
@@ -344,6 +346,28 @@ function DashboardPage() {
               to="/saved"
             />
           </div>
+        </section>
+
+        <section className="flex flex-col gap-4">
+          <h2 className="flex items-center gap-2 text-lg font-semibold text-slate-900">
+            <Users className="h-5 w-5 text-blue-600" aria-hidden="true" />
+            Family
+          </h2>
+          {familyMembers.length === 0 ? (
+            <EmptyRelationship message="No family members yet." />
+          ) : (
+            <div className="flex flex-col gap-3">
+              {familyMembers.map((member) => (
+                <ListRow
+                  key={member.id}
+                  icon={Users}
+                  title={member.fullName}
+                  subtitle={member.relationship}
+                  to="/family"
+                />
+              ))}
+            </div>
+          )}
         </section>
 
         <section className="flex flex-col gap-4">

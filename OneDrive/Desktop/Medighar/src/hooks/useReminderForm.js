@@ -5,6 +5,7 @@ import {
 } from "@/services/reminders/reminders.service.js";
 
 const INITIAL_MEDICINE_VALUES = {
+  memberId: "me",
   medicineId: "",
   dosage: "",
   frequency: "Once Daily",
@@ -14,25 +15,11 @@ const INITIAL_MEDICINE_VALUES = {
 };
 
 const INITIAL_APPOINTMENT_VALUES = {
+  memberId: "me",
   appointmentId: "",
   leadTime: "",
 };
 
-/**
- * Owns the combined reminder-creation form state for both reminder types.
- * One form, one submit handler, branching internally by the selected type
- * — avoids duplicating a near-identical form for each type.
- * @returns {{
- *   type: "medicine"|"appointment",
- *   setType: Function,
- *   medicineValues: object,
- *   appointmentValues: object,
- *   errors: Record<string, string>,
- *   updateMedicineField: (field: string, value: string) => void,
- *   updateAppointmentField: (field: string, value: string) => void,
- *   handleSubmit: (event: React.FormEvent) => void,
- * }}
- */
 export function useReminderForm() {
   const [type, setType] = useState("medicine");
   const [medicineValues, setMedicineValues] = useState(INITIAL_MEDICINE_VALUES);

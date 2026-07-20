@@ -5,6 +5,7 @@ import {
 } from "@/services/records/records.service.js";
 
 const INITIAL_VALUES = {
+  memberId: "me",
   title: "",
   type: "",
   doctorName: "",
@@ -15,20 +16,6 @@ const INITIAL_VALUES = {
   attachmentFileType: "",
 };
 
-/**
- * Owns the single create/edit form shared by both flows. When editingId is
- * set, submitting updates that record instead of creating a new one — one
- * form serves both actions, avoiding a duplicate edit form.
- * @returns {{
- *   values: object,
- *   errors: Record<string, string>,
- *   isEditing: boolean,
- *   updateField: (field: string, value: string) => void,
- *   startEdit: (record: object) => void,
- *   resetForm: () => void,
- *   handleSubmit: (event: React.FormEvent) => void,
- * }}
- */
 export function useRecordForm() {
   const [editingId, setEditingId] = useState(null);
   const [values, setValues] = useState(INITIAL_VALUES);
@@ -42,6 +29,7 @@ export function useRecordForm() {
     setEditingId(record.id);
     setErrors({});
     setValues({
+      memberId: record.memberId ?? "me",
       title: record.title,
       type: record.type,
       doctorName: record.doctorName,

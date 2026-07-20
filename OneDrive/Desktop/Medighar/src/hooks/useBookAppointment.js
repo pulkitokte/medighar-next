@@ -7,6 +7,7 @@ import {
 } from "@/services/appointments/appointments.service.js";
 
 const INITIAL_VALUES = {
+  memberId: "me",
   patientName: "",
   age: "",
   gender: "",
@@ -18,19 +19,6 @@ const INITIAL_VALUES = {
   reason: "",
 };
 
-/**
- * Owns the booking form state and submission flow for a single doctor.
- * The doctor id is read from the route params, matching the *Details
- * hooks' convention.
- * @returns {{
- *   doctor: object|null,
- *   notFound: boolean,
- *   values: object,
- *   errors: Record<string, string>,
- *   updateField: (field: string, value: string) => void,
- *   handleSubmit: (event: React.FormEvent) => void,
- * }}
- */
 export function useBookAppointment() {
   const { doctorId } = useParams();
   const navigate = useNavigate();

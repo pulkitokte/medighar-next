@@ -4,6 +4,7 @@ import { useReminders } from "@/hooks/useReminders.js";
 import { useMedicalRecords } from "@/hooks/useMedicalRecords.js";
 import { useSavedItems } from "@/hooks/useSavedItems.js";
 import { useMedicalProfile } from "@/hooks/useMedicalProfile.js";
+import { useFamilyProfiles } from "@/hooks/useFamilyProfiles.js";
 import {
   getAllRecentEntries,
   subscribeToRecent,
@@ -13,25 +14,20 @@ import {
   subscribeToReviews,
 } from "@/services/reviews/reviews.service.js";
 import { getDoctorById } from "@/services/doctors/doctors.service.js";
-import { buildHealthInsights } from "@/services/insights/insights.service.js";
+import {
+  buildHealthInsights,
+  computeFamilyStats,
+} from "@/services/insights/insights.service.js";
 
 const EMPTY_SNAPSHOT = "[]";
 
-/**
- * Aggregates data from every existing module (Appointments, Reminders,
- * Medical Records, Saved, Recently Viewed, Reviews, Medical Profile) into
- * the Health Insights & Statistics view. Reuses each module's existing
- * hooks/services directly — creates no storage of its own and duplicates
- * no business logic beyond composing already-exported aggregation
- * functions.
- * @returns {object}
- */
 export function useHealthInsights() {
   const appointments = useAppointments();
   const reminders = useReminders();
   const { filteredRecords } = useMedicalRecords();
   const saved = useSavedItems();
   const { completion: profileCompletion } = useMedicalProfile();
+  const { members } = useFamilyProfiles();
 
   const recentSnapshot = useSyncExternalStore(
     subscribeToRecent,
@@ -111,5 +107,7 @@ export function useHealthInsights() {
     ],
   );
 
-  return { ...insights, profileCompletion };
+  const familyStats = useMemo(() => computeFamilyStats(members), [members]);
+
+  return { ...insights, profileCompletion, familyStats };
 }

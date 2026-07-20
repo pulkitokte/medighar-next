@@ -1,15 +1,6 @@
 import { groupByField, uniqueValues } from "@/shared/lib/repositoryHelpers.js";
 import { buildActivityTimeline } from "@/services/dashboard/dashboard.service.js";
 
-/**
- * Pure aggregation logic for Health Insights & Statistics. This service
- * owns no storage of its own — every number here is derived from
- * already-resolved data supplied by useAppointments, useReminders,
- * useMedicalRecords, useSavedItems, Recently Viewed, and Reviews. It
- * reuses buildActivityTimeline from dashboard.service.js rather than
- * reimplementing timeline construction.
- */
-
 const MONTH_LABELS = [
   "Jan",
   "Feb",
@@ -25,12 +16,6 @@ const MONTH_LABELS = [
   "Dec",
 ];
 
-/**
- * Computes appointment statistics: totals, by-month counts, by-specialty
- * counts, and the most visited doctors.
- * @param {{ upcoming: Array<object>, past: Array<object> }} appointments
- * @returns {object}
- */
 export function computeAppointmentStats({ upcoming = [], past = [] }) {
   const all = [...upcoming, ...past];
   const completed = all.filter(
@@ -68,11 +53,6 @@ export function computeAppointmentStats({ upcoming = [], past = [] }) {
   };
 }
 
-/**
- * Computes reminder statistics: type counts and status breakdown.
- * @param {{ upcoming: Array<object>, completed: Array<object>, disabled: Array<object> }} reminders
- * @returns {object}
- */
 export function computeReminderStats({
   upcoming = [],
   completed = [],
@@ -96,12 +76,6 @@ export function computeReminderStats({
   };
 }
 
-/**
- * Computes medical record statistics: totals, by-type counts, by-year
- * counts.
- * @param {Array<object>} records
- * @returns {object}
- */
 export function computeRecordStats(records = []) {
   const byType = Object.entries(groupByField(records, "type"))
     .map(([type, list]) => ({ type, count: list.length }))
@@ -116,11 +90,6 @@ export function computeRecordStats(records = []) {
   return { total: records.length, byType, byYear };
 }
 
-/**
- * Computes overall healthcare activity counts.
- * @param {{ recentCount: number, reviewCount: number, timelineCount: number }} params
- * @returns {object}
- */
 export function computeActivityStats({
   recentCount = 0,
   reviewCount = 0,
@@ -171,12 +140,6 @@ const ACHIEVEMENT_RULES = [
   },
 ];
 
-/**
- * Evaluates the fixed achievement rule set against the aggregated stats,
- * deterministically — no randomness, no AI.
- * @param {object} stats
- * @returns {Array<{ key: string, label: string, description: string, unlocked: boolean }>}
- */
 export function computeAchievements(stats) {
   return ACHIEVEMENT_RULES.map((rule) => ({
     key: rule.key,
@@ -186,12 +149,6 @@ export function computeAchievements(stats) {
   }));
 }
 
-/**
- * Generates deterministic, plain-language summary sentences from the
- * aggregated stats.
- * @param {object} stats
- * @returns {Array<string>}
- */
 export function generateSummaries(stats) {
   const summaries = [];
 
@@ -200,13 +157,11 @@ export function generateSummaries(stats) {
       `You have ${stats.appointments.upcoming} upcoming appointment${stats.appointments.upcoming === 1 ? "" : "s"}.`,
     );
   }
-
   if (stats.records.total > 0) {
     summaries.push(
       `You have added ${stats.records.total} medical record${stats.records.total === 1 ? "" : "s"}.`,
     );
   }
-
   if (stats.activity.reviewCount > 0) {
     const reviewedDoctorCount = uniqueValues(
       stats.reviewedDoctorIds ?? [],
@@ -215,19 +170,16 @@ export function generateSummaries(stats) {
       `You've reviewed ${reviewedDoctorCount} doctor${reviewedDoctorCount === 1 ? "" : "s"}.`,
     );
   }
-
   if (stats.reminders.active > 0) {
     summaries.push(
       `You currently manage ${stats.reminders.active} active reminder${stats.reminders.active === 1 ? "" : "s"}.`,
     );
   }
-
   if (stats.savedCount > 0) {
     summaries.push(
       `You have ${stats.savedCount} saved item${stats.savedCount === 1 ? "" : "s"} for quick access.`,
     );
   }
-
   if (stats.appointments.completed > 0) {
     summaries.push(
       `You've completed ${stats.appointments.completed} appointment${stats.appointments.completed === 1 ? "" : "s"} so far.`,
@@ -237,11 +189,6 @@ export function generateSummaries(stats) {
   return summaries;
 }
 
-/**
- * Builds the full insights payload from already-resolved data.
- * @param {object} sources
- * @returns {object}
- */
 export function buildHealthInsights(sources) {
   const appointments = computeAppointmentStats(sources.appointments);
   const reminders = computeReminderStats(sources.reminders);
@@ -265,4 +212,21 @@ export function buildHealthInsights(sources) {
     achievements: computeAchievements(stats),
     summaries: generateSummaries(stats),
   };
+}
+
+/**
+ * Computes family-related insight statistics: total member count and blood
+ * group distribution across all members (including "Me").
+ * @param {Array<object>} members
+ * @returns {{ count: number, bloodGroupDistribution: Array<{ bloodGroup: string, count: number }> }}
+ */
+export function computeFamilyStats(members = []) {
+  const withBloodGroup = members.filter((member) => member.bloodGroup);
+  const groups = groupByField(withBloodGroup, "bloodGroup");
+
+  const bloodGroupDistribution = Object.entries(groups)
+    .map(([bloodGroup, list]) => ({ bloodGroup, count: list.length }))
+    .sort((a, b) => b.count - a.count);
+
+  return { count: members.length, bloodGroupDistribution };
 }

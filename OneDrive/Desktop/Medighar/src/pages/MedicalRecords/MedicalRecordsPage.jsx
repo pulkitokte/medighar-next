@@ -16,6 +16,7 @@ import EmptyState from "@/shared/components/ui/EmptyState.jsx";
 import EmptyRelationship from "@/shared/components/ui/EmptyRelationship.jsx";
 import { useMedicalRecords } from "@/hooks/useMedicalRecords.js";
 import { useRecordForm } from "@/hooks/useRecordForm.js";
+import { useFamilyProfiles } from "@/hooks/useFamilyProfiles.js";
 import {
   RECORD_TYPES,
   ATTACHMENT_FILE_TYPES,
@@ -46,6 +47,7 @@ function RecordForm({
   onChange,
   onSubmit,
   onCancel,
+  members,
 }) {
   return (
     <form
@@ -57,6 +59,21 @@ function RecordForm({
       </h3>
 
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+        <label className="flex flex-col gap-1.5 text-sm">
+          <span className="font-medium text-slate-700">Family Member</span>
+          <select
+            value={values.memberId}
+            onChange={(event) => onChange("memberId", event.target.value)}
+            className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:border-blue-400 focus:outline-none"
+          >
+            {members.map((member) => (
+              <option key={member.id} value={member.id}>
+                {member.fullName}
+              </option>
+            ))}
+          </select>
+        </label>
+
         <label className="flex flex-col gap-1.5 text-sm">
           <span className="font-medium text-slate-700">Record Title</span>
           <input
@@ -201,6 +218,10 @@ function RecordCard({ record, onEdit, onDelete }) {
         </span>
       </div>
 
+      {record.member && !record.member.isSelf && (
+        <p className="text-xs text-slate-500">For {record.member.fullName}</p>
+      )}
+
       <div className="flex flex-col gap-1 text-sm text-slate-600">
         <span>
           {record.doctorName} · {record.hospital}
@@ -272,6 +293,8 @@ function MedicalRecordsPage() {
     remove,
   } = useMedicalRecords();
 
+  const { members } = useFamilyProfiles();
+
   const {
     values,
     errors,
@@ -303,6 +326,7 @@ function MedicalRecordsPage() {
           onChange={updateField}
           onSubmit={handleSubmit}
           onCancel={resetForm}
+          members={members}
         />
 
         {totalCount === 0 ? (

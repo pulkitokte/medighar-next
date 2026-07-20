@@ -6,20 +6,10 @@ import {
   subscribeToAppointments,
 } from "@/services/appointments/appointments.service.js";
 import { getDoctorById } from "@/services/doctors/doctors.service.js";
+import { getMemberById } from "@/services/family/family.service.js";
 
 const EMPTY_SNAPSHOT = "[]";
 
-/**
- * Loads every stored appointment, enriched with its derived status and
- * resolved doctor, split into upcoming and past. Mirrors
- * useSavedItems.js / useRecentItems.js's reactive subscription pattern.
- * @returns {{
- *   upcoming: Array<object>,
- *   past: Array<object>,
- *   totalCount: number,
- *   cancel: (id: string) => void,
- * }}
- */
 export function useAppointments() {
   const snapshot = useSyncExternalStore(
     subscribeToAppointments,
@@ -30,11 +20,17 @@ export function useAppointments() {
   const enriched = useMemo(() => {
     const appointments = JSON.parse(snapshot);
 
-    return appointments.map((appointment) => ({
-      ...appointment,
-      status: deriveAppointmentStatus(appointment),
-      doctor: getDoctorById(appointment.doctorId),
-    }));
+    return appointments.map((appointment) => {
+      const memberId = appointment.memberId ?? "me";
+
+      return {
+        ...appointment,
+        memberId,
+        status: deriveAppointmentStatus(appointment),
+        doctor: getDoctorById(appointment.doctorId),
+        member: getMemberById(memberId),
+      };
+    });
   }, [snapshot]);
 
   const upcoming = useMemo(

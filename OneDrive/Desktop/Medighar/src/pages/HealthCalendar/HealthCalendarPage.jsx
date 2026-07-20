@@ -227,6 +227,9 @@ function HealthCalendarPage() {
     setShowAppointments,
     setShowReminders,
     setShowRecords,
+    memberFilter,
+    setMemberFilter,
+    familyMembers,
     eventsByDate,
     upcomingEvents,
     todayEvents,
@@ -257,42 +260,63 @@ function HealthCalendarPage() {
           center
         />
 
-        <div className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-          <div className="flex items-center gap-2">
-            {VIEW_OPTIONS.map((option) => (
-              <button
-                key={option.key}
-                type="button"
-                aria-pressed={viewMode === option.key}
-                onClick={() => setViewMode(option.key)}
-                className={cn(
-                  "rounded-full border px-4 py-1.5 text-sm font-medium transition-colors",
-                  viewMode === option.key
-                    ? "border-blue-600 bg-blue-600 text-white shadow-sm"
-                    : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50",
-                )}
-              >
-                {option.label}
-              </button>
-            ))}
+        <div className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5">
+          <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+            <div className="flex items-center gap-2">
+              {VIEW_OPTIONS.map((option) => (
+                <button
+                  key={option.key}
+                  type="button"
+                  aria-pressed={viewMode === option.key}
+                  onClick={() => setViewMode(option.key)}
+                  className={cn(
+                    "rounded-full border px-4 py-1.5 text-sm font-medium transition-colors",
+                    viewMode === option.key
+                      ? "border-blue-600 bg-blue-600 text-white shadow-sm"
+                      : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50",
+                  )}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <FilterToggle
+                label="Appointments"
+                active={visibility.showAppointments}
+                onToggle={() => setShowAppointments((previous) => !previous)}
+              />
+              <FilterToggle
+                label="Reminders"
+                active={visibility.showReminders}
+                onToggle={() => setShowReminders((previous) => !previous)}
+              />
+              <FilterToggle
+                label="Medical Records"
+                active={visibility.showRecords}
+                onToggle={() => setShowRecords((previous) => !previous)}
+              />
+            </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2 border-t border-slate-100 pt-3">
+            <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
+              Show events for
+            </span>
             <FilterToggle
-              label="Appointments"
-              active={visibility.showAppointments}
-              onToggle={() => setShowAppointments((previous) => !previous)}
+              label="All Members"
+              active={memberFilter === "all"}
+              onToggle={() => setMemberFilter("all")}
             />
-            <FilterToggle
-              label="Reminders"
-              active={visibility.showReminders}
-              onToggle={() => setShowReminders((previous) => !previous)}
-            />
-            <FilterToggle
-              label="Medical Records"
-              active={visibility.showRecords}
-              onToggle={() => setShowRecords((previous) => !previous)}
-            />
+            {familyMembers.map((member) => (
+              <FilterToggle
+                key={member.id}
+                label={member.fullName}
+                active={memberFilter === member.id}
+                onToggle={() => setMemberFilter(member.id)}
+              />
+            ))}
           </div>
         </div>
 

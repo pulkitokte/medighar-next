@@ -23,37 +23,18 @@ function generateId(prefix) {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
-/**
- * Returns every stored reminder record.
- * @returns {Array<object>}
- */
 export function getAllReminders() {
   return getReminders();
 }
 
-/**
- * Validates medicine reminder form values.
- * @param {object} values
- * @returns {{ errors: Record<string, string>, isValid: boolean }}
- */
 export function validateMedicineReminder(values = {}) {
   const errors = {};
 
-  if (!values.medicineId) {
-    errors.medicineId = "Please select a medicine.";
-  }
-
-  if (!values.dosage || !values.dosage.trim()) {
+  if (!values.medicineId) errors.medicineId = "Please select a medicine.";
+  if (!values.dosage || !values.dosage.trim())
     errors.dosage = "Dosage is required.";
-  }
-
-  if (!values.frequency) {
-    errors.frequency = "Please select a frequency.";
-  }
-
-  if (!values.startDate) {
-    errors.startDate = "Start date is required.";
-  }
+  if (!values.frequency) errors.frequency = "Please select a frequency.";
+  if (!values.startDate) errors.startDate = "Start date is required.";
 
   if (!values.endDate) {
     errors.endDate = "End date is required.";
@@ -64,18 +45,11 @@ export function validateMedicineReminder(values = {}) {
     errors.endDate = "End date must be on or after the start date.";
   }
 
-  if (!values.reminderTime) {
-    errors.reminderTime = "Reminder time is required.";
-  }
+  if (!values.reminderTime) errors.reminderTime = "Reminder time is required.";
 
   return { errors, isValid: Object.keys(errors).length === 0 };
 }
 
-/**
- * Validates and creates a medicine reminder.
- * @param {{ medicineId: string, dosage: string, frequency: string, startDate: string, endDate: string, reminderTime: string }} values
- * @returns {{ success: boolean, errors?: Record<string, string>, reminder?: object }}
- */
 export function createMedicineReminder(values) {
   const { errors, isValid } = validateMedicineReminder(values);
 
@@ -86,6 +60,7 @@ export function createMedicineReminder(values) {
   const record = {
     id: generateId("reminder"),
     type: "medicine",
+    memberId: values.memberId || "me",
     enabled: true,
     createdAt: Date.now(),
     medicineId: values.medicineId,
@@ -101,30 +76,16 @@ export function createMedicineReminder(values) {
   return { success: true, reminder: record };
 }
 
-/**
- * Validates appointment reminder form values.
- * @param {object} values
- * @returns {{ errors: Record<string, string>, isValid: boolean }}
- */
 export function validateAppointmentReminderForm(values = {}) {
   const errors = {};
 
-  if (!values.appointmentId) {
+  if (!values.appointmentId)
     errors.appointmentId = "Please select an appointment.";
-  }
-
-  if (!values.leadTime) {
-    errors.leadTime = "Please select when to be reminded.";
-  }
+  if (!values.leadTime) errors.leadTime = "Please select when to be reminded.";
 
   return { errors, isValid: Object.keys(errors).length === 0 };
 }
 
-/**
- * Validates and creates a reminder linked to an existing appointment.
- * @param {{ appointmentId: string, leadTime: string }} values
- * @returns {{ success: boolean, errors?: Record<string, string>, reminder?: object }}
- */
 export function createAppointmentReminder(values) {
   const { errors, isValid } = validateAppointmentReminderForm(values);
 
@@ -135,6 +96,7 @@ export function createAppointmentReminder(values) {
   const record = {
     id: generateId("reminder"),
     type: "appointment",
+    memberId: values.memberId || "me",
     enabled: true,
     createdAt: Date.now(),
     appointmentId: values.appointmentId,
@@ -146,10 +108,6 @@ export function createAppointmentReminder(values) {
   return { success: true, reminder: record };
 }
 
-/**
- * Enables a reminder by id, using local state only.
- * @param {string} id
- */
 export function enableReminder(id) {
   setReminders(
     getReminders().map((reminder) =>
@@ -158,10 +116,6 @@ export function enableReminder(id) {
   );
 }
 
-/**
- * Disables a reminder by id, using local state only.
- * @param {string} id
- */
 export function disableReminder(id) {
   setReminders(
     getReminders().map((reminder) =>
@@ -170,23 +124,10 @@ export function disableReminder(id) {
   );
 }
 
-/**
- * Deletes a reminder by id, using local state only.
- * @param {string} id
- */
 export function deleteReminder(id) {
   setReminders(getReminders().filter((reminder) => reminder.id !== id));
 }
 
-/**
- * Derives a reminder's current status. A manually disabled reminder always
- * reports "disabled" regardless of dates. Otherwise, medicine reminders are
- * "completed" once their end date has passed; appointment reminders follow
- * the linked appointment's own derived status.
- * @param {object} reminder
- * @param {{ appointment?: object|null }} [context]
- * @returns {"upcoming"|"completed"|"disabled"}
- */
 export function deriveReminderStatus(reminder, context = {}) {
   if (!reminder.enabled) return "disabled";
 

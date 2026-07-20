@@ -44,6 +44,9 @@ function AppointmentCard({ appointment, onCancel }) {
             </p>
             <p className="text-sm text-slate-500">
               {appointment.doctor?.specialty}
+              {appointment.member &&
+                !appointment.member.isSelf &&
+                ` · For ${appointment.member.fullName}`}
             </p>
           </div>
         </div>
