@@ -23,12 +23,6 @@ function generateId() {
   return `member-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
-/**
- * Builds the virtual "Me" member from the existing Medical Profile module.
- * Never stored as a family record — reused directly, satisfying "Do NOT
- * duplicate Medical Profile logic."
- * @returns {object}
- */
 function buildMeMember() {
   const profile = getProfile(ME_MEMBER_ID);
 
@@ -49,30 +43,15 @@ function buildMeMember() {
   };
 }
 
-/**
- * Returns every family member, with the virtual "Me" entry always first.
- * @returns {Array<object>}
- */
 export function getAllMembers() {
   return [buildMeMember(), ...getMembers()];
 }
 
-/**
- * Returns a single member by id, or null if not found. "Me" always
- * resolves via the Medical Profile module.
- * @param {string} id
- * @returns {object|null}
- */
 export function getMemberById(id) {
   if (!id || id === ME_MEMBER_ID) return buildMeMember();
   return getMembers().find((member) => member.id === id) ?? null;
 }
 
-/**
- * Validates family member form values.
- * @param {object} values
- * @returns {{ errors: Record<string, string>, isValid: boolean }}
- */
 export function validateMember(values = {}) {
   const errors = {};
 
@@ -87,11 +66,6 @@ export function validateMember(values = {}) {
   return { errors, isValid: Object.keys(errors).length === 0 };
 }
 
-/**
- * Validates and creates a new family member.
- * @param {object} values
- * @returns {{ success: boolean, errors?: Record<string, string>, member?: object }}
- */
 export function createMember(values) {
   const { errors, isValid } = validateMember(values);
 
@@ -118,7 +92,9 @@ export function createMember(values) {
 
 /**
  * Validates and updates an existing family member. "Me" cannot be edited
- * through this function since it isn't a stored record.
+ * through this function since it isn't a stored record. Now stamps
+ * updatedAt on every edit so the Health Timeline can surface a
+ * "Family Member Updated" event without any additional storage.
  * @param {string} id
  * @param {object} values
  * @returns {{ success: boolean, errors?: Record<string, string>, member?: object }}
@@ -153,6 +129,7 @@ export function updateMember(id, values) {
       gender: values.gender || "",
       emergencyContact: values.emergencyContact?.trim() ?? "",
       notes: values.notes?.trim() ?? "",
+      updatedAt: Date.now(),
     };
 
     return updated;
@@ -163,11 +140,6 @@ export function updateMember(id, values) {
   return { success: true, member: updated };
 }
 
-/**
- * Deletes a family member by id, using local state only. "Me" cannot be
- * deleted.
- * @param {string} id
- */
 export function deleteMember(id) {
   if (id === ME_MEMBER_ID) return;
   setMembers(getMembers().filter((member) => member.id !== id));

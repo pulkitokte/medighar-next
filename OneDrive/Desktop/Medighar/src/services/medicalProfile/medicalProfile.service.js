@@ -1,11 +1,12 @@
 import {
   getProfile,
+  getAllProfiles,
   setProfile,
   clearProfile,
   subscribeToProfile,
 } from "@/services/medicalProfile/medicalProfile.repository.js";
 
-export { getProfile, subscribeToProfile };
+export { getProfile, getAllProfiles, subscribeToProfile };
 
 export const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 export const GENDER_OPTIONS = ["Male", "Female", "Other"];
@@ -32,12 +33,6 @@ function isFilled(value) {
   return typeof value === "string" ? value.trim().length > 0 : Boolean(value);
 }
 
-/**
- * Validates the minimum fields needed for a profile to be useful in an
- * emergency. Every other field is optional and only affects completion.
- * @param {object} values
- * @returns {{ errors: Record<string, string>, isValid: boolean }}
- */
 export function validateProfile(values = {}) {
   const errors = {};
 
@@ -54,12 +49,6 @@ export function validateProfile(values = {}) {
   return { errors, isValid: Object.keys(errors).length === 0 };
 }
 
-/**
- * Validates and saves a member's medical profile.
- * @param {string} memberId
- * @param {object} values
- * @returns {{ success: boolean, errors?: Record<string, string>, profile?: object }}
- */
 export function saveProfile(memberId, values) {
   const { errors, isValid } = validateProfile(values);
 
@@ -81,28 +70,14 @@ export function saveProfile(memberId, values) {
   return { success: true, profile: record };
 }
 
-/**
- * Deletes a member's medical profile entirely, using local state only.
- * @param {string} memberId
- */
 export function deleteProfile(memberId) {
   clearProfile(memberId);
 }
 
-/**
- * Alias for deleteProfile — "Reset" clears the stored profile back to
- * empty for the given member.
- * @param {string} memberId
- */
 export function resetProfile(memberId) {
   clearProfile(memberId);
 }
 
-/**
- * Computes the percentage of profile fields that have been filled in.
- * @param {object|null} profile
- * @returns {number}
- */
 export function computeCompletionPercentage(profile) {
   if (!profile) return 0;
 
@@ -113,12 +88,6 @@ export function computeCompletionPercentage(profile) {
   return Math.round((filledCount / PROFILE_FIELDS.length) * 100);
 }
 
-/**
- * Splits a comma-separated free-text field (allergies, conditions,
- * medications) into a clean list for display purposes.
- * @param {string} value
- * @returns {Array<string>}
- */
 export function splitListField(value) {
   if (!value) return [];
   return value

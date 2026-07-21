@@ -1,12 +1,3 @@
-/**
- * Owns the only data-access concern for Emergency Medical Profiles:
- * reading and writing to localStorage. Storage now holds one profile per
- * family member, keyed by memberId, under a single "profiles" object. A
- * profile previously stored as a single flat object (pre-Family-Profiles)
- * is automatically treated as belonging to "me" on read — no destructive
- * migration, no data loss, same storage key.
- */
-
 const STORAGE_KEY = "medighar:medical-profile";
 const CHANGE_EVENT = "medical-profile:change";
 const DEFAULT_MEMBER_ID = "me";
@@ -33,7 +24,6 @@ function readProfiles() {
     return parsed.profiles;
   }
 
-  // Legacy flat single-profile shape: treat the whole object as "me".
   return { [DEFAULT_MEMBER_ID]: parsed };
 }
 
@@ -44,29 +34,25 @@ function writeProfiles(profiles) {
   window.dispatchEvent(new Event(CHANGE_EVENT));
 }
 
-/**
- * Returns the stored medical profile for the given member, or null.
- * @param {string} [memberId]
- * @returns {object|null}
- */
 export function getProfile(memberId = DEFAULT_MEMBER_ID) {
   return readProfiles()[memberId] ?? null;
 }
 
 /**
- * Persists a member's medical profile and notifies any subscribed hooks.
- * @param {string} memberId
- * @param {object} profile
+ * Returns every stored profile, keyed by memberId. Read-only, additive —
+ * used by modules (like the Health Timeline) that need to react to any
+ * profile changing, not just one specific member's profile.
+ * @returns {Record<string, object>}
  */
+export function getAllProfiles() {
+  return readProfiles();
+}
+
 export function setProfile(memberId = DEFAULT_MEMBER_ID, profile) {
   const profiles = readProfiles();
   writeProfiles({ ...profiles, [memberId]: profile });
 }
 
-/**
- * Clears a member's stored medical profile.
- * @param {string} [memberId]
- */
 export function clearProfile(memberId = DEFAULT_MEMBER_ID) {
   const profiles = readProfiles();
   const next = { ...profiles };
@@ -74,11 +60,6 @@ export function clearProfile(memberId = DEFAULT_MEMBER_ID) {
   writeProfiles(next);
 }
 
-/**
- * Subscribes to medical profile changes made anywhere in the app.
- * @param {() => void} callback
- * @returns {() => void} unsubscribe function
- */
 export function subscribeToProfile(callback) {
   window.addEventListener(CHANGE_EVENT, callback);
   return () => window.removeEventListener(CHANGE_EVENT, callback);

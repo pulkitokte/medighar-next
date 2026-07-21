@@ -20,6 +20,7 @@ const NAV_LINKS = [
   { label: "Insights", to: "/insights" },
   { label: "Medical ID", to: "/medical-profile" },
   { label: "Family", to: "/family" },
+  { label: "Timeline", to: "/timeline" },
 ];
 
 function Navbar() {
