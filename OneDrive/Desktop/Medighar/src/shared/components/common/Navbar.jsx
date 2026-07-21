@@ -21,6 +21,7 @@ const NAV_LINKS = [
   { label: "Medical ID", to: "/medical-profile" },
   { label: "Family", to: "/family" },
   { label: "Timeline", to: "/timeline" },
+  { label: "Notifications", to: "/notifications" },
 ];
 
 function Navbar() {

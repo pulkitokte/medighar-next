@@ -5,6 +5,7 @@ import { useReminders } from "@/hooks/useReminders.js";
 import { useMedicalRecords } from "@/hooks/useMedicalRecords.js";
 import { useMedicalProfile } from "@/hooks/useMedicalProfile.js";
 import { useFamilyProfiles } from "@/hooks/useFamilyProfiles.js";
+import { useNotifications } from "@/hooks/useNotifications.js";
 import {
   getAllRecentEntries,
   subscribeToRecent,
@@ -38,6 +39,7 @@ export function useDashboard() {
   const { recentRecords, totalCount: recordsCount } = useMedicalRecords();
   const { completion: profileCompletion } = useMedicalProfile();
   const { members: familyMembers } = useFamilyProfiles();
+  const { recentNotifications, stats: notificationStats } = useNotifications();
 
   const recentSnapshot = useSyncExternalStore(
     subscribeToRecent,
@@ -94,6 +96,7 @@ export function useDashboard() {
     activeRemindersCount: upcomingReminders.length,
     recordsCount,
     familyMembersCount: familyMembers.length,
+    unreadNotificationsCount: notificationStats.unread,
   };
 
   return {
@@ -110,5 +113,6 @@ export function useDashboard() {
     quickActions: QUICK_ACTIONS,
     profileCompletion,
     familyMembers: familyMembers.slice(0, FAMILY_PREVIEW_LIMIT),
+    recentNotifications,
   };
 }

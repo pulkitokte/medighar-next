@@ -5,6 +5,7 @@ import { useMedicalRecords } from "@/hooks/useMedicalRecords.js";
 import { useSavedItems } from "@/hooks/useSavedItems.js";
 import { useMedicalProfile } from "@/hooks/useMedicalProfile.js";
 import { useFamilyProfiles } from "@/hooks/useFamilyProfiles.js";
+import { useNotifications } from "@/hooks/useNotifications.js";
 import {
   getAllRecentEntries,
   subscribeToRecent,
@@ -28,6 +29,7 @@ export function useHealthInsights() {
   const saved = useSavedItems();
   const { completion: profileCompletion } = useMedicalProfile();
   const { members } = useFamilyProfiles();
+  const { stats: notificationStats } = useNotifications();
 
   const recentSnapshot = useSyncExternalStore(
     subscribeToRecent,
@@ -109,5 +111,5 @@ export function useHealthInsights() {
 
   const familyStats = useMemo(() => computeFamilyStats(members), [members]);
 
-  return { ...insights, profileCompletion, familyStats };
+  return { ...insights, profileCompletion, familyStats, notificationStats };
 }

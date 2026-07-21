@@ -18,6 +18,7 @@ import Container from "@/shared/components/ui/Container.jsx";
 import PageHeading from "@/shared/components/ui/PageHeading.jsx";
 import EmptyRelationship from "@/shared/components/ui/EmptyRelationship.jsx";
 import { useHealthInsights } from "@/hooks/useHealthInsights.js";
+import { NOTIFICATION_CATEGORIES } from "@/services/notifications/notification.service.js";
 
 function StatCard({ icon: Icon, label, value }) {
   return (
@@ -133,6 +134,13 @@ function HealthInsightsPage() {
     ...insights.appointments.byMonth.map((month) => month.count),
     1,
   );
+
+  const notificationCategoryItems = NOTIFICATION_CATEGORIES.filter(
+    (category) => category.key !== "all",
+  ).map((category) => ({
+    label: category.label,
+    count: insights.notificationStats.byCategory[category.key] ?? 0,
+  }));
 
   return (
     <Section paddingY="py-16 sm:py-20">
@@ -383,6 +391,37 @@ function HealthInsightsPage() {
                 labelKey="bloodGroup"
                 countKey="count"
                 emptyMessage="No blood group data yet."
+              />
+            </div>
+          </div>
+        </section>
+
+        <section className="flex flex-col gap-4">
+          <h2 className="text-lg font-semibold text-slate-900">
+            Notifications
+          </h2>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="grid grid-cols-2 gap-4">
+              <StatCard
+                icon={Bell}
+                label="Total Notifications"
+                value={insights.notificationStats.total}
+              />
+              <StatCard
+                icon={Bell}
+                label="Unread Notifications"
+                value={insights.notificationStats.unread}
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <p className="text-sm font-medium text-slate-700">
+                Notifications by Category
+              </p>
+              <BarList
+                items={notificationCategoryItems}
+                labelKey="label"
+                countKey="count"
+                emptyMessage="No notifications yet."
               />
             </div>
           </div>

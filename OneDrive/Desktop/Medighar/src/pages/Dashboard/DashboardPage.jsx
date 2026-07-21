@@ -149,6 +149,7 @@ function DashboardPage() {
     quickActions,
     profileCompletion,
     familyMembers,
+    recentNotifications,
   } = useDashboard();
 
   return (
@@ -160,7 +161,7 @@ function DashboardPage() {
           center
         />
 
-        <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-7">
+        <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-8">
           <StatTile
             icon={Bookmark}
             label="Saved Items"
@@ -202,6 +203,12 @@ function DashboardPage() {
             label="Family Members"
             value={overview.familyMembersCount}
             to="/family"
+          />
+          <StatTile
+            icon={Bell}
+            label="Unread Notifications"
+            value={overview.unreadNotificationsCount}
+            to="/notifications"
           />
         </section>
 
@@ -316,6 +323,46 @@ function DashboardPage() {
               </div>
             )}
           </section>
+
+          <section className="flex flex-col gap-4">
+            <h2 className="text-lg font-semibold text-slate-900">
+              Recent Notifications
+            </h2>
+            {recentNotifications.length === 0 ? (
+              <EmptyRelationship message="No notifications yet." />
+            ) : (
+              <div className="flex flex-col gap-3">
+                {recentNotifications.map((notification) => (
+                  <ListRow
+                    key={notification.id}
+                    icon={notification.icon}
+                    title={notification.title}
+                    subtitle={notification.memberName}
+                    to="/notifications"
+                  />
+                ))}
+              </div>
+            )}
+          </section>
+
+          <section className="flex flex-col gap-4">
+            <h2 className="text-lg font-semibold text-slate-900">Family</h2>
+            {familyMembers.length === 0 ? (
+              <EmptyRelationship message="No family members yet." />
+            ) : (
+              <div className="flex flex-col gap-3">
+                {familyMembers.map((member) => (
+                  <ListRow
+                    key={member.id}
+                    icon={Users}
+                    title={member.fullName}
+                    subtitle={member.relationship}
+                    to="/family"
+                  />
+                ))}
+              </div>
+            )}
+          </section>
         </div>
 
         <section className="flex flex-col gap-4">
@@ -346,28 +393,6 @@ function DashboardPage() {
               to="/saved"
             />
           </div>
-        </section>
-
-        <section className="flex flex-col gap-4">
-          <h2 className="flex items-center gap-2 text-lg font-semibold text-slate-900">
-            <Users className="h-5 w-5 text-blue-600" aria-hidden="true" />
-            Family
-          </h2>
-          {familyMembers.length === 0 ? (
-            <EmptyRelationship message="No family members yet." />
-          ) : (
-            <div className="flex flex-col gap-3">
-              {familyMembers.map((member) => (
-                <ListRow
-                  key={member.id}
-                  icon={Users}
-                  title={member.fullName}
-                  subtitle={member.relationship}
-                  to="/family"
-                />
-              ))}
-            </div>
-          )}
         </section>
 
         <section className="flex flex-col gap-4">
