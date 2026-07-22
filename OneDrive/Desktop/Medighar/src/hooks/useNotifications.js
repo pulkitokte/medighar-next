@@ -8,6 +8,10 @@ import {
   subscribeToProfile,
 } from "@/services/medicalProfile/medicalProfile.service.js";
 import {
+  getAllReportLogs,
+  subscribeToReports,
+} from "@/services/reports/report.service.js";
+import {
   buildNotifications,
   filterByCategory,
   searchNotifications,
@@ -21,16 +25,8 @@ import { toDateKey } from "@/services/calendar/calendar.service.js";
 
 const EMPTY_SNAPSHOT = "[]";
 const EMPTY_PROFILES_SNAPSHOT = "{}";
+const EMPTY_REPORTS_SNAPSHOT = "[]";
 
-/**
- * Aggregates data from every existing module (Appointments, Reminders,
- * Medical Records, Medical Profile, Family Profiles) into the Notification
- * Center. Reuses each module's existing hooks/services directly — creates
- * no storage of its own beyond read-state, and duplicates no business
- * logic. Snapshots are content-based (never Date.now()/Math.random()), and
- * no setState is called inside useMemo, per the established pattern.
- * @returns {object}
- */
 export function useNotifications() {
   const { upcoming: upcomingAppointments, past: pastAppointments } =
     useAppointments();
@@ -52,6 +48,12 @@ export function useNotifications() {
     subscribeToProfile,
     () => JSON.stringify(getAllProfiles()),
     () => EMPTY_PROFILES_SNAPSHOT,
+  );
+
+  const reportsSnapshot = useSyncExternalStore(
+    subscribeToReports,
+    () => JSON.stringify(getAllReportLogs()),
+    () => EMPTY_REPORTS_SNAPSHOT,
   );
 
   const now = useMemo(() => new Date(), []);
@@ -76,6 +78,11 @@ export function useNotifications() {
     }));
   }, [profilesSnapshot, members]);
 
+  const reportLogs = useMemo(
+    () => JSON.parse(reportsSnapshot),
+    [reportsSnapshot],
+  );
+
   const allNotifications = useMemo(
     () =>
       buildNotifications(
@@ -85,6 +92,7 @@ export function useNotifications() {
           records: filteredRecords,
           memberProfiles,
           familyMembers: members,
+          reportLogs,
           rawAppointments: {
             upcoming: upcomingAppointments,
             past: pastAppointments,
@@ -106,6 +114,7 @@ export function useNotifications() {
       filteredRecords,
       memberProfiles,
       members,
+      reportLogs,
       now,
       todayKey,
       readSnapshot,

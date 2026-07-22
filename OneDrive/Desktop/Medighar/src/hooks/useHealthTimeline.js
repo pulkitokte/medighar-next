@@ -8,6 +8,10 @@ import {
   subscribeToProfile,
 } from "@/services/medicalProfile/medicalProfile.service.js";
 import {
+  getAllReportLogs,
+  subscribeToReports,
+} from "@/services/reports/report.service.js";
+import {
   buildTimelineEvents,
   filterByCategory,
   filterByMember,
@@ -16,21 +20,8 @@ import {
 } from "@/services/timeline/timeline.service.js";
 
 const EMPTY_PROFILES_SNAPSHOT = "{}";
+const EMPTY_REPORTS_SNAPSHOT = "[]";
 
-/**
- * Aggregates data from every existing module (Appointments, Reminders,
- * Medical Records, Medical Profile, Family Profiles) into the Health
- * Timeline view. Reuses each module's existing hooks/services directly —
- * creates no storage of its own and duplicates no business logic.
- *
- * Important: the Medical Profile snapshot below must reflect actual store
- * content (not a clock value like Date.now()), or useSyncExternalStore
- * will never see two equal snapshots in a row and will re-render forever.
- * Event construction happens inside a single useMemo with no setState
- * calls in its body — errors are returned as part of the memoized result,
- * never set as a side effect during render.
- * @returns {object}
- */
 export function useHealthTimeline() {
   const { upcoming: upcomingAppointments, past: pastAppointments } =
     useAppointments();
@@ -46,6 +37,12 @@ export function useHealthTimeline() {
     subscribeToProfile,
     () => JSON.stringify(getAllProfiles()),
     () => EMPTY_PROFILES_SNAPSHOT,
+  );
+
+  const reportsSnapshot = useSyncExternalStore(
+    subscribeToReports,
+    () => JSON.stringify(getAllReportLogs()),
+    () => EMPTY_REPORTS_SNAPSHOT,
   );
 
   const allAppointments = useMemo(
@@ -67,12 +64,15 @@ export function useHealthTimeline() {
     }));
   }, [profilesSnapshot, members]);
 
+  const reportLogs = useMemo(
+    () => JSON.parse(reportsSnapshot),
+    [reportsSnapshot],
+  );
+
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [memberFilter, setMemberFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Single memo, no setState inside its body. Errors are a plain part of
-  // the returned, memoized value rather than a side effect.
   const { events: allEvents, error } = useMemo(() => {
     try {
       const events = buildTimelineEvents({
@@ -81,6 +81,7 @@ export function useHealthTimeline() {
         records: filteredRecords,
         memberProfiles,
         familyMembers: members,
+        reportLogs,
       });
       return { events, error: null };
     } catch (caughtError) {
@@ -92,7 +93,14 @@ export function useHealthTimeline() {
             : "Failed to build timeline.",
       };
     }
-  }, [allAppointments, allReminders, filteredRecords, memberProfiles, members]);
+  }, [
+    allAppointments,
+    allReminders,
+    filteredRecords,
+    memberProfiles,
+    members,
+    reportLogs,
+  ]);
 
   const filteredEvents = useMemo(() => {
     let events = filterByCategory(allEvents, categoryFilter);

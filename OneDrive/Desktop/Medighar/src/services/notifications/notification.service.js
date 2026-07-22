@@ -24,15 +24,6 @@ import {
 
 export { subscribeToNotifications };
 
-/**
- * Pure aggregation logic for the Notification Center. This service owns no
- * storage of its own beyond read-state (handled entirely by the
- * repository) — every notification is derived from already-resolved data
- * supplied by useAppointments, useReminders, useMedicalRecords, the
- * Medical Profile module, and useFamilyProfiles. It never mutates the
- * data it receives.
- */
-
 export const PRIORITY = {
   LOW: "low",
   MEDIUM: "medium",
@@ -92,6 +83,7 @@ const TYPE_META = {
   "family-updated": { icon: UserCog, category: "family", to: "/family" },
   "birthday-upcoming": { icon: Cake, category: "general", to: "/family" },
   "milestone-unlocked": { icon: Trophy, category: "general", to: "/timeline" },
+  "report-generated": { icon: FileText, category: "general", to: "/reports" },
 };
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -132,18 +124,10 @@ function buildNotification({
     link: meta.to,
     category: meta.category,
     icon: meta.icon,
-    read: false, // resolved against read ids by the caller
+    read: false,
   };
 }
 
-/**
- * Builds "Upcoming Appointment" (within 7 days) and "Appointment
- * Completed" (within the last 7 days) notifications from already-enriched
- * appointments.
- * @param {Array<object>} appointments
- * @param {Date} now
- * @returns {Array<object>}
- */
 export function buildAppointmentNotifications(appointments = [], now) {
   const nowMs = now.getTime();
   const notifications = [];
@@ -197,14 +181,6 @@ export function buildAppointmentNotifications(appointments = [], now) {
   return notifications;
 }
 
-/**
- * Builds "Reminder Created" (within the last 7 days) and "Reminder Due
- * Today" notifications from already-enriched reminders.
- * @param {Array<object>} reminders
- * @param {Date} now
- * @param {string} todayKey
- * @returns {Array<object>}
- */
 export function buildReminderNotifications(reminders = [], now, todayKey) {
   const nowMs = now.getTime();
   const notifications = [];
@@ -260,12 +236,6 @@ export function buildReminderNotifications(reminders = [], now, todayKey) {
   return notifications;
 }
 
-/**
- * Builds "Medical Record Added" notifications (within the last 7 days).
- * @param {Array<object>} records
- * @param {Date} now
- * @returns {Array<object>}
- */
 export function buildRecordNotifications(records = [], now) {
   const nowMs = now.getTime();
 
@@ -289,12 +259,6 @@ export function buildRecordNotifications(records = [], now) {
     );
 }
 
-/**
- * Builds "Medical Profile Updated" notifications (within the last 7 days).
- * @param {Array<{ id: string, fullName: string, profile: object|null }>} memberProfiles
- * @param {Date} now
- * @returns {Array<object>}
- */
 export function buildProfileNotifications(memberProfiles = [], now) {
   const nowMs = now.getTime();
 
@@ -319,13 +283,6 @@ export function buildProfileNotifications(memberProfiles = [], now) {
     );
 }
 
-/**
- * Builds "Family Member Added"/"Family Member Updated" notifications
- * (within the last 7 days).
- * @param {Array<object>} members
- * @param {Date} now
- * @returns {Array<object>}
- */
 export function buildFamilyNotifications(members = [], now) {
   const nowMs = now.getTime();
   const notifications = [];
@@ -373,15 +330,6 @@ export function buildFamilyNotifications(members = [], now) {
   return notifications;
 }
 
-/**
- * Computes the next birthday's day offset from a "YYYY-MM-DD" date of
- * birth. Self-contained date-only math (mirrors the pattern used
- * elsewhere for date-only fields) to avoid a cross-module dependency for
- * a single small calculation.
- * @param {string} dob
- * @param {Date} today
- * @returns {number}
- */
 function daysUntilNextBirthday(dob, today) {
   const [, month, day] = dob.split("-").map(Number);
   if (!month || !day) return Infinity;
@@ -394,13 +342,6 @@ function daysUntilNextBirthday(dob, today) {
   return Math.round((candidate.getTime() - today.getTime()) / DAY_MS);
 }
 
-/**
- * Builds "Upcoming Birthday" notifications for any member with a date of
- * birth on their Medical Profile, within the next 30 days.
- * @param {Array<{ id: string, fullName: string, profile: object|null }>} memberProfiles
- * @param {Date} now
- * @returns {Array<object>}
- */
 export function buildBirthdayNotifications(memberProfiles = [], now) {
   const year = now.getFullYear();
 
@@ -428,14 +369,6 @@ export function buildBirthdayNotifications(memberProfiles = [], now) {
     .filter(Boolean);
 }
 
-/**
- * Builds "Milestone Unlocked" notifications by reusing the existing
- * achievement rules from insights.service.js — the rules are defined in
- * exactly one place and only invoked here.
- * @param {{ appointments: object, reminders: object, records: Array<object> }} sources
- * @param {Date} now
- * @returns {Array<object>}
- */
 export function buildMilestoneNotifications(sources, now) {
   const appointmentStats = computeAppointmentStats(sources.appointments);
   const reminderStats = computeReminderStats(sources.reminders);
@@ -469,13 +402,34 @@ export function buildMilestoneNotifications(sources, now) {
 }
 
 /**
- * Combines every source into one normalized, newest-first notification
- * list with read state resolved against the repository.
- * @param {object} sources
+ * Builds "Health Report Generated" notifications from the reports
+ * module's generation log. reportLogs is supplied by the caller (hook
+ * layer) — this file never imports report.service.js, keeping the
+ * dependency one-directional.
+ * @param {Array<object>} reportLogs
  * @param {Date} now
- * @param {string} todayKey
  * @returns {Array<object>}
  */
+export function buildReportNotifications(reportLogs = [], now) {
+  const nowMs = now.getTime();
+
+  return reportLogs
+    .filter((log) => isWithinPastDays(log.generatedAt, nowMs, 7))
+    .map((log) =>
+      buildNotification({
+        id: `report-generated-${log.id}`,
+        type: "report-generated",
+        title: `${log.typeLabel || "Health report"} generated`,
+        description: `For ${log.memberLabel || "All Members"}`,
+        priority: PRIORITY.LOW,
+        createdAt: log.generatedAt,
+        source: "Health Reports",
+        memberId: log.memberId ?? "all",
+        memberName: log.memberLabel || "All Members",
+      }),
+    );
+}
+
 export function buildNotifications(sources, now, todayKey) {
   const readIds = new Set(getReadIds());
 
@@ -494,6 +448,7 @@ export function buildNotifications(sources, now, todayKey) {
       },
       now,
     ),
+    ...buildReportNotifications(sources.reportLogs, now),
   ];
 
   return notifications
@@ -504,32 +459,18 @@ export function buildNotifications(sources, now, todayKey) {
     .sort((a, b) => b.createdAt - a.createdAt);
 }
 
-/**
- * Marks a single notification as read.
- * @param {string} id
- */
 export function markAsRead(id) {
   const readIds = getReadIds();
   if (readIds.includes(id)) return;
   setReadIds([...readIds, id]);
 }
 
-/**
- * Marks every given notification id as read.
- * @param {Array<string>} ids
- */
 export function markAllAsRead(ids) {
   const readIds = new Set(getReadIds());
   ids.forEach((id) => readIds.add(id));
   setReadIds([...readIds]);
 }
 
-/**
- * Filters notifications by category ("all" returns everything unchanged).
- * @param {Array<object>} notifications
- * @param {string} category
- * @returns {Array<object>}
- */
 export function filterByCategory(notifications, category) {
   if (!category || category === "all") return notifications;
   return notifications.filter(
@@ -537,13 +478,6 @@ export function filterByCategory(notifications, category) {
   );
 }
 
-/**
- * Searches notifications by title, description, or member name. Reuses
- * the existing generic safeSearch helper.
- * @param {Array<object>} notifications
- * @param {string} query
- * @returns {Array<object>}
- */
 export function searchNotifications(notifications, query) {
   return safeSearch(notifications, query, [
     "title",
@@ -552,12 +486,6 @@ export function searchNotifications(notifications, query) {
   ]);
 }
 
-/**
- * Computes summary counts for the statistics header and for the
- * Insights integration.
- * @param {Array<object>} notifications
- * @returns {{ total: number, unread: number, byCategory: Record<string, number> }}
- */
 export function computeNotificationStats(notifications) {
   const byCategory = {};
 

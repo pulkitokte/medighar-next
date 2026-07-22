@@ -22,6 +22,7 @@ const NAV_LINKS = [
   { label: "Family", to: "/family" },
   { label: "Timeline", to: "/timeline" },
   { label: "Notifications", to: "/notifications" },
+  { label: "Health Reports", to: "/reports" },
 ];
 
 function Navbar() {

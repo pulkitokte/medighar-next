@@ -1,22 +1,5 @@
-import { safeSearch } from "@/shared/lib/search.js";
-import {
-  CalendarClock,
-  CalendarCheck,
-  Pill,
-  BellRing,
-  FileText,
-  IdCard,
-  UserPlus,
-  UserCog,
-} from "lucide-react";
-
-/**
- * Pure aggregation logic for the Health Timeline. This service owns no
- * storage of its own — every event is derived from already-resolved data
- * supplied by useAppointments, useReminders, useMedicalRecords, the
- * Medical Profile module, and useFamilyProfiles. It only normalizes,
- * combines, sorts, and filters — it never mutates the data it receives.
- */
+import { CalendarClock, Pill, FileText } from "lucide-react";
+import { groupByField } from "@/shared/lib/repositoryHelpers.js";
 
 export const EVENT_TYPES = {
   APPOINTMENT_CREATED: "appointment-created",
@@ -29,6 +12,7 @@ export const EVENT_TYPES = {
   FAMILY_MEMBER_ADDED: "family-member-added",
   FAMILY_MEMBER_UPDATED: "family-member-updated",
   FAMILY_MEMBER_DELETED: "family-member-deleted",
+  REPORT_GENERATED: "report-generated",
 };
 
 export const EVENT_TYPE_META = {
@@ -41,7 +25,7 @@ export const EVENT_TYPE_META = {
   },
   [EVENT_TYPES.APPOINTMENT_COMPLETED]: {
     label: "Appointment Completed",
-    icon: CalendarCheck,
+    icon: CalendarClock,
     color: "green",
     category: "appointments",
     to: "/appointments",
@@ -55,14 +39,14 @@ export const EVENT_TYPE_META = {
   },
   [EVENT_TYPES.APPOINTMENT_REMINDER_CREATED]: {
     label: "Appointment Reminder Created",
-    icon: BellRing,
+    icon: Pill,
     color: "amber",
     category: "medicines",
     to: "/reminders",
   },
   [EVENT_TYPES.REMINDER_COMPLETED]: {
     label: "Reminder Completed",
-    icon: BellRing,
+    icon: Pill,
     color: "green",
     category: "medicines",
     to: "/reminders",
@@ -76,31 +60,38 @@ export const EVENT_TYPE_META = {
   },
   [EVENT_TYPES.PROFILE_UPDATED]: {
     label: "Medical Profile Updated",
-    icon: IdCard,
+    icon: FileText,
     color: "cyan",
     category: "profiles",
     to: "/medical-profile",
   },
   [EVENT_TYPES.FAMILY_MEMBER_ADDED]: {
     label: "Family Member Added",
-    icon: UserPlus,
+    icon: FileText,
     color: "pink",
     category: "family",
     to: "/family",
   },
   [EVENT_TYPES.FAMILY_MEMBER_UPDATED]: {
     label: "Family Member Updated",
-    icon: UserCog,
+    icon: FileText,
     color: "pink",
     category: "family",
     to: "/family",
   },
   [EVENT_TYPES.FAMILY_MEMBER_DELETED]: {
     label: "Family Member Deleted",
-    icon: UserCog,
+    icon: FileText,
     color: "pink",
     category: "family",
     to: "/family",
+  },
+  [EVENT_TYPES.REPORT_GENERATED]: {
+    label: "Health Report Generated",
+    icon: FileText,
+    color: "cyan",
+    category: "reports",
+    to: "/reports",
   },
 };
 
@@ -111,6 +102,7 @@ export const FILTER_CATEGORIES = [
   { key: "records", label: "Records" },
   { key: "profiles", label: "Profiles" },
   { key: "family", label: "Family" },
+  { key: "reports", label: "Reports" },
 ];
 
 function buildEvent({
@@ -133,7 +125,7 @@ function buildEvent({
     memberName,
     title,
     description,
-    date, // epoch ms
+    date,
     icon: meta.icon,
     color: meta.color,
     category: meta.category,
@@ -142,13 +134,6 @@ function buildEvent({
   };
 }
 
-/**
- * Builds "Appointment Created" and, where applicable, "Appointment
- * Completed" events from already-enriched appointments (each already
- * carrying a resolved `doctor` and `member`).
- * @param {Array<object>} appointments
- * @returns {Array<object>}
- */
 export function buildAppointmentEvents(appointments = []) {
   const events = [];
 
@@ -190,13 +175,6 @@ export function buildAppointmentEvents(appointments = []) {
   return events;
 }
 
-/**
- * Builds reminder-creation and completion events from already-enriched
- * reminders (each already carrying a resolved `medicine`/`appointment` and
- * `member`).
- * @param {Array<object>} reminders
- * @returns {Array<object>}
- */
 export function buildReminderEvents(reminders = []) {
   const events = [];
 
@@ -250,12 +228,6 @@ export function buildReminderEvents(reminders = []) {
   return events;
 }
 
-/**
- * Builds "Medical Record Added" events from already-enriched records (each
- * already carrying a resolved `member`).
- * @param {Array<object>} records
- * @returns {Array<object>}
- */
 export function buildRecordEvents(records = []) {
   return records.map((record) =>
     buildEvent({
@@ -272,12 +244,6 @@ export function buildRecordEvents(records = []) {
   );
 }
 
-/**
- * Builds "Medical Profile Updated" events, one per member whose profile
- * exists and has an updatedAt timestamp.
- * @param {Array<{ id: string, fullName: string, profile: object|null }>} memberProfiles
- * @returns {Array<object>}
- */
 export function buildProfileEvents(memberProfiles = []) {
   return memberProfiles
     .filter((entry) => entry.profile?.updatedAt)
@@ -296,15 +262,6 @@ export function buildProfileEvents(memberProfiles = []) {
     );
 }
 
-/**
- * Builds "Family Member Added" and, where an updatedAt exists,
- * "Family Member Updated" events. "Family Member Deleted" is intentionally
- * never generated here — deletion removes the record with no trace left to
- * build an event from, and adding a deletion log would itself be the kind
- * of duplicate storage this module is required to avoid.
- * @param {Array<object>} members
- * @returns {Array<object>}
- */
 export function buildFamilyEvents(members = []) {
   const events = [];
 
@@ -346,10 +303,29 @@ export function buildFamilyEvents(members = []) {
 }
 
 /**
- * Combines every source into one normalized, newest-first event list.
- * @param {object} sources
+ * Builds "Health Report Generated" events from the reports module's
+ * generation log. reportLogs is supplied by the caller (hook layer) —
+ * this file never imports report.service.js, keeping the dependency
+ * one-directional (report.service.js → timeline.service.js only).
+ * @param {Array<object>} reportLogs
  * @returns {Array<object>}
  */
+export function buildReportEvents(reportLogs = []) {
+  return reportLogs.map((log) =>
+    buildEvent({
+      id: `report-generated-${log.id}`,
+      type: EVENT_TYPES.REPORT_GENERATED,
+      memberId: log.memberId ?? "all",
+      memberName: log.memberLabel || "All Members",
+      title: `${log.typeLabel || "Health report"} generated`,
+      description: `For ${log.memberLabel || "All Members"}`,
+      date: log.generatedAt,
+      to: "/reports",
+      source: "Health Reports",
+    }),
+  );
+}
+
 export function buildTimelineEvents(sources) {
   const events = [
     ...buildAppointmentEvents(sources.appointments),
@@ -357,6 +333,7 @@ export function buildTimelineEvents(sources) {
     ...buildRecordEvents(sources.records),
     ...buildProfileEvents(sources.memberProfiles),
     ...buildFamilyEvents(sources.familyMembers),
+    ...buildReportEvents(sources.reportLogs),
   ];
 
   return events
@@ -364,44 +341,20 @@ export function buildTimelineEvents(sources) {
     .sort((a, b) => b.date - a.date);
 }
 
-/**
- * Filters events by category ("all" returns everything unchanged).
- * @param {Array<object>} events
- * @param {string} category
- * @returns {Array<object>}
- */
 export function filterByCategory(events, category) {
   if (!category || category === "all") return events;
   return events.filter((event) => event.category === category);
 }
 
-/**
- * Filters events by member id ("all" returns everything unchanged).
- * @param {Array<object>} events
- * @param {string} memberId
- * @returns {Array<object>}
- */
 export function filterByMember(events, memberId) {
   if (!memberId || memberId === "all") return events;
   return events.filter((event) => event.memberId === memberId);
 }
 
-/**
- * Searches events by title, description, or member name. Reuses the
- * existing generic safeSearch helper rather than a bespoke matcher.
- * @param {Array<object>} events
- * @param {string} query
- * @returns {Array<object>}
- */
 export function searchEvents(events, query) {
   return safeSearch(events, query, ["title", "description", "memberName"]);
 }
 
-/**
- * Computes summary counts for the statistics header.
- * @param {Array<object>} events
- * @returns {{ total: number, appointments: number, records: number, reminders: number, profiles: number, family: number }}
- */
 export function computeTimelineStats(events) {
   const countBy = (category) =>
     events.filter((event) => event.category === category).length;

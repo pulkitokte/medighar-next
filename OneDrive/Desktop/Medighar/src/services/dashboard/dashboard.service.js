@@ -1,16 +1,15 @@
-import { CalendarPlus, Stethoscope, Pill, FileText, Bell } from "lucide-react";
+import {
+  CalendarPlus,
+  Stethoscope,
+  Pill,
+  FileText,
+  Bell,
+  FileBarChart,
+} from "lucide-react";
 import { getDoctorById } from "@/services/doctors/doctors.service.js";
 import { getMedicineById } from "@/services/medicines/medicines.service.js";
 import { getDiseaseById } from "@/services/diseases/diseases.service.js";
 import { getPharmacyById } from "@/services/pharmacy/pharmacy.service.js";
-
-/**
- * Pure aggregation logic for the Personal Health Dashboard. This service
- * owns no storage of its own — every value it works with is read from the
- * existing Saved, Recently Viewed, Appointments, Reminders, Medical
- * Records, and Reviews services. Its only job is to combine and normalize
- * that data for display.
- */
 
 const ENTITY_RESOLVERS = {
   doctor: getDoctorById,
@@ -62,16 +61,15 @@ export const QUICK_ACTIONS = [
     to: "/reminders",
     icon: Bell,
   },
+  {
+    key: "generate-report",
+    label: "Generate Report",
+    description: "Create a printable health report to share.",
+    to: "/reports",
+    icon: FileBarChart,
+  },
 ];
 
-/**
- * Resolves raw recently-viewed entries ({type, id, viewedAt}) into their
- * actual entities, dropping any whose entity no longer exists. Reuses each
- * module's existing getXById function; introduces no new data access.
- * @param {Array<{type: string, id: string, viewedAt: number}>} entries
- * @param {number} [limit]
- * @returns {Array<{type: string, id: string, viewedAt: number, entity: object, to: string}>}
- */
 export function resolveRecentEntries(entries = [], limit = 5) {
   return entries
     .map((entry) => {
@@ -90,21 +88,6 @@ export function resolveRecentEntries(entries = [], limit = 5) {
     .slice(0, limit);
 }
 
-/**
- * Builds a unified, newest-first activity timeline from already-resolved
- * data supplied by the caller (appointments, reminders, records, resolved
- * recent-view entries, and flattened reviews). Purely a normalize + sort
- * operation; no data is fetched or stored here.
- * @param {{
- *   appointments?: Array<object>,
- *   reminders?: Array<object>,
- *   records?: Array<object>,
- *   recentEntries?: Array<object>,
- *   reviews?: Array<object>,
- * }} sources
- * @param {number} [limit]
- * @returns {Array<{ id: string, type: string, message: string, timestamp: number, to: string }>}
- */
 export function buildActivityTimeline(
   {
     appointments = [],
