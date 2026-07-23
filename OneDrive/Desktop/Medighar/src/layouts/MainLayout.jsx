@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Outlet } from "react-router-dom";
 import Navbar from "@/shared/components/common/Navbar.jsx";
+import CommandPalette from "@/shared/components/ui/CommandPalette.jsx";
 import { useUserPreferences } from "@/hooks/useUserPreferences.js";
 
 function MainLayout() {
@@ -8,7 +9,6 @@ function MainLayout() {
 
   useEffect(() => {
     const root = document.documentElement;
-
     root.setAttribute("data-theme", preferences.theme);
     root.setAttribute("data-font-size", preferences.fontSize);
     root.setAttribute("data-reduced-motion", String(preferences.reducedMotion));
