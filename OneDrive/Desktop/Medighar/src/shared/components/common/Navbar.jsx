@@ -23,6 +23,7 @@ const NAV_LINKS = [
   { label: "Timeline", to: "/timeline" },
   { label: "Notifications", to: "/notifications" },
   { label: "Health Reports", to: "/reports" },
+  { label: "Settings", to: "/settings" },
 ];
 
 function Navbar() {
@@ -33,14 +34,18 @@ function Navbar() {
           <Logo size="sm" showText />
         </NavLink>
 
-        <nav className="hidden items-center gap-8 md:flex">
+        <nav
+          aria-label="Primary navigation"
+          className="hidden items-center gap-8 md:flex"
+        >
           {NAV_LINKS.map((link) => (
             <NavLink
               key={link.to}
               to={link.to}
               className={({ isActive }) =>
                 cn(
-                  "text-sm font-medium text-slate-600 hover:text-slate-900",
+                  "rounded text-sm font-medium text-slate-600 hover:text-slate-900",
+                  "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-500",
                   isActive && "text-slate-900",
                 )
               }

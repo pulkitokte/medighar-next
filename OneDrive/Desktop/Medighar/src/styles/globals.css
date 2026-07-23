@@ -116,3 +116,85 @@ select {
     opacity: 1;
   }
 }
+
+/* ==========================================================================
+   User Preferences — Accessibility & Appearance
+   Driven by data-* attributes set on <html> by MainLayout, sourced from
+   the centralized preferences system (services/preferences/).
+   ========================================================================== */
+
+/* Global visible focus state, independent of any preference. */
+:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+/* Font size */
+html[data-font-size="small"] {
+  font-size: 14px;
+}
+
+html[data-font-size="medium"] {
+  font-size: 16px;
+}
+
+html[data-font-size="large"] {
+  font-size: 18px;
+}
+
+/* Theme (dark styling kept intentionally minimal since the app is
+   primarily light-designed today; this establishes the architecture for
+   future expansion). */
+[data-theme="dark"] body {
+  background-color: #0f172a;
+  color: #f1f5f9;
+}
+
+@media (prefers-color-scheme: dark) {
+  [data-theme="system"] body {
+    background-color: #0f172a;
+    color: #f1f5f9;
+  }
+}
+
+/* Reduced motion — both explicit preference and OS-level setting are
+   respected. */
+[data-reduced-motion="true"] *,
+[data-reduced-motion="true"] *::before,
+[data-reduced-motion="true"] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* High contrast mode — exposes helper classes pages can opt into, plus a
+   stronger default focus ring while enabled. */
+[data-high-contrast="true"] {
+  --hc-border-color: #000000;
+}
+
+[data-high-contrast="true"] :focus-visible {
+  outline: 3px solid #000000 !important;
+  outline-offset: 2px;
+}
+
+.hc-border {
+  border-color: var(--hc-border-color, currentColor) !important;
+  border-width: 2px !important;
+}
+
+.hc-text {
+  color: #000000 !important;
+}
