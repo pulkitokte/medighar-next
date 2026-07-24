@@ -10,9 +10,13 @@ import {
   Trophy,
 } from "lucide-react";
 import { safeSearch } from "@/shared/lib/search.js";
+import { toDateKey } from "@/services/calendar/calendar.service.js";
+import { buildTimelineEvents } from "@/services/timeline/timeline.service.js";
 import {
   getReadIds,
   setReadIds,
+  getDismissedIds,
+  setDismissedIds,
   subscribeToNotifications,
 } from "@/services/notifications/notifications.repository.js";
 import {
@@ -23,6 +27,15 @@ import {
 } from "@/services/insights/insights.service.js";
 
 export { subscribeToNotifications };
+
+/**
+ * Pure aggregation logic for the Smart Notifications & Activity Center.
+ * This service owns no storage beyond read/dismissed state (handled
+ * entirely by the repository) — every notification and activity item is
+ * derived from already-resolved data supplied by the caller. It reuses
+ * buildTimelineEvents from timeline.service.js for the Activity Feed
+ * rather than reimplementing cross-module aggregation.
+ */
 
 export const PRIORITY = {
   LOW: "low",
@@ -38,6 +51,10 @@ export const PRIORITY_META = {
   [PRIORITY.URGENT]: { label: "Urgent", className: "bg-red-50 text-red-700" },
 };
 
+/**
+ * Every notification category, used by Insights and other generic
+ * consumers to compute per-category breakdowns.
+ */
 export const NOTIFICATION_CATEGORIES = [
   { key: "all", label: "All" },
   { key: "appointments", label: "Appointments" },
@@ -46,6 +63,22 @@ export const NOTIFICATION_CATEGORIES = [
   { key: "profile", label: "Medical Profile" },
   { key: "family", label: "Family" },
   { key: "general", label: "General" },
+  { key: "reports", label: "Reports" },
+];
+
+/**
+ * The curated filter set shown on the Notification Center page. "unread"
+ * is a read-state filter, not a category, and is handled specially by
+ * filterNotificationsByFilter.
+ */
+export const FILTER_OPTIONS = [
+  { key: "all", label: "All" },
+  { key: "unread", label: "Unread" },
+  { key: "appointments", label: "Appointments" },
+  { key: "reports", label: "Reports" },
+  { key: "family", label: "Family" },
+  { key: "reminders", label: "Reminders" },
+  { key: "records", label: "Medical Records" },
 ];
 
 const TYPE_META = {
@@ -83,7 +116,7 @@ const TYPE_META = {
   "family-updated": { icon: UserCog, category: "family", to: "/family" },
   "birthday-upcoming": { icon: Cake, category: "general", to: "/family" },
   "milestone-unlocked": { icon: Trophy, category: "general", to: "/timeline" },
-  "report-generated": { icon: FileText, category: "general", to: "/reports" },
+  "report-generated": { icon: FileText, category: "reports", to: "/reports" },
 };
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -401,15 +434,6 @@ export function buildMilestoneNotifications(sources, now) {
     );
 }
 
-/**
- * Builds "Health Report Generated" notifications from the reports
- * module's generation log. reportLogs is supplied by the caller (hook
- * layer) — this file never imports report.service.js, keeping the
- * dependency one-directional.
- * @param {Array<object>} reportLogs
- * @param {Date} now
- * @returns {Array<object>}
- */
 export function buildReportNotifications(reportLogs = [], now) {
   const nowMs = now.getTime();
 
@@ -430,8 +454,18 @@ export function buildReportNotifications(reportLogs = [], now) {
     );
 }
 
+/**
+ * Combines every source into one normalized, newest-first notification
+ * list with read and dismissed state resolved against the repository.
+ * Dismissed notifications are filtered out entirely.
+ * @param {object} sources
+ * @param {Date} now
+ * @param {string} todayKey
+ * @returns {Array<object>}
+ */
 export function buildNotifications(sources, now, todayKey) {
   const readIds = new Set(getReadIds());
+  const dismissedIds = new Set(getDismissedIds());
 
   const notifications = [
     ...buildAppointmentNotifications(sources.appointments, now),
@@ -452,6 +486,7 @@ export function buildNotifications(sources, now, todayKey) {
   ];
 
   return notifications
+    .filter((notification) => !dismissedIds.has(notification.id))
     .map((notification) => ({
       ...notification,
       read: readIds.has(notification.id),
@@ -459,18 +494,53 @@ export function buildNotifications(sources, now, todayKey) {
     .sort((a, b) => b.createdAt - a.createdAt);
 }
 
+/**
+ * Marks a single notification as read.
+ * @param {string} id
+ */
 export function markAsRead(id) {
   const readIds = getReadIds();
   if (readIds.includes(id)) return;
   setReadIds([...readIds, id]);
 }
 
+/**
+ * Marks every given notification id as read.
+ * @param {Array<string>} ids
+ */
 export function markAllAsRead(ids) {
   const readIds = new Set(getReadIds());
   ids.forEach((id) => readIds.add(id));
   setReadIds([...readIds]);
 }
 
+/**
+ * Dismisses (deletes) a single notification. It will not reappear on
+ * future generation.
+ * @param {string} id
+ */
+export function dismissNotification(id) {
+  const dismissedIds = getDismissedIds();
+  if (dismissedIds.includes(id)) return;
+  setDismissedIds([...dismissedIds, id]);
+}
+
+/**
+ * Dismisses (clears) every given notification id.
+ * @param {Array<string>} ids
+ */
+export function clearAllNotifications(ids) {
+  const dismissedIds = new Set(getDismissedIds());
+  ids.forEach((id) => dismissedIds.add(id));
+  setDismissedIds([...dismissedIds]);
+}
+
+/**
+ * Filters notifications by category ("all" returns everything unchanged).
+ * @param {Array<object>} notifications
+ * @param {string} category
+ * @returns {Array<object>}
+ */
 export function filterByCategory(notifications, category) {
   if (!category || category === "all") return notifications;
   return notifications.filter(
@@ -478,6 +548,27 @@ export function filterByCategory(notifications, category) {
   );
 }
 
+/**
+ * Filters notifications by the Notification Center's filter bar, which
+ * includes both real categories and the "unread" read-state filter.
+ * @param {Array<object>} notifications
+ * @param {string} filterKey
+ * @returns {Array<object>}
+ */
+export function filterNotificationsByFilter(notifications, filterKey) {
+  if (!filterKey || filterKey === "all") return notifications;
+  if (filterKey === "unread")
+    return notifications.filter((notification) => !notification.read);
+  return filterByCategory(notifications, filterKey);
+}
+
+/**
+ * Searches notifications by title, description, or member name. Reuses
+ * the existing generic safeSearch helper.
+ * @param {Array<object>} notifications
+ * @param {string} query
+ * @returns {Array<object>}
+ */
 export function searchNotifications(notifications, query) {
   return safeSearch(notifications, query, [
     "title",
@@ -486,6 +577,12 @@ export function searchNotifications(notifications, query) {
   ]);
 }
 
+/**
+ * Computes summary counts for the statistics header and for the
+ * Insights integration.
+ * @param {Array<object>} notifications
+ * @returns {{ total: number, unread: number, byCategory: Record<string, number> }}
+ */
 export function computeNotificationStats(notifications) {
   const byCategory = {};
 
@@ -502,4 +599,109 @@ export function computeNotificationStats(notifications) {
     unread: notifications.filter((notification) => !notification.read).length,
     byCategory,
   };
+}
+
+/**
+ * Groups notifications into Today / Yesterday / This Week / Older
+ * buckets, using local calendar-day comparisons (reuses toDateKey from
+ * calendar.service.js rather than writing new date-bucketing logic).
+ * @param {Array<object>} notifications
+ * @param {Date} now
+ * @returns {{ Today: Array<object>, Yesterday: Array<object>, "This Week": Array<object>, Older: Array<object> }}
+ */
+export function groupNotificationsByRecency(notifications, now) {
+  const todayKey = toDateKey(now);
+  const yesterdayKey = toDateKey(new Date(now.getTime() - DAY_MS));
+  const weekAgoMs = now.getTime() - 7 * DAY_MS;
+
+  const groups = { Today: [], Yesterday: [], "This Week": [], Older: [] };
+
+  notifications.forEach((notification) => {
+    const key = toDateKey(notification.createdAt);
+
+    if (key === todayKey) {
+      groups.Today.push(notification);
+    } else if (key === yesterdayKey) {
+      groups.Yesterday.push(notification);
+    } else if (notification.createdAt >= weekAgoMs) {
+      groups["This Week"].push(notification);
+    } else {
+      groups.Older.push(notification);
+    }
+  });
+
+  return groups;
+}
+
+/**
+ * Formats a timestamp as a short, human-readable relative time string
+ * (e.g. "5 minutes ago"), suitable for both visible display and
+ * screen-reader announcement via an accessible <time> element.
+ * @param {number} timestamp
+ * @param {number} [now]
+ * @returns {string}
+ */
+export function formatRelativeTime(timestamp, now = Date.now()) {
+  const diffMinutes = Math.round((now - timestamp) / 60000);
+
+  if (diffMinutes < 1) return "Just now";
+  if (diffMinutes < 60)
+    return `${diffMinutes} minute${diffMinutes === 1 ? "" : "s"} ago`;
+
+  const diffHours = Math.round(diffMinutes / 60);
+  if (diffHours < 24)
+    return `${diffHours} hour${diffHours === 1 ? "" : "s"} ago`;
+
+  const diffDays = Math.round(diffHours / 24);
+  if (diffDays < 7) return `${diffDays} day${diffDays === 1 ? "" : "s"} ago`;
+
+  return new Date(timestamp).toLocaleDateString("en-IN", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+/**
+ * Merges notifications with important user activities (reusing
+ * buildTimelineEvents from timeline.service.js) into one chronological
+ * feed. This is the Activity Feed's entire implementation — no
+ * aggregation logic is duplicated here, only merged and sorted.
+ * @param {Array<object>} notifications
+ * @param {object} timelineSources
+ * @param {number} [limit]
+ * @returns {Array<object>}
+ */
+export function buildActivityFeed(notifications, timelineSources, limit = 30) {
+  const timelineEvents = buildTimelineEvents(timelineSources);
+
+  const activityItems = timelineEvents.map((event) => ({
+    id: `activity-${event.id}`,
+    kind: "activity",
+    title: event.title,
+    description: event.description,
+    timestamp: event.date,
+    icon: event.icon,
+    category: event.category,
+    link: event.link,
+    memberName: event.memberName,
+  }));
+
+  const notificationItems = notifications.map((notification) => ({
+    id: `notification-${notification.id}`,
+    kind: "notification",
+    title: notification.title,
+    description: notification.description,
+    timestamp: notification.createdAt,
+    icon: notification.icon,
+    category: notification.category,
+    link: notification.link,
+    memberName: notification.memberName,
+    priority: notification.priority,
+    read: notification.read,
+  }));
+
+  return [...activityItems, ...notificationItems]
+    .sort((a, b) => b.timestamp - a.timestamp)
+    .slice(0, limit);
 }

@@ -13,20 +13,35 @@ import {
 } from "@/services/reports/report.service.js";
 import {
   buildNotifications,
-  filterByCategory,
+  buildActivityFeed,
+  filterNotificationsByFilter,
   searchNotifications,
   computeNotificationStats,
+  groupNotificationsByRecency,
   markAsRead,
   markAllAsRead,
+  dismissNotification,
+  clearAllNotifications,
   subscribeToNotifications,
 } from "@/services/notifications/notification.service.js";
-import { getReadIds } from "@/services/notifications/notifications.repository.js";
+import {
+  getReadIds,
+  getDismissedIds,
+} from "@/services/notifications/notifications.repository.js";
 import { toDateKey } from "@/services/calendar/calendar.service.js";
 
 const EMPTY_SNAPSHOT = "[]";
 const EMPTY_PROFILES_SNAPSHOT = "{}";
 const EMPTY_REPORTS_SNAPSHOT = "[]";
 
+/**
+ * Aggregates data from every existing module (Appointments, Reminders,
+ * Medical Records, Medical Profile, Family Profiles, Health Reports) into
+ * the Smart Notifications & Activity Center. Reuses each module's existing
+ * hooks/services directly — creates no storage of its own beyond
+ * read/dismissed state, and duplicates no business logic.
+ * @returns {object}
+ */
 export function useNotifications() {
   const { upcoming: upcomingAppointments, past: pastAppointments } =
     useAppointments();
@@ -41,6 +56,12 @@ export function useNotifications() {
   const readSnapshot = useSyncExternalStore(
     subscribeToNotifications,
     () => JSON.stringify(getReadIds()),
+    () => EMPTY_SNAPSHOT,
+  );
+
+  const dismissedSnapshot = useSyncExternalStore(
+    subscribeToNotifications,
+    () => JSON.stringify(getDismissedIds()),
     () => EMPTY_SNAPSHOT,
   );
 
@@ -106,7 +127,8 @@ export function useNotifications() {
         now,
         todayKey,
       ),
-    // readSnapshot intentionally drives recomputation of resolved read state
+    // readSnapshot/dismissedSnapshot intentionally drive recomputation of
+    // resolved read/dismissed state
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       allAppointments,
@@ -118,17 +140,47 @@ export function useNotifications() {
       now,
       todayKey,
       readSnapshot,
+      dismissedSnapshot,
     ],
   );
 
-  const [categoryFilter, setCategoryFilter] = useState("all");
+  const activityFeed = useMemo(
+    () =>
+      buildActivityFeed(allNotifications, {
+        appointments: allAppointments,
+        reminders: allReminders,
+        records: filteredRecords,
+        memberProfiles,
+        familyMembers: members,
+        reportLogs,
+      }),
+    [
+      allNotifications,
+      allAppointments,
+      allReminders,
+      filteredRecords,
+      memberProfiles,
+      members,
+      reportLogs,
+    ],
+  );
+
+  const [activeFilter, setActiveFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
 
   const filteredNotifications = useMemo(() => {
-    let notifications = filterByCategory(allNotifications, categoryFilter);
+    let notifications = filterNotificationsByFilter(
+      allNotifications,
+      activeFilter,
+    );
     notifications = searchNotifications(notifications, searchQuery);
     return notifications;
-  }, [allNotifications, categoryFilter, searchQuery]);
+  }, [allNotifications, activeFilter, searchQuery]);
+
+  const groupedNotifications = useMemo(
+    () => groupNotificationsByRecency(filteredNotifications, now),
+    [filteredNotifications, now],
+  );
 
   const stats = useMemo(
     () => computeNotificationStats(allNotifications),
@@ -142,17 +194,23 @@ export function useNotifications() {
 
   const markRead = useCallback((id) => markAsRead(id), []);
   const markAllRead = useCallback(() => markAllAsRead(allIds), [allIds]);
+  const dismiss = useCallback((id) => dismissNotification(id), []);
+  const clearAll = useCallback(() => clearAllNotifications(allIds), [allIds]);
 
   return {
     notifications: filteredNotifications,
+    groupedNotifications,
     recentNotifications: allNotifications.slice(0, 5),
+    activityFeed,
     stats,
-    categoryFilter,
-    setCategoryFilter,
+    activeFilter,
+    setActiveFilter,
     searchQuery,
     setSearchQuery,
     markRead,
     markAllRead,
+    dismiss,
+    clearAll,
     loading: false,
     error: null,
   };

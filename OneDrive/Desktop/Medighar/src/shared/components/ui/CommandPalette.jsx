@@ -1,12 +1,5 @@
 import { useEffect, useRef } from "react";
-import {
-  X,
-  Search,
-  History,
-  ArrowUp,
-  ArrowDown,
-  CornerDownLeft,
-} from "lucide-react";
+import { X, Search, History, ArrowUp, ArrowDown, CornerDownLeft } from "lucide-react";
 import { cn } from "@/shared/lib/cn.js";
 import { useGlobalSearch } from "@/hooks/useGlobalSearch.js";
 import SearchResultItem from "@/shared/components/ui/SearchResultItem.jsx";
@@ -72,8 +65,7 @@ function CommandPalette() {
     }
   };
 
-  const activeId =
-    visibleResults.length > 0 ? optionId(activeIndex) : undefined;
+  const activeId = visibleResults.length > 0 ? optionId(activeIndex) : undefined;
 
   return (
     <div
@@ -89,10 +81,7 @@ function CommandPalette() {
         className="flex w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl"
       >
         <div className="flex items-center gap-3 border-b border-slate-200 px-4">
-          <Search
-            className="h-5 w-5 shrink-0 text-slate-400"
-            aria-hidden="true"
-          />
+          <Search className="h-5 w-5 shrink-0 text-slate-400" aria-hidden="true" />
           <input
             ref={inputRef}
             type="text"
@@ -160,12 +149,7 @@ function CommandPalette() {
               No results for &ldquo;{query.trim()}&rdquo;
             </p>
           ) : (
-            <ul
-              id={LISTBOX_ID}
-              role="listbox"
-              aria-label="Search results"
-              className="flex flex-col gap-4"
-            >
+            <ul id={LISTBOX_ID} role="listbox" aria-label="Search results" className="flex flex-col gap-4">
               {hasQuery
                 ? Object.entries(groups).map(([category, results]) => (
                     <li key={category}>

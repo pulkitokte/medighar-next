@@ -28,17 +28,13 @@ function SearchResultItem({ result, isActive, id, onSelect, onHover }) {
       }}
       className={cn(
         "flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-sm",
-        isActive
-          ? "bg-blue-50 text-blue-900"
-          : "text-slate-700 hover:bg-slate-50",
+        isActive ? "bg-blue-50 text-blue-900" : "text-slate-700 hover:bg-slate-50",
       )}
     >
       <span
         className={cn(
           "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg",
-          isActive
-            ? "bg-blue-100 text-blue-600"
-            : "bg-slate-100 text-slate-500",
+          isActive ? "bg-blue-100 text-blue-600" : "bg-slate-100 text-slate-500",
         )}
         aria-hidden="true"
       >
