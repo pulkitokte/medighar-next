@@ -28,15 +28,6 @@ import {
 
 export { subscribeToNotifications };
 
-/**
- * Pure aggregation logic for the Smart Notifications & Activity Center.
- * This service owns no storage beyond read/dismissed state (handled
- * entirely by the repository) — every notification and activity item is
- * derived from already-resolved data supplied by the caller. It reuses
- * buildTimelineEvents from timeline.service.js for the Activity Feed
- * rather than reimplementing cross-module aggregation.
- */
-
 export const PRIORITY = {
   LOW: "low",
   MEDIUM: "medium",
@@ -51,10 +42,6 @@ export const PRIORITY_META = {
   [PRIORITY.URGENT]: { label: "Urgent", className: "bg-red-50 text-red-700" },
 };
 
-/**
- * Every notification category, used by Insights and other generic
- * consumers to compute per-category breakdowns.
- */
 export const NOTIFICATION_CATEGORIES = [
   { key: "all", label: "All" },
   { key: "appointments", label: "Appointments" },
@@ -66,11 +53,6 @@ export const NOTIFICATION_CATEGORIES = [
   { key: "reports", label: "Reports" },
 ];
 
-/**
- * The curated filter set shown on the Notification Center page. "unread"
- * is a read-state filter, not a category, and is handled specially by
- * filterNotificationsByFilter.
- */
 export const FILTER_OPTIONS = [
   { key: "all", label: "All" },
   { key: "unread", label: "Unread" },
@@ -117,6 +99,7 @@ const TYPE_META = {
   "birthday-upcoming": { icon: Cake, category: "general", to: "/family" },
   "milestone-unlocked": { icon: Trophy, category: "general", to: "/timeline" },
   "report-generated": { icon: FileText, category: "reports", to: "/reports" },
+  "passport-generated": { icon: IdCard, category: "general", to: "/passport" },
 };
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -455,14 +438,38 @@ export function buildReportNotifications(reportLogs = [], now) {
 }
 
 /**
- * Combines every source into one normalized, newest-first notification
- * list with read and dismissed state resolved against the repository.
- * Dismissed notifications are filtered out entirely.
- * @param {object} sources
+ * Builds "Health Passport Generated" notifications from the passport
+ * module's action log (generation only, not printing — printing doesn't
+ * need its own notification per spec). passportLogs is supplied by the
+ * caller (hook layer); this file never imports passport.service.js.
+ * @param {Array<object>} passportLogs
  * @param {Date} now
- * @param {string} todayKey
  * @returns {Array<object>}
  */
+export function buildPassportNotifications(passportLogs = [], now) {
+  const nowMs = now.getTime();
+
+  return passportLogs
+    .filter(
+      (log) =>
+        log.action === "generated" &&
+        isWithinPastDays(log.generatedAt, nowMs, 7),
+    )
+    .map((log) =>
+      buildNotification({
+        id: `passport-generated-${log.id}`,
+        type: "passport-generated",
+        title: "Health Passport generated",
+        description: `For ${log.memberLabel || "Me"}`,
+        priority: PRIORITY.LOW,
+        createdAt: log.generatedAt,
+        source: "Health Passport",
+        memberId: log.memberLabel ? log.memberLabel.toLowerCase() : "me",
+        memberName: log.memberLabel || "Me",
+      }),
+    );
+}
+
 export function buildNotifications(sources, now, todayKey) {
   const readIds = new Set(getReadIds());
   const dismissedIds = new Set(getDismissedIds());
@@ -483,6 +490,7 @@ export function buildNotifications(sources, now, todayKey) {
       now,
     ),
     ...buildReportNotifications(sources.reportLogs, now),
+    ...buildPassportNotifications(sources.passportLogs, now),
   ];
 
   return notifications
@@ -494,53 +502,30 @@ export function buildNotifications(sources, now, todayKey) {
     .sort((a, b) => b.createdAt - a.createdAt);
 }
 
-/**
- * Marks a single notification as read.
- * @param {string} id
- */
 export function markAsRead(id) {
   const readIds = getReadIds();
   if (readIds.includes(id)) return;
   setReadIds([...readIds, id]);
 }
 
-/**
- * Marks every given notification id as read.
- * @param {Array<string>} ids
- */
 export function markAllAsRead(ids) {
   const readIds = new Set(getReadIds());
   ids.forEach((id) => readIds.add(id));
   setReadIds([...readIds]);
 }
 
-/**
- * Dismisses (deletes) a single notification. It will not reappear on
- * future generation.
- * @param {string} id
- */
 export function dismissNotification(id) {
   const dismissedIds = getDismissedIds();
   if (dismissedIds.includes(id)) return;
   setDismissedIds([...dismissedIds, id]);
 }
 
-/**
- * Dismisses (clears) every given notification id.
- * @param {Array<string>} ids
- */
 export function clearAllNotifications(ids) {
   const dismissedIds = new Set(getDismissedIds());
   ids.forEach((id) => dismissedIds.add(id));
   setDismissedIds([...dismissedIds]);
 }
 
-/**
- * Filters notifications by category ("all" returns everything unchanged).
- * @param {Array<object>} notifications
- * @param {string} category
- * @returns {Array<object>}
- */
 export function filterByCategory(notifications, category) {
   if (!category || category === "all") return notifications;
   return notifications.filter(
@@ -548,13 +533,6 @@ export function filterByCategory(notifications, category) {
   );
 }
 
-/**
- * Filters notifications by the Notification Center's filter bar, which
- * includes both real categories and the "unread" read-state filter.
- * @param {Array<object>} notifications
- * @param {string} filterKey
- * @returns {Array<object>}
- */
 export function filterNotificationsByFilter(notifications, filterKey) {
   if (!filterKey || filterKey === "all") return notifications;
   if (filterKey === "unread")
@@ -562,13 +540,6 @@ export function filterNotificationsByFilter(notifications, filterKey) {
   return filterByCategory(notifications, filterKey);
 }
 
-/**
- * Searches notifications by title, description, or member name. Reuses
- * the existing generic safeSearch helper.
- * @param {Array<object>} notifications
- * @param {string} query
- * @returns {Array<object>}
- */
 export function searchNotifications(notifications, query) {
   return safeSearch(notifications, query, [
     "title",
@@ -577,12 +548,6 @@ export function searchNotifications(notifications, query) {
   ]);
 }
 
-/**
- * Computes summary counts for the statistics header and for the
- * Insights integration.
- * @param {Array<object>} notifications
- * @returns {{ total: number, unread: number, byCategory: Record<string, number> }}
- */
 export function computeNotificationStats(notifications) {
   const byCategory = {};
 
@@ -601,14 +566,6 @@ export function computeNotificationStats(notifications) {
   };
 }
 
-/**
- * Groups notifications into Today / Yesterday / This Week / Older
- * buckets, using local calendar-day comparisons (reuses toDateKey from
- * calendar.service.js rather than writing new date-bucketing logic).
- * @param {Array<object>} notifications
- * @param {Date} now
- * @returns {{ Today: Array<object>, Yesterday: Array<object>, "This Week": Array<object>, Older: Array<object> }}
- */
 export function groupNotificationsByRecency(notifications, now) {
   const todayKey = toDateKey(now);
   const yesterdayKey = toDateKey(new Date(now.getTime() - DAY_MS));
@@ -633,14 +590,6 @@ export function groupNotificationsByRecency(notifications, now) {
   return groups;
 }
 
-/**
- * Formats a timestamp as a short, human-readable relative time string
- * (e.g. "5 minutes ago"), suitable for both visible display and
- * screen-reader announcement via an accessible <time> element.
- * @param {number} timestamp
- * @param {number} [now]
- * @returns {string}
- */
 export function formatRelativeTime(timestamp, now = Date.now()) {
   const diffMinutes = Math.round((now - timestamp) / 60000);
 
@@ -662,16 +611,6 @@ export function formatRelativeTime(timestamp, now = Date.now()) {
   });
 }
 
-/**
- * Merges notifications with important user activities (reusing
- * buildTimelineEvents from timeline.service.js) into one chronological
- * feed. This is the Activity Feed's entire implementation — no
- * aggregation logic is duplicated here, only merged and sorted.
- * @param {Array<object>} notifications
- * @param {object} timelineSources
- * @param {number} [limit]
- * @returns {Array<object>}
- */
 export function buildActivityFeed(notifications, timelineSources, limit = 30) {
   const timelineEvents = buildTimelineEvents(timelineSources);
 

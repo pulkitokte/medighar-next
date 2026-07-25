@@ -24,6 +24,7 @@ const NAV_LINKS = [
   { label: "Notifications", to: "/notifications" },
   { label: "Health Reports", to: "/reports" },
   { label: "Settings", to: "/settings" },
+  { label: "Health Passport", to: "/passport" },
 ];
 
 function Navbar() {

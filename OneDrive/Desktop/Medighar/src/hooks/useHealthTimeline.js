@@ -12,6 +12,10 @@ import {
   subscribeToReports,
 } from "@/services/reports/report.service.js";
 import {
+  getAllPassportLogs,
+  subscribeToPassport,
+} from "@/services/passport/passport.service.js";
+import {
   buildTimelineEvents,
   filterByCategory,
   filterByMember,
@@ -21,6 +25,7 @@ import {
 
 const EMPTY_PROFILES_SNAPSHOT = "{}";
 const EMPTY_REPORTS_SNAPSHOT = "[]";
+const EMPTY_PASSPORT_SNAPSHOT = "[]";
 
 export function useHealthTimeline() {
   const { upcoming: upcomingAppointments, past: pastAppointments } =
@@ -43,6 +48,12 @@ export function useHealthTimeline() {
     subscribeToReports,
     () => JSON.stringify(getAllReportLogs()),
     () => EMPTY_REPORTS_SNAPSHOT,
+  );
+
+  const passportSnapshot = useSyncExternalStore(
+    subscribeToPassport,
+    () => JSON.stringify(getAllPassportLogs()),
+    () => EMPTY_PASSPORT_SNAPSHOT,
   );
 
   const allAppointments = useMemo(
@@ -68,6 +79,10 @@ export function useHealthTimeline() {
     () => JSON.parse(reportsSnapshot),
     [reportsSnapshot],
   );
+  const passportLogs = useMemo(
+    () => JSON.parse(passportSnapshot),
+    [passportSnapshot],
+  );
 
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [memberFilter, setMemberFilter] = useState("all");
@@ -82,6 +97,7 @@ export function useHealthTimeline() {
         memberProfiles,
         familyMembers: members,
         reportLogs,
+        passportLogs,
       });
       return { events, error: null };
     } catch (caughtError) {
@@ -100,6 +116,7 @@ export function useHealthTimeline() {
     memberProfiles,
     members,
     reportLogs,
+    passportLogs,
   ]);
 
   const filteredEvents = useMemo(() => {

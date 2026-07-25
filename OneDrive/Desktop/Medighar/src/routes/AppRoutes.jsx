@@ -26,6 +26,7 @@ import HealthTimelinePage from "@/pages/HealthTimeline/HealthTimelinePage.jsx";
 import NotificationCenterPage from "@/pages/NotificationCenter/NotificationCenterPage.jsx";
 import HealthReportsPage from "@/pages/HealthReports/HealthReportsPage.jsx";
 import SettingsPage from "@/pages/Settings/SettingsPage.jsx";
+import HealthPassportPage from "@/pages/HealthPassport/HealthPassportPage.jsx";
 
 function AppRoutes() {
   return (
@@ -63,6 +64,7 @@ function AppRoutes() {
         <Route path="/notifications" element={<NotificationCenterPage />} />
         <Route path="/reports" element={<HealthReportsPage />} />
         <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/passport" element={<HealthPassportPage />} />
       </Route>
     </Routes>
   );

@@ -1,6 +1,6 @@
-import { CalendarClock, Pill, FileText } from "lucide-react";
-import { safeSearch } from "@/shared/lib/search.js";
+import { CalendarClock, Pill, FileText, IdCard, BookUser } from "lucide-react";
 import { groupByField } from "@/shared/lib/repositoryHelpers.js";
+import { safeSearch } from "@/shared/lib/search.js";
 
 export const EVENT_TYPES = {
   APPOINTMENT_CREATED: "appointment-created",
@@ -14,6 +14,8 @@ export const EVENT_TYPES = {
   FAMILY_MEMBER_UPDATED: "family-member-updated",
   FAMILY_MEMBER_DELETED: "family-member-deleted",
   REPORT_GENERATED: "report-generated",
+  PASSPORT_GENERATED: "passport-generated",
+  PASSPORT_PRINTED: "passport-printed",
 };
 
 export const EVENT_TYPE_META = {
@@ -94,6 +96,20 @@ export const EVENT_TYPE_META = {
     category: "reports",
     to: "/reports",
   },
+  [EVENT_TYPES.PASSPORT_GENERATED]: {
+    label: "Health Passport Generated",
+    icon: IdCard,
+    color: "cyan",
+    category: "passport",
+    to: "/passport",
+  },
+  [EVENT_TYPES.PASSPORT_PRINTED]: {
+    label: "Health Passport Printed",
+    icon: BookUser,
+    color: "cyan",
+    category: "passport",
+    to: "/passport",
+  },
 };
 
 export const FILTER_CATEGORIES = [
@@ -104,6 +120,7 @@ export const FILTER_CATEGORIES = [
   { key: "profiles", label: "Profiles" },
   { key: "family", label: "Family" },
   { key: "reports", label: "Reports" },
+  { key: "passport", label: "Passport" },
 ];
 
 function buildEvent({
@@ -303,14 +320,6 @@ export function buildFamilyEvents(members = []) {
   return events;
 }
 
-/**
- * Builds "Health Report Generated" events from the reports module's
- * generation log. reportLogs is supplied by the caller (hook layer) —
- * this file never imports report.service.js, keeping the dependency
- * one-directional (report.service.js → timeline.service.js only).
- * @param {Array<object>} reportLogs
- * @returns {Array<object>}
- */
 export function buildReportEvents(reportLogs = []) {
   return reportLogs.map((log) =>
     buildEvent({
@@ -327,6 +336,38 @@ export function buildReportEvents(reportLogs = []) {
   );
 }
 
+/**
+ * Builds "Health Passport Generated"/"Printed" events from the passport
+ * module's action log. passportLogs is supplied by the caller (hook
+ * layer) — this file never imports passport.service.js, keeping the
+ * dependency one-directional (passport.service.js never imports this
+ * file either — both remain independent, composed only at the hook
+ * layer).
+ * @param {Array<object>} passportLogs
+ * @returns {Array<object>}
+ */
+export function buildPassportEvents(passportLogs = []) {
+  return passportLogs.map((log) =>
+    buildEvent({
+      id: `passport-${log.action}-${log.id}`,
+      type:
+        log.action === "printed"
+          ? EVENT_TYPES.PASSPORT_PRINTED
+          : EVENT_TYPES.PASSPORT_GENERATED,
+      memberId: log.memberLabel ? log.memberLabel.toLowerCase() : "me",
+      memberName: log.memberLabel || "Me",
+      title:
+        log.action === "printed"
+          ? "Health Passport printed"
+          : "Health Passport generated",
+      description: `For ${log.memberLabel || "Me"}`,
+      date: log.generatedAt,
+      to: "/passport",
+      source: "Health Passport",
+    }),
+  );
+}
+
 export function buildTimelineEvents(sources) {
   const events = [
     ...buildAppointmentEvents(sources.appointments),
@@ -335,6 +376,7 @@ export function buildTimelineEvents(sources) {
     ...buildProfileEvents(sources.memberProfiles),
     ...buildFamilyEvents(sources.familyMembers),
     ...buildReportEvents(sources.reportLogs),
+    ...buildPassportEvents(sources.passportLogs),
   ];
 
   return events

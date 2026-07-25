@@ -5,6 +5,7 @@ import {
   FileText,
   Bell,
   FileBarChart,
+  IdCard,
 } from "lucide-react";
 import { getDoctorById } from "@/services/doctors/doctors.service.js";
 import { getMedicineById } from "@/services/medicines/medicines.service.js";
@@ -67,6 +68,13 @@ export const QUICK_ACTIONS = [
     description: "Create a printable health report to share.",
     to: "/reports",
     icon: FileBarChart,
+  },
+  {
+    key: "health-passport",
+    label: "Health Passport",
+    description: "View your complete emergency-ready health summary.",
+    to: "/passport",
+    icon: IdCard,
   },
 ];
 

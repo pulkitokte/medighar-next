@@ -12,6 +12,10 @@ import {
   subscribeToReports,
 } from "@/services/reports/report.service.js";
 import {
+  getAllPassportLogs,
+  subscribeToPassport,
+} from "@/services/passport/passport.service.js";
+import {
   buildNotifications,
   buildActivityFeed,
   filterNotificationsByFilter,
@@ -33,15 +37,8 @@ import { toDateKey } from "@/services/calendar/calendar.service.js";
 const EMPTY_SNAPSHOT = "[]";
 const EMPTY_PROFILES_SNAPSHOT = "{}";
 const EMPTY_REPORTS_SNAPSHOT = "[]";
+const EMPTY_PASSPORT_SNAPSHOT = "[]";
 
-/**
- * Aggregates data from every existing module (Appointments, Reminders,
- * Medical Records, Medical Profile, Family Profiles, Health Reports) into
- * the Smart Notifications & Activity Center. Reuses each module's existing
- * hooks/services directly — creates no storage of its own beyond
- * read/dismissed state, and duplicates no business logic.
- * @returns {object}
- */
 export function useNotifications() {
   const { upcoming: upcomingAppointments, past: pastAppointments } =
     useAppointments();
@@ -77,6 +74,12 @@ export function useNotifications() {
     () => EMPTY_REPORTS_SNAPSHOT,
   );
 
+  const passportSnapshot = useSyncExternalStore(
+    subscribeToPassport,
+    () => JSON.stringify(getAllPassportLogs()),
+    () => EMPTY_PASSPORT_SNAPSHOT,
+  );
+
   const now = useMemo(() => new Date(), []);
   const todayKey = useMemo(() => toDateKey(now), [now]);
 
@@ -103,6 +106,10 @@ export function useNotifications() {
     () => JSON.parse(reportsSnapshot),
     [reportsSnapshot],
   );
+  const passportLogs = useMemo(
+    () => JSON.parse(passportSnapshot),
+    [passportSnapshot],
+  );
 
   const allNotifications = useMemo(
     () =>
@@ -114,6 +121,7 @@ export function useNotifications() {
           memberProfiles,
           familyMembers: members,
           reportLogs,
+          passportLogs,
           rawAppointments: {
             upcoming: upcomingAppointments,
             past: pastAppointments,
@@ -127,8 +135,7 @@ export function useNotifications() {
         now,
         todayKey,
       ),
-    // readSnapshot/dismissedSnapshot intentionally drive recomputation of
-    // resolved read/dismissed state
+    // readSnapshot/dismissedSnapshot intentionally drive recomputation
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       allAppointments,
@@ -137,6 +144,7 @@ export function useNotifications() {
       memberProfiles,
       members,
       reportLogs,
+      passportLogs,
       now,
       todayKey,
       readSnapshot,
@@ -153,6 +161,7 @@ export function useNotifications() {
         memberProfiles,
         familyMembers: members,
         reportLogs,
+        passportLogs,
       }),
     [
       allNotifications,
@@ -162,6 +171,7 @@ export function useNotifications() {
       memberProfiles,
       members,
       reportLogs,
+      passportLogs,
     ],
   );
 
