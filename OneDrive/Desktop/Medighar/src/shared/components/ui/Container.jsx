@@ -8,16 +8,14 @@ const READING_WIDTH_CLASSES = {
 
 function Container({ children, className }) {
   const { preferences } = useUserPreferences();
-  const widthClass =
-    READING_WIDTH_CLASSES[preferences.readingWidth] ??
-    READING_WIDTH_CLASSES.comfortable;
+  const widthClass = READING_WIDTH_CLASSES[preferences.readingWidth] ?? READING_WIDTH_CLASSES.comfortable;
 
   return (
     <div
       className={cn(
-        "mx-auto w-full px-4 sm:px-6 lg:px-8",
+        "mx-auto w-full px-4 sm:px-6 lg:px-8 xl:px-10",
         widthClass,
-        preferences.compactMode && "px-3 sm:px-4 lg:px-6",
+        preferences.compactMode && "px-3 sm:px-4 lg:px-6 xl:px-8",
         className,
       )}
     >

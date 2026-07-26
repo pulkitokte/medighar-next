@@ -1,6 +1,6 @@
 function SkeletonCard() {
   return (
-    <div className="flex h-full flex-col gap-4 rounded-xl border border-slate-200 bg-white p-6">
+    <div className="card-surface flex h-full flex-col gap-4 border border-slate-200 bg-white p-6">
       <div className="flex items-center gap-3">
         <div className="h-12 w-12 shrink-0 animate-pulse rounded-full bg-slate-200" />
         <div className="flex-1 space-y-2">
@@ -12,21 +12,11 @@ function SkeletonCard() {
         <div className="h-3 w-full animate-pulse rounded bg-slate-200" />
         <div className="h-3 w-5/6 animate-pulse rounded bg-slate-200" />
       </div>
-      <div className="mt-auto h-8 w-full animate-pulse rounded-lg bg-slate-200" />
+      <div className="mt-auto h-8 w-full animate-pulse rounded-xl bg-slate-200" />
     </div>
   );
 }
 
-/**
- * Reusable loading state. Default mode shows a title/description with a
- * skeleton grid mimicking a listing page's card layout. Compact mode shows
- * a minimal inline indicator for smaller spaces.
- * @param {{
- *   title?: string,
- *   description?: string,
- *   compact?: boolean,
- * }} props
- */
 function LoadingState({ title = "Loading...", description, compact = false }) {
   if (compact) {
     return (

@@ -6,22 +6,6 @@ import EmptyRelationship from "@/shared/components/ui/EmptyRelationship.jsx";
 
 const MAX_RELATED_ITEMS = 3;
 
-/**
- * Reusable "related records" section used on every Details page. Caps the
- * visible items at MAX_RELATED_ITEMS, shows a "View All" button that
- * navigates to the relevant listing page, and falls back to
- * EmptyRelationship when there are no items. The actual grid/card markup is
- * supplied by the caller via renderGrid, so this component never needs to
- * know about MedicineGrid, DoctorGrid, PharmacyGrid, or DiseaseGrid.
- * @param {{
- *   icon: React.ComponentType,
- *   title: string,
- *   items?: Array<object>,
- *   emptyMessage: string,
- *   viewAllHref?: string,
- *   renderGrid: (items: Array<object>) => React.ReactNode,
- * }} props
- */
 function RelationSection({
   icon: Icon,
   title,

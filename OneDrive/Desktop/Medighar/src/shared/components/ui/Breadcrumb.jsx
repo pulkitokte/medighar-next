@@ -1,11 +1,6 @@
 import { Link } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
 
-/**
- * Reusable breadcrumb trail. The last item (or any item without a `to`) is
- * rendered as the current page and is not a link.
- * @param {{ items: Array<{ label: string, to?: string }> }} props
- */
 function Breadcrumb({ items = [] }) {
   return (
     <nav aria-label="Breadcrumb">
@@ -31,7 +26,7 @@ function Breadcrumb({ items = [] }) {
               ) : (
                 <Link
                   to={item.to}
-                  className="transition-colors hover:text-slate-900"
+                  className="transition-premium rounded hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
                 >
                   {item.label}
                 </Link>
