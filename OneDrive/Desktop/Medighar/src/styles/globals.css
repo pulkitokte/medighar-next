@@ -1,234 +1,47 @@
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-html {
-  -webkit-text-size-adjust: 100%;
-  text-size-adjust: 100%;
-  scroll-behavior: smooth;
-}
-
-body {
-  min-height: 100svh;
-  font-family:
-    system-ui,
-    -apple-system,
-    'Segoe UI',
-    Roboto,
-    Helvetica,
-    Arial,
-    sans-serif;
-  line-height: 1.5;
-  color: #0f172a;
-  background-color: #ffffff;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
-  -webkit-tap-highlight-color: transparent;
-}
-
-::selection {
-  background-color: #2563eb;
-  color: #ffffff;
-}
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-weight: 600;
-  line-height: 1.25;
-  color: inherit;
-  letter-spacing: -0.02em;
-}
-
-p {
-  color: inherit;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-button {
-  font-family: inherit;
-  font-size: inherit;
-  color: inherit;
-  background: none;
-  border: none;
-  cursor: pointer;
-}
-
-img,
-picture,
-video,
-canvas,
-svg {
-  display: block;
-  max-width: 100%;
-  height: auto;
-}
-
-input,
-textarea,
-select {
-  font: inherit;
-}
-
-/* Scrollbar styling */
-::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background-color: #cbd5e1;
-  border-radius: 9999px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background-color: #94a3b8;
-}
-
-* {
-  scrollbar-width: thin;
-  scrollbar-color: #cbd5e1 transparent;
-}
-
-/* Utility */
-.page-transition {
-  animation: page-fade-in 250ms ease;
-}
-
-@keyframes page-fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
 /* ==========================================================================
-   User Preferences — Accessibility & Appearance
-   Driven by data-* attributes set on <html> by MainLayout, sourced from
-   the centralized preferences system (services/preferences/).
+   Home Hero — Premium Visual Identity (UI/UX Transformation Phase)
+   Additive keyframes only. Reduced-motion handling reuses the existing
+   global override defined above — no new reduced-motion logic needed.
    ========================================================================== */
 
-:focus-visible {
-  outline: 2px solid #2563eb;
-  outline-offset: 2px;
-}
-
-html[data-font-size="small"] {
-  font-size: 14px;
-}
-
-html[data-font-size="medium"] {
-  font-size: 16px;
-}
-
-html[data-font-size="large"] {
-  font-size: 18px;
-}
-
-[data-theme="dark"] body {
-  background-color: #0f172a;
-  color: #f1f5f9;
-}
-
-@media (prefers-color-scheme: dark) {
-  [data-theme="system"] body {
-    background-color: #0f172a;
-    color: #f1f5f9;
+@keyframes float-slow {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
   }
 }
 
-[data-reduced-motion="true"] *,
-[data-reduced-motion="true"] *::before,
-[data-reduced-motion="true"] *::after {
-  animation-duration: 0.001ms !important;
-  animation-iteration-count: 1 !important;
-  transition-duration: 0.001ms !important;
-  scroll-behavior: auto !important;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
+@keyframes float-medium {
+  0%,
+  100% {
+    transform: translateY(0);
   }
-
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.001ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.001ms !important;
-    scroll-behavior: auto !important;
+  50% {
+    transform: translateY(-8px);
   }
 }
 
-[data-high-contrast="true"] {
-  --hc-border-color: #000000;
+@keyframes float-fast {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-6px) rotate(6deg);
+  }
 }
 
-[data-high-contrast="true"] :focus-visible {
-  outline: 3px solid #000000 !important;
-  outline-offset: 2px;
+.animate-float-slow {
+  animation: float-slow 6s ease-in-out infinite;
 }
 
-.hc-border {
-  border-color: var(--hc-border-color, currentColor) !important;
-  border-width: 2px !important;
+.animate-float-medium {
+  animation: float-medium 5s ease-in-out infinite;
 }
 
-.hc-text {
-  color: #000000 !important;
-}
-
-/* ==========================================================================
-   Premium Design System — Phase 1 UI/UX Refinement
-   Additive design tokens and utility classes used by shared components.
-   No existing rule above this point is modified.
-   ========================================================================== */
-
-:root {
-  --radius-card: 1rem;
-  --radius-pill: 9999px;
-  --shadow-card: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 1px rgba(15, 23, 42, 0.03);
-  --shadow-card-hover: 0 12px 24px -8px rgba(15, 23, 42, 0.12), 0 4px 8px -4px rgba(15, 23, 42, 0.06);
-  --transition-base: 200ms cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.transition-premium {
-  transition: box-shadow var(--transition-base), transform var(--transition-base), border-color var(--transition-base), background-color var(--transition-base), color var(--transition-base);
-}
-
-.card-surface {
-  border-radius: var(--radius-card);
-  box-shadow: var(--shadow-card);
-}
-
-.card-surface-hover:hover {
-  box-shadow: var(--shadow-card-hover);
-}
-
-.hide-scrollbar {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-
-.hide-scrollbar::-webkit-scrollbar {
-  display: none;
+.animate-float-fast {
+  animation: float-fast 4.5s ease-in-out infinite;
 }
