@@ -4,6 +4,7 @@ import {
   History,
   CalendarClock,
   Bell,
+  BellRing,
   FileText,
   ChevronRight,
   Stethoscope,
@@ -14,6 +15,7 @@ import {
   IdCard,
   Users,
 } from "lucide-react";
+import { cn } from "@/shared/lib/cn.js";
 import Section from "@/shared/components/ui/Section.jsx";
 import Container from "@/shared/components/ui/Container.jsx";
 import PageHeading from "@/shared/components/ui/PageHeading.jsx";
@@ -21,26 +23,37 @@ import Button from "@/shared/components/ui/Button.jsx";
 import EmptyRelationship from "@/shared/components/ui/EmptyRelationship.jsx";
 import { useDashboard } from "@/hooks/useDashboard.js";
 
-const RECENT_TYPE_ICONS = {
-  doctor: Stethoscope,
-  medicine: Pill,
-  disease: Activity,
-  pharmacy: Store,
+/**
+ * Premium pastel color tokens per module family, matching the
+ * approved Medighhar design language:
+ * Doctors→Sky, Medicines→Pista, Diseases→Apricot, Pharmacy→Lavender,
+ * Dashboard→Mint Emerald, Timeline→Clay, Notifications→Mustard,
+ * Medical Records→Slate Blue, Family→Coral.
+ */
+const TONE_STYLES = {
+  sky: { surface: "bg-sky-50", icon: "text-sky-600", iconBg: "bg-sky-100", ring: "hover:border-sky-200" },
+  pista: { surface: "bg-lime-50", icon: "text-lime-700", iconBg: "bg-lime-100", ring: "hover:border-lime-200" },
+  apricot: { surface: "bg-orange-50", icon: "text-orange-600", iconBg: "bg-orange-100", ring: "hover:border-orange-200" },
+  lavender: { surface: "bg-violet-50", icon: "text-violet-600", iconBg: "bg-violet-100", ring: "hover:border-violet-200" },
+  mint: { surface: "bg-emerald-50", icon: "text-emerald-600", iconBg: "bg-emerald-100", ring: "hover:border-emerald-200" },
+  clay: { surface: "bg-amber-50", icon: "text-amber-700", iconBg: "bg-amber-100", ring: "hover:border-amber-200" },
+  mustard: { surface: "bg-yellow-50", icon: "text-yellow-700", iconBg: "bg-yellow-100", ring: "hover:border-yellow-200" },
+  slateBlue: { surface: "bg-indigo-50", icon: "text-indigo-600", iconBg: "bg-indigo-100", ring: "hover:border-indigo-200" },
+  coral: { surface: "bg-rose-50", icon: "text-rose-600", iconBg: "bg-rose-100", ring: "hover:border-rose-200" },
 };
-const TIMELINE_TYPE_ICONS = {
-  appointment: CalendarClock,
-  reminder: Bell,
-  record: FileText,
-  recent: History,
-  review: Star,
+
+const QUICK_ACTION_TONES = {
+  "book-appointment": "sky",
+  "browse-doctors": "sky",
+  "browse-medicines": "pista",
+  "medical-records": "slateBlue",
+  "reminder-center": "pista",
+  "generate-report": "clay",
+  "health-passport": "mint",
 };
 
 function formatDate(dateString) {
-  return new Date(dateString).toLocaleDateString("en-IN", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
+  return new Date(dateString).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 }
 
 function formatDateTime(timestamp) {
@@ -53,18 +66,26 @@ function formatDateTime(timestamp) {
   });
 }
 
-function StatTile({ icon: Icon, label, value, to }) {
+function StatTile({ icon: Icon, label, value, to, tone = "mint" }) {
   const navigate = useNavigate();
+  const styles = TONE_STYLES[tone];
+
   return (
     <button
       type="button"
       onClick={() => navigate(to)}
-      className="flex flex-col items-start gap-2 rounded-2xl border border-slate-200 bg-white p-5 text-left shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+      aria-label={`${label}: ${value}. View details.`}
+      className={cn(
+        "card-surface card-surface-hover transition-premium flex flex-col items-start gap-3 border border-slate-100 bg-white p-5 text-left",
+        "hover:-translate-y-0.5",
+        "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500",
+        styles.ring,
+      )}
     >
-      <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50">
-        <Icon className="h-5 w-5 text-blue-600" aria-hidden="true" />
+      <span className={cn("flex h-11 w-11 items-center justify-center rounded-2xl", styles.iconBg)}>
+        <Icon className={cn("h-5 w-5", styles.icon)} aria-hidden="true" />
       </span>
-      <span className="text-2xl font-semibold text-slate-900">{value}</span>
+      <span className="text-2xl font-semibold tracking-tight text-slate-900">{value}</span>
       <span className="text-sm text-slate-500">{label}</span>
     </button>
   );
@@ -73,67 +94,95 @@ function StatTile({ icon: Icon, label, value, to }) {
 function QuickActionCard({ action }) {
   const navigate = useNavigate();
   const Icon = action.icon;
+  const tone = QUICK_ACTION_TONES[action.key] ?? "mint";
+  const styles = TONE_STYLES[tone];
+
   return (
     <button
       type="button"
       onClick={() => navigate(action.to)}
-      className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 text-left shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+      className={cn(
+        "card-surface card-surface-hover transition-premium flex items-start gap-4 border border-slate-100 bg-white p-5 text-left",
+        "hover:-translate-y-0.5",
+        "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500",
+        styles.ring,
+      )}
     >
-      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50">
-        <Icon className="h-5 w-5 text-blue-600" aria-hidden="true" />
+      <span className={cn("flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl", styles.iconBg)}>
+        <Icon className={cn("h-5.5 w-5.5", styles.icon)} aria-hidden="true" />
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block text-sm font-semibold text-slate-900">
-          {action.label}
-        </span>
-        <span className="block truncate text-xs text-slate-500">
-          {action.description}
-        </span>
+        <span className="block text-sm font-semibold text-slate-900">{action.label}</span>
+        <span className="mt-0.5 block text-xs leading-relaxed text-slate-500">{action.description}</span>
       </span>
-      <ChevronRight
-        className="h-4 w-4 shrink-0 text-slate-400"
-        aria-hidden="true"
-      />
+      <ChevronRight className="mt-1 h-4 w-4 shrink-0 text-slate-300" aria-hidden="true" />
     </button>
   );
 }
 
-function ListRow({ icon: Icon, title, subtitle, to, actionLabel = "View" }) {
+function ListRow({ icon: Icon, title, subtitle, to, actionLabel = "View", tone = "mint" }) {
   const navigate = useNavigate();
+  const styles = TONE_STYLES[tone];
+
   return (
-    <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-4">
+    <div className="transition-premium flex items-center justify-between gap-3 rounded-2xl border border-slate-100 bg-white p-4 hover:shadow-sm">
       <div className="flex min-w-0 items-center gap-3">
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50">
-          <Icon className="h-4 w-4 text-blue-600" aria-hidden="true" />
+        <span className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-xl", styles.iconBg)}>
+          <Icon className={cn("h-4.5 w-4.5", styles.icon)} aria-hidden="true" />
         </span>
         <div className="min-w-0">
           <p className="truncate text-sm font-medium text-slate-900">{title}</p>
-          {subtitle && (
-            <p className="truncate text-xs text-slate-500">{subtitle}</p>
-          )}
+          {subtitle && <p className="truncate text-xs text-slate-500">{subtitle}</p>}
         </div>
       </div>
-      <Button variant="outline" size="sm" onClick={() => navigate(to)}>
+
+      <Button variant="outline" size="sm" onClick={() => navigate(to)} className="shrink-0 rounded-full">
         {actionLabel}
       </Button>
     </div>
   );
 }
 
-function TimelineRow({ event }) {
-  const Icon = TIMELINE_TYPE_ICONS[event.type] ?? History;
+function DashboardSection({ title, tone, icon: Icon, children }) {
+  const styles = TONE_STYLES[tone];
+
   return (
-    <div className="flex items-start gap-3 rounded-xl border border-slate-200 bg-white p-4">
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50">
-        <Icon className="h-4 w-4 text-blue-600" aria-hidden="true" />
+    <section className="flex flex-col gap-4">
+      <h2 className="flex items-center gap-2 text-base font-semibold text-slate-900">
+        <span className={cn("flex h-7 w-7 items-center justify-center rounded-lg", styles.iconBg)}>
+          <Icon className={cn("h-4 w-4", styles.icon)} aria-hidden="true" />
+        </span>
+        {title}
+      </h2>
+      {children}
+    </section>
+  );
+}
+
+function TimelineRow({ event, isLast }) {
+  const Icon = event.icon ?? History;
+
+  return (
+    <li className="relative flex gap-4 pb-6 last:pb-0">
+      {!isLast && (
+        <span
+          aria-hidden="true"
+          className="absolute left-[19px] top-10 h-[calc(100%-2.25rem)] w-px bg-slate-200"
+        />
+      )}
+      <span className="relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-emerald-100 bg-emerald-50 shadow-sm">
+        <Icon className="h-4 w-4 text-emerald-600" aria-hidden="true" />
       </span>
-      <div className="min-w-0 flex-1">
+      <div className="min-w-0 flex-1 rounded-2xl border border-slate-100 bg-white p-4">
         <p className="text-sm text-slate-900">{event.message}</p>
-        <p className="text-xs text-slate-500">
+        <time
+          dateTime={new Date(event.timestamp).toISOString()}
+          className="mt-1 block text-xs text-slate-400"
+        >
           {formatDateTime(event.timestamp)}
-        </p>
+        </time>
       </div>
-    </div>
+    </li>
   );
 }
 
@@ -153,69 +202,42 @@ function DashboardPage() {
   } = useDashboard();
 
   return (
-    <Section paddingY="py-16 sm:py-20">
-      <Container className="flex flex-col gap-12">
+    <Section paddingY="py-14 sm:py-20">
+      <Container className="flex flex-col gap-14">
         <PageHeading
           title="Dashboard"
-          subtitle="Your health activity, all in one place."
+          subtitle="A calm, complete view of your health activity — all in one place."
           center
         />
 
-        <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-8">
-          <StatTile
-            icon={Bookmark}
-            label="Saved Items"
-            value={overview.savedCount}
-            to="/saved"
-          />
-          <StatTile
-            icon={History}
-            label="Recently Viewed"
-            value={overview.recentCount}
-            to="/recent"
-          />
-          <StatTile
-            icon={CalendarClock}
-            label="Upcoming Appointments"
-            value={overview.upcomingAppointmentsCount}
-            to="/appointments"
-          />
-          <StatTile
-            icon={Bell}
-            label="Active Reminders"
-            value={overview.activeRemindersCount}
-            to="/reminders"
-          />
-          <StatTile
-            icon={FileText}
-            label="Medical Records"
-            value={overview.recordsCount}
-            to="/medical-records"
-          />
-          <StatTile
-            icon={IdCard}
-            label="Medical ID Complete"
-            value={`${profileCompletion}%`}
-            to="/medical-profile"
-          />
-          <StatTile
-            icon={Users}
-            label="Family Members"
-            value={overview.familyMembersCount}
-            to="/family"
-          />
-          <StatTile
-            icon={Bell}
-            label="Unread Notifications"
-            value={overview.unreadNotificationsCount}
-            to="/notifications"
-          />
+        <section aria-label="Health overview" className="flex flex-col gap-5">
+          <h2 className="text-base font-semibold text-slate-900">Health Overview</h2>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 xl:grid-cols-8">
+            <StatTile icon={Bookmark} label="Saved Items" value={overview.savedCount} to="/saved" tone="lavender" />
+            <StatTile icon={History} label="Recently Viewed" value={overview.recentCount} to="/recent" tone="slateBlue" />
+            <StatTile
+              icon={CalendarClock}
+              label="Upcoming Appointments"
+              value={overview.upcomingAppointmentsCount}
+              to="/appointments"
+              tone="sky"
+            />
+            <StatTile icon={Bell} label="Active Reminders" value={overview.activeRemindersCount} to="/reminders" tone="pista" />
+            <StatTile icon={FileText} label="Medical Records" value={overview.recordsCount} to="/medical-records" tone="slateBlue" />
+            <StatTile icon={IdCard} label="Medical ID Complete" value={`${profileCompletion}%`} to="/medical-profile" tone="mint" />
+            <StatTile icon={Users} label="Family Members" value={overview.familyMembersCount} to="/family" tone="coral" />
+            <StatTile
+              icon={BellRing}
+              label="Unread Notifications"
+              value={overview.unreadNotificationsCount}
+              to="/notifications"
+              tone="mustard"
+            />
+          </div>
         </section>
 
-        <section className="flex flex-col gap-4">
-          <h2 className="text-lg font-semibold text-slate-900">
-            Quick Actions
-          </h2>
+        <section aria-label="Quick actions" className="flex flex-col gap-5">
+          <h2 className="text-base font-semibold text-slate-900">Quick Actions</h2>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {quickActions.map((action) => (
               <QuickActionCard key={action.key} action={action} />
@@ -224,10 +246,7 @@ function DashboardPage() {
         </section>
 
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-2">
-          <section className="flex flex-col gap-4">
-            <h2 className="text-lg font-semibold text-slate-900">
-              Upcoming Appointments
-            </h2>
+          <DashboardSection title="Upcoming Appointments" icon={CalendarClock} tone="sky">
             {upcomingAppointments.length === 0 ? (
               <EmptyRelationship message="No upcoming appointments." />
             ) : (
@@ -235,23 +254,19 @@ function DashboardPage() {
                 {upcomingAppointments.map((appointment) => (
                   <ListRow
                     key={appointment.id}
-                    icon={CalendarClock}
-                    title={
-                      appointment.doctor?.name ?? "Doctor no longer listed"
-                    }
+                    icon={Stethoscope}
+                    title={appointment.doctor?.name ?? "Doctor no longer listed"}
                     subtitle={`${formatDate(appointment.date)} · ${appointment.timeSlot}`}
                     to="/appointments"
                     actionLabel="Quick View"
+                    tone="sky"
                   />
                 ))}
               </div>
             )}
-          </section>
+          </DashboardSection>
 
-          <section className="flex flex-col gap-4">
-            <h2 className="text-lg font-semibold text-slate-900">
-              Active Reminders
-            </h2>
+          <DashboardSection title="Active Reminders" icon={Bell} tone="pista">
             {activeReminders.length === 0 ? (
               <EmptyRelationship message="No active reminders." />
             ) : (
@@ -262,9 +277,8 @@ function DashboardPage() {
                     icon={reminder.type === "medicine" ? Pill : CalendarClock}
                     title={
                       reminder.type === "medicine"
-                        ? (reminder.medicine?.name ?? "Medicine reminder")
-                        : (reminder.appointment?.doctor?.name ??
-                          "Appointment reminder")
+                        ? reminder.medicine?.name ?? "Medicine reminder"
+                        : reminder.appointment?.doctor?.name ?? "Appointment reminder"
                     }
                     subtitle={
                       reminder.type === "medicine"
@@ -274,16 +288,14 @@ function DashboardPage() {
                           : "Linked appointment unavailable"
                     }
                     to="/reminders"
+                    tone="pista"
                   />
                 ))}
               </div>
             )}
-          </section>
+          </DashboardSection>
 
-          <section className="flex flex-col gap-4">
-            <h2 className="text-lg font-semibold text-slate-900">
-              Recent Medical Records
-            </h2>
+          <DashboardSection title="Recent Medical Records" icon={FileText} tone="slateBlue">
             {recentRecords.length === 0 ? (
               <EmptyRelationship message="No medical records yet." />
             ) : (
@@ -295,39 +307,38 @@ function DashboardPage() {
                     title={record.title}
                     subtitle={`${record.doctorName} · ${record.type} · ${formatDate(record.date)}`}
                     to="/medical-records"
+                    tone="slateBlue"
                   />
                 ))}
               </div>
             )}
-          </section>
+          </DashboardSection>
 
-          <section className="flex flex-col gap-4">
-            <h2 className="text-lg font-semibold text-slate-900">
-              Recently Viewed
-            </h2>
+          <DashboardSection title="Recently Viewed" icon={History} tone="lavender">
             {recentEntries.length === 0 ? (
               <EmptyRelationship message="No recently viewed items." />
             ) : (
               <div className="flex flex-col gap-3">
-                {recentEntries.map((entry) => (
-                  <ListRow
-                    key={`${entry.type}-${entry.id}`}
-                    icon={RECENT_TYPE_ICONS[entry.type] ?? History}
-                    title={entry.entity?.name}
-                    subtitle={
-                      entry.type.charAt(0).toUpperCase() + entry.type.slice(1)
-                    }
-                    to={entry.to}
-                  />
-                ))}
+                {recentEntries.map((entry) => {
+                  const ENTRY_ICONS = { doctor: Stethoscope, medicine: Pill, disease: Activity, pharmacy: Store };
+                  const ENTRY_TONES = { doctor: "sky", medicine: "pista", disease: "apricot", pharmacy: "lavender" };
+
+                  return (
+                    <ListRow
+                      key={`${entry.type}-${entry.id}`}
+                      icon={ENTRY_ICONS[entry.type] ?? History}
+                      title={entry.entity?.name}
+                      subtitle={entry.type.charAt(0).toUpperCase() + entry.type.slice(1)}
+                      to={entry.to}
+                      tone={ENTRY_TONES[entry.type] ?? "lavender"}
+                    />
+                  );
+                })}
               </div>
             )}
-          </section>
+          </DashboardSection>
 
-          <section className="flex flex-col gap-4">
-            <h2 className="text-lg font-semibold text-slate-900">
-              Recent Notifications
-            </h2>
+          <DashboardSection title="Recent Notifications" icon={BellRing} tone="mustard">
             {recentNotifications.length === 0 ? (
               <EmptyRelationship message="No notifications yet." />
             ) : (
@@ -339,14 +350,14 @@ function DashboardPage() {
                     title={notification.title}
                     subtitle={notification.memberName}
                     to="/notifications"
+                    tone="mustard"
                   />
                 ))}
               </div>
             )}
-          </section>
+          </DashboardSection>
 
-          <section className="flex flex-col gap-4">
-            <h2 className="text-lg font-semibold text-slate-900">Family</h2>
+          <DashboardSection title="Family" icon={Users} tone="coral">
             {familyMembers.length === 0 ? (
               <EmptyRelationship message="No family members yet." />
             ) : (
@@ -358,56 +369,39 @@ function DashboardPage() {
                     title={member.fullName}
                     subtitle={member.relationship}
                     to="/family"
+                    tone="coral"
                   />
                 ))}
               </div>
             )}
-          </section>
+          </DashboardSection>
         </div>
 
-        <section className="flex flex-col gap-4">
-          <h2 className="text-lg font-semibold text-slate-900">Saved Items</h2>
+        <section aria-label="Saved items" className="flex flex-col gap-5">
+          <h2 className="text-base font-semibold text-slate-900">Saved Items</h2>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-            <StatTile
-              icon={Stethoscope}
-              label="Doctors"
-              value={saved.savedDoctors.length}
-              to="/saved"
-            />
-            <StatTile
-              icon={Pill}
-              label="Medicines"
-              value={saved.savedMedicines.length}
-              to="/saved"
-            />
-            <StatTile
-              icon={Activity}
-              label="Diseases"
-              value={saved.savedDiseases.length}
-              to="/saved"
-            />
-            <StatTile
-              icon={Store}
-              label="Pharmacies"
-              value={saved.savedPharmacies.length}
-              to="/saved"
-            />
+            <StatTile icon={Stethoscope} label="Doctors" value={saved.savedDoctors.length} to="/saved" tone="sky" />
+            <StatTile icon={Pill} label="Medicines" value={saved.savedMedicines.length} to="/saved" tone="pista" />
+            <StatTile icon={Activity} label="Diseases" value={saved.savedDiseases.length} to="/saved" tone="apricot" />
+            <StatTile icon={Store} label="Pharmacies" value={saved.savedPharmacies.length} to="/saved" tone="lavender" />
           </div>
         </section>
 
-        <section className="flex flex-col gap-4">
-          <h2 className="flex items-center gap-2 text-lg font-semibold text-slate-900">
-            <Activity className="h-5 w-5 text-blue-600" aria-hidden="true" />
-            Activity Timeline
+        <section aria-label="Recent activity" className="flex flex-col gap-5">
+          <h2 className="flex items-center gap-2 text-base font-semibold text-slate-900">
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-100">
+              <Activity className="h-4 w-4 text-amber-700" aria-hidden="true" />
+            </span>
+            Recent Activity
           </h2>
           {timeline.length === 0 ? (
             <EmptyRelationship message="No activity yet." />
           ) : (
-            <div className="flex flex-col gap-3">
-              {timeline.map((event) => (
-                <TimelineRow key={event.id} event={event} />
+            <ol className="flex flex-col">
+              {timeline.map((event, index) => (
+                <TimelineRow key={event.id} event={event} isLast={index === timeline.length - 1} />
               ))}
-            </div>
+            </ol>
           )}
         </section>
       </Container>
