@@ -1,4 +1,4 @@
-import { Star } from "lucide-react";
+import { Star, Quote } from "lucide-react";
 import { motion } from "framer-motion";
 import Section from "@/shared/components/ui/Section.jsx";
 import Container from "@/shared/components/ui/Container.jsx";
@@ -11,7 +11,7 @@ function StarRating() {
       {Array.from({ length: 5 }).map((_, index) => (
         <Star
           key={index}
-          className="h-4 w-4 fill-amber-400 text-amber-400"
+          className="h-3.5 w-3.5 fill-amber-400 text-amber-400"
           aria-hidden="true"
         />
       ))}
@@ -26,24 +26,25 @@ function TestimonialCard({ testimonial, index }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.3 }}
       transition={{ duration: 0.5, ease: "easeOut", delay: index * 0.08 }}
-      className="flex h-full flex-col gap-5 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+      className="card-surface transition-premium relative flex h-full flex-col gap-5 border border-slate-100 bg-white p-7 hover:-translate-y-1 hover:shadow-[0_20px_40px_-16px_rgba(15,23,42,0.14)]"
     >
-      <StarRating />
+      <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50" aria-hidden="true">
+        <Quote className="h-4 w-4 text-emerald-500" fill="currentColor" />
+      </span>
 
-      <p className="flex-1 text-sm text-slate-600">
-        &ldquo;{testimonial.review}&rdquo;
-      </p>
+      <p className="flex-1 text-sm leading-relaxed text-slate-600">{testimonial.review}</p>
 
-      <div className="flex items-center gap-3">
-        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-semibold text-blue-700">
-          {testimonial.initials}
-        </span>
-        <div>
-          <p className="text-sm font-semibold text-slate-900">
-            {testimonial.name}
-          </p>
-          <p className="text-xs text-slate-500">{testimonial.city}</p>
+      <div className="flex items-center justify-between gap-3 border-t border-slate-100 pt-5">
+        <div className="flex items-center gap-3">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-emerald-100 to-sky-100 text-sm font-semibold text-emerald-700">
+            {testimonial.initials}
+          </span>
+          <div>
+            <p className="text-sm font-semibold text-slate-900">{testimonial.name}</p>
+            <p className="text-xs text-slate-500">{testimonial.city}</p>
+          </div>
         </div>
+        <StarRating />
       </div>
     </motion.div>
   );
@@ -51,7 +52,10 @@ function TestimonialCard({ testimonial, index }) {
 
 function Testimonials() {
   return (
-    <Section paddingY="py-20 sm:py-28" className="bg-slate-50">
+    <Section
+      paddingY="py-20 sm:py-28"
+      className="bg-gradient-to-b from-white via-slate-50/70 to-slate-50"
+    >
       <Container className="flex flex-col items-center gap-16">
         <div className="flex max-w-2xl flex-col items-center gap-4 text-center">
           <PageHeading
