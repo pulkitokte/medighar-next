@@ -22,10 +22,11 @@ function DoctorSort({ value, onChange }) {
               aria-pressed={isActive}
               onClick={() => onChange(option.key)}
               className={cn(
-                "rounded-full border px-4 py-1.5 text-sm font-medium transition-colors",
+                "transition-premium rounded-full border px-4 py-1.5 text-sm font-medium",
+                "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500",
                 isActive
-                  ? "border-blue-600 bg-blue-600 text-white shadow-sm"
-                  : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50",
+                  ? "border-sky-600 bg-sky-600 text-white shadow-sm"
+                  : "border-slate-200 bg-white text-slate-600 hover:border-sky-200 hover:bg-sky-50",
               )}
             >
               {option.label}

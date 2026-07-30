@@ -18,7 +18,7 @@ function DoctorFilters({ value, onChange }) {
   };
 
   return (
-    <div className="flex w-full flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:flex-row sm:flex-wrap sm:items-end sm:gap-6">
+    <div className="flex w-full flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:gap-6">
       <FilterSelect
         label="Specialty"
         value={value.specialty}
@@ -49,10 +49,11 @@ function DoctorFilters({ value, onChange }) {
         aria-pressed={value.verifiedOnly}
         onClick={toggleVerified}
         className={cn(
-          "inline-flex h-10 items-center gap-2 rounded-lg border px-4 text-sm font-medium transition-colors",
+          "transition-premium inline-flex h-10 items-center gap-2 rounded-full border px-4 text-sm font-medium",
+          "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500",
           value.verifiedOnly
-            ? "border-blue-200 bg-blue-50 text-blue-700"
-            : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50",
+            ? "border-sky-200 bg-sky-100 text-sky-700"
+            : "border-slate-200 bg-white text-slate-600 hover:border-sky-200 hover:bg-sky-50",
         )}
       >
         <BadgeCheck className="h-4 w-4" aria-hidden="true" />

@@ -30,28 +30,25 @@ function DoctorsPage() {
   } = useDoctors();
 
   return (
-    <Section paddingY="py-16 sm:py-20">
+    <Section paddingY="py-14 sm:py-20" className="bg-gradient-to-b from-sky-50/50 via-white to-white">
       <Container className="flex flex-col gap-10">
         <PageHeading
           title="Find Your Doctor"
-          subtitle="Browse qualified doctors across specialties, cities and healthcare systems."
+          subtitle="Browse qualified, verified doctors across specialties, cities and healthcare systems."
           center
         />
 
-        <div className="mx-auto w-full max-w-2xl">
+        <div className="card-surface mx-auto flex w-full max-w-4xl flex-col gap-5 border border-sky-100 bg-white/90 p-5 sm:p-6">
           <DoctorSearchBar value={searchQuery} onChange={setSearchQuery} />
+          <div className="h-px w-full bg-sky-50" aria-hidden="true" />
+          <DoctorFilters value={filters} onChange={setFilters} />
         </div>
-
-        <DoctorFilters value={filters} onChange={setFilters} />
 
         <div className="flex flex-col gap-6">
           <DoctorSort value={sortBy} onChange={setSortBy} />
 
           {loading ? (
-            <LoadingState
-              title="Loading doctors..."
-              description="Finding the best matches for you."
-            />
+            <LoadingState title="Loading doctors..." description="Finding the best matches for you." />
           ) : error ? (
             <ErrorState
               title="Unable to load doctors"
