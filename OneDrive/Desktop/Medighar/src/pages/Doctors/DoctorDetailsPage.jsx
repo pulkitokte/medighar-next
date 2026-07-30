@@ -12,6 +12,7 @@ import {
   Share2,
   Activity,
   Trash2,
+  MessageSquareText,
 } from "lucide-react";
 import { cn } from "@/shared/lib/cn.js";
 import Section from "@/shared/components/ui/Section.jsx";
@@ -41,9 +42,7 @@ function StarRating({ value, size = "h-4 w-4" }) {
           key={star}
           className={cn(
             size,
-            star <= Math.round(value)
-              ? "fill-amber-400 text-amber-400"
-              : "text-slate-300",
+            star <= Math.round(value) ? "fill-amber-400 text-amber-400" : "text-slate-300",
           )}
         />
       ))}
@@ -65,9 +64,7 @@ function RatingInput({ value, onChange }) {
           <Star
             className={cn(
               "h-6 w-6",
-              star <= value
-                ? "fill-amber-400 text-amber-400"
-                : "text-slate-300",
+              star <= value ? "fill-amber-400 text-amber-400" : "text-slate-300",
             )}
           />
         </button>
@@ -84,11 +81,8 @@ function DistributionRow({ star, count, total }) {
       <span className="w-14 shrink-0 text-slate-600">
         {star} star{star === 1 ? "" : "s"}
       </span>
-      <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-100">
-        <div
-          className="h-full rounded-full bg-amber-400"
-          style={{ width: `${percentage}%` }}
-        />
+      <div className="h-2 flex-1 overflow-hidden rounded-full bg-white">
+        <div className="h-full rounded-full bg-amber-400" style={{ width: `${percentage}%` }} />
       </div>
       <span className="w-8 shrink-0 text-right text-slate-500">{count}</span>
     </div>
@@ -103,16 +97,21 @@ function ReviewCard({ review, onDelete }) {
   });
 
   return (
-    <div className="flex flex-col gap-2 rounded-xl border border-slate-200 bg-white p-5">
+    <div className="card-surface flex flex-col gap-3 border border-slate-100 bg-white p-5">
       <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="text-sm font-semibold text-slate-900">{review.name}</p>
-          <p className="text-xs text-slate-500">{formattedDate}</p>
+        <div className="flex items-center gap-3">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-sky-100 to-sky-50 text-xs font-semibold text-sky-700">
+            {review.name?.charAt(0)?.toUpperCase() ?? "?"}
+          </span>
+          <div>
+            <p className="text-sm font-semibold text-slate-900">{review.name}</p>
+            <p className="text-xs text-slate-500">{formattedDate}</p>
+          </div>
         </div>
         <StarRating value={review.rating} />
       </div>
       <p className="text-sm font-medium text-slate-900">{review.title}</p>
-      <p className="text-sm text-slate-600">{review.text}</p>
+      <p className="text-sm leading-relaxed text-slate-600">{review.text}</p>
       <div>
         <Button
           variant="ghost"
@@ -133,9 +132,7 @@ function DoctorDetailsPage() {
   const { doctor, treatsDiseases, notFound } = useDoctorDetails();
   const navigate = useNavigate();
 
-  const { reviews, stats, submitReview, removeReview } = useDoctorReviews(
-    doctor?.id,
-  );
+  const { reviews, stats, submitReview, removeReview } = useDoctorReviews(doctor?.id);
 
   const [formValues, setFormValues] = useState(INITIAL_REVIEW_FORM);
   const [formErrors, setFormErrors] = useState({});
@@ -171,8 +168,8 @@ function DoctorDetailsPage() {
   if (!doctor) return null;
 
   return (
-    <Section paddingY="py-16 sm:py-20">
-      <Container className="flex flex-col gap-10">
+    <Section paddingY="py-14 sm:py-20" className="bg-gradient-to-b from-sky-50/50 via-white to-white">
+      <Container className="flex flex-col gap-12">
         <Breadcrumb
           items={[
             { label: "Home", to: "/" },
@@ -181,92 +178,99 @@ function DoctorDetailsPage() {
           ]}
         />
 
-        <div className="flex flex-col items-center gap-6 text-center sm:flex-row sm:items-start sm:text-left">
-          <span
-            className="flex h-24 w-24 shrink-0 items-center justify-center rounded-full bg-blue-100 text-2xl font-semibold text-blue-700"
+        {/* Profile Hero */}
+        <div className="card-surface relative overflow-hidden border border-sky-100 bg-white/90 p-6 sm:p-10">
+          <div
+            className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-sky-100/50 blur-3xl"
             aria-hidden="true"
-          >
-            {doctor.initials}
-          </span>
+          />
 
-          <div className="flex flex-1 flex-col items-center gap-2 sm:items-start">
-            <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-semibold text-slate-900 sm:text-3xl">
-                {doctor.name}
-              </h1>
-              {doctor.verified && (
-                <BadgeCheck
-                  className="h-5 w-5 shrink-0 text-blue-600"
-                  aria-label="Verified doctor"
-                />
-              )}
-            </div>
-            <p className="text-sm text-slate-500 sm:text-base">
-              {doctor.qualification}
-            </p>
-            <p className="text-sm font-medium text-blue-600 sm:text-base">
-              {doctor.specialty}
-            </p>
+          <div className="relative flex flex-col items-center gap-6 text-center sm:flex-row sm:items-start sm:text-left">
+            <span className="flex h-28 w-28 shrink-0 items-center justify-center rounded-3xl bg-gradient-to-br from-sky-100 to-sky-50 text-3xl font-semibold text-sky-700 shadow-sm">
+              {doctor.initials}
+            </span>
 
-            <div className="flex flex-wrap items-center justify-center gap-4 pt-2 sm:justify-start">
-              <Button
-                onClick={() => navigate(`/appointments/book/${doctor.id}`)}
-              >
-                Book Appointment
-              </Button>
-              <Button variant="outline" onClick={handleShare}>
-                <Share2 className="h-4 w-4" aria-hidden="true" />
-                Share Profile
-              </Button>
+            <div className="flex flex-1 flex-col items-center gap-3 sm:items-start">
+              <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
+                <h1 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">
+                  {doctor.name}
+                </h1>
+                {doctor.verified && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-sky-100 px-2.5 py-1 text-xs font-medium text-sky-700">
+                    <BadgeCheck className="h-3.5 w-3.5" aria-hidden="true" />
+                    Verified
+                  </span>
+                )}
+              </div>
+
+              <p className="text-sm text-slate-500">{doctor.qualification}</p>
+
+              <span className="inline-flex items-center rounded-full bg-sky-50 px-3 py-1 text-sm font-medium text-sky-700">
+                {doctor.specialty}
+              </span>
+
+              <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-sm text-slate-500 sm:justify-start">
+                <span className="flex items-center gap-1.5">
+                  <Clock className="h-4 w-4 text-slate-400" aria-hidden="true" />
+                  {doctor.experienceYears} yrs experience
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <MapPin className="h-4 w-4 text-slate-400" aria-hidden="true" />
+                  {doctor.city}
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <Languages className="h-4 w-4 text-slate-400" aria-hidden="true" />
+                  {doctor.languages.join(", ")}
+                </span>
+              </div>
+
+              <div className="flex flex-wrap items-center justify-center gap-4 pt-2 sm:justify-start">
+                <Button
+                  onClick={() => navigate(`/appointments/book/${doctor.id}`)}
+                  className="rounded-full bg-sky-600 hover:bg-sky-700"
+                >
+                  Book Appointment
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={handleShare}
+                  className="rounded-full border-slate-200 hover:border-sky-200 hover:bg-sky-50"
+                >
+                  <Share2 className="h-4 w-4" aria-hidden="true" />
+                  Share Profile
+                </Button>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <InfoCard
-            icon={Clock}
-            label="Experience"
-            value={`${doctor.experienceYears} yrs`}
-          />
-          <InfoCard
-            icon={Star}
-            label="Rating"
-            value={`${doctor.rating.toFixed(1)} / 5.0`}
-          />
-          <InfoCard
-            icon={IndianRupee}
-            label="Consultation Fee"
-            value={`\u20B9${doctor.fee}`}
-          />
-          <InfoCard icon={MapPin} label="City" value={doctor.city} />
-          <InfoCard
-            icon={HeartPulse}
-            label="Healthcare System"
-            value={doctor.healthcareSystem}
-          />
-          <InfoCard
-            icon={Languages}
-            label="Languages"
-            value={doctor.languages.join(", ")}
-          />
-        </div>
+        {/* Information Cards */}
+        <section className="flex flex-col gap-4">
+          <h2 className="text-base font-semibold text-slate-900">Consultation Details</h2>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <InfoCard icon={Clock} label="Experience" value={`${doctor.experienceYears} yrs`} />
+            <InfoCard icon={Star} label="Rating" value={`${doctor.rating.toFixed(1)} / 5.0`} />
+            <InfoCard icon={IndianRupee} label="Consultation Fee" value={`\u20B9${doctor.fee}`} />
+            <InfoCard icon={MapPin} label="City" value={doctor.city} />
+            <InfoCard icon={HeartPulse} label="Healthcare System" value={doctor.healthcareSystem} />
+            <InfoCard icon={Languages} label="Languages" value={doctor.languages.join(", ")} />
+          </div>
+        </section>
 
-        <TextSection title="Biography" content={doctor.biography} />
+        <TextSection title="About Doctor" content={doctor.biography} />
 
-        <ListSection
-          icon={CalendarClock}
-          title="Availability"
-          items={doctor.availability}
-        />
+        <ListSection icon={CalendarClock} title="Availability" items={doctor.availability} />
 
+        {/* Reviews */}
         <section className="flex flex-col gap-6">
-          <h2 className="text-lg font-semibold text-slate-900">
-            Ratings & Reviews
+          <h2 className="flex items-center gap-2 text-base font-semibold text-slate-900">
+            <MessageSquareText className="h-5 w-5 text-sky-600" aria-hidden="true" />
+            Ratings &amp; Reviews
           </h2>
 
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,280px)_1fr]">
-            <div className="flex flex-col items-center gap-2 rounded-2xl border border-slate-200 bg-white p-6 text-center">
-              <p className="text-4xl font-semibold text-slate-900">
+            <div className="card-surface flex flex-col items-center gap-2 border border-sky-100 bg-sky-50/50 p-6 text-center">
+              <p className="text-4xl font-semibold tracking-tight text-slate-900">
                 {stats.total > 0 ? stats.average.toFixed(1) : "—"}
               </p>
               <StarRating value={stats.average} size="h-5 w-5" />
@@ -275,37 +279,23 @@ function DoctorDetailsPage() {
               </p>
             </div>
 
-            <div className="flex flex-col gap-2 rounded-2xl border border-slate-200 bg-white p-6">
+            <div className="card-surface flex flex-col gap-2 border border-slate-100 bg-white p-6">
               {[5, 4, 3, 2, 1].map((star) => (
-                <DistributionRow
-                  key={star}
-                  star={star}
-                  count={stats.distribution[star]}
-                  total={stats.total}
-                />
+                <DistributionRow key={star} star={star} count={stats.distribution[star]} total={stats.total} />
               ))}
             </div>
           </div>
 
           <form
             onSubmit={handleReviewSubmit}
-            className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-6"
+            className="card-surface flex flex-col gap-4 border border-slate-100 bg-white p-6"
           >
-            <h3 className="text-base font-semibold text-slate-900">
-              Write a Review
-            </h3>
+            <h3 className="text-sm font-semibold text-slate-900">Write a Review</h3>
 
             <div className="flex flex-col gap-1.5">
-              <span className="text-sm font-medium text-slate-700">
-                Your Rating
-              </span>
-              <RatingInput
-                value={formValues.rating}
-                onChange={(value) => updateField("rating", value)}
-              />
-              {formErrors.rating && (
-                <p className="text-xs text-red-600">{formErrors.rating}</p>
-              )}
+              <span className="text-sm font-medium text-slate-700">Your Rating</span>
+              <RatingInput value={formValues.rating} onChange={(value) => updateField("rating", value)} />
+              {formErrors.rating && <p className="text-xs text-red-600">{formErrors.rating}</p>}
             </div>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -315,11 +305,9 @@ function DoctorDetailsPage() {
                   type="text"
                   value={formValues.name}
                   onChange={(event) => updateField("name", event.target.value)}
-                  className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 focus:border-blue-400 focus:outline-none"
+                  className="transition-premium h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 focus:border-sky-400 focus:outline-none"
                 />
-                {formErrors.name && (
-                  <p className="text-xs text-red-600">{formErrors.name}</p>
-                )}
+                {formErrors.name && <p className="text-xs text-red-600">{formErrors.name}</p>}
               </label>
 
               <label className="flex flex-col gap-1.5 text-sm">
@@ -328,11 +316,9 @@ function DoctorDetailsPage() {
                   type="text"
                   value={formValues.title}
                   onChange={(event) => updateField("title", event.target.value)}
-                  className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 focus:border-blue-400 focus:outline-none"
+                  className="transition-premium h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 focus:border-sky-400 focus:outline-none"
                 />
-                {formErrors.title && (
-                  <p className="text-xs text-red-600">{formErrors.title}</p>
-                )}
+                {formErrors.title && <p className="text-xs text-red-600">{formErrors.title}</p>}
               </label>
             </div>
 
@@ -342,15 +328,15 @@ function DoctorDetailsPage() {
                 value={formValues.text}
                 onChange={(event) => updateField("text", event.target.value)}
                 rows={4}
-                className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-blue-400 focus:outline-none"
+                className="transition-premium rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-sky-400 focus:outline-none"
               />
-              {formErrors.text && (
-                <p className="text-xs text-red-600">{formErrors.text}</p>
-              )}
+              {formErrors.text && <p className="text-xs text-red-600">{formErrors.text}</p>}
             </label>
 
             <div>
-              <Button type="submit">Submit Review</Button>
+              <Button type="submit" className="rounded-full bg-sky-600 hover:bg-sky-700">
+                Submit Review
+              </Button>
             </div>
           </form>
 
@@ -359,11 +345,7 @@ function DoctorDetailsPage() {
               <EmptyRelationship message="No reviews yet. Be the first to review this doctor." />
             ) : (
               reviews.map((review) => (
-                <ReviewCard
-                  key={review.id}
-                  review={review}
-                  onDelete={removeReview}
-                />
+                <ReviewCard key={review.id} review={review} onDelete={removeReview} />
               ))
             )}
           </div>
