@@ -30,7 +30,7 @@ function DiseasesPage() {
   } = useDiseases();
 
   return (
-    <Section paddingY="py-16 sm:py-20">
+    <Section paddingY="py-14 sm:py-20" className="bg-gradient-to-b from-amber-50/40 via-white to-white">
       <Container className="flex flex-col gap-10">
         <PageHeading
           title="Explore Diseases"
@@ -38,20 +38,17 @@ function DiseasesPage() {
           center
         />
 
-        <div className="mx-auto w-full max-w-2xl">
+        <div className="card-surface mx-auto flex w-full max-w-4xl flex-col gap-5 border border-amber-100 bg-white/90 p-5 sm:p-6">
           <DiseaseSearchBar value={searchQuery} onChange={setSearchQuery} />
+          <div className="h-px w-full bg-amber-50" aria-hidden="true" />
+          <DiseaseFilters value={filters} onChange={setFilters} />
         </div>
-
-        <DiseaseFilters value={filters} onChange={setFilters} />
 
         <div className="flex flex-col gap-6">
           <DiseaseSort value={sortBy} onChange={setSortBy} />
 
           {loading ? (
-            <LoadingState
-              title="Loading diseases..."
-              description="Finding the best matches for you."
-            />
+            <LoadingState title="Loading diseases..." description="Finding the best matches for you." />
           ) : error ? (
             <ErrorState
               title="Unable to load diseases"

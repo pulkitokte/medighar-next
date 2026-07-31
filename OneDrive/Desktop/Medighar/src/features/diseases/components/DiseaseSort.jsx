@@ -22,10 +22,11 @@ function DiseaseSort({ value, onChange }) {
               aria-pressed={isActive}
               onClick={() => onChange(option.key)}
               className={cn(
-                "rounded-full border px-4 py-1.5 text-sm font-medium transition-colors",
+                "transition-premium rounded-full border px-4 py-1.5 text-sm font-medium",
+                "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600",
                 isActive
-                  ? "border-blue-600 bg-blue-600 text-white shadow-sm"
-                  : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50",
+                  ? "border-amber-600 bg-amber-600 text-white shadow-sm"
+                  : "border-slate-200 bg-white text-slate-600 hover:border-amber-200 hover:bg-amber-50",
               )}
             >
               {option.label}

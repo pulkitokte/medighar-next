@@ -15,7 +15,7 @@ function DiseaseFilters({ value, onChange }) {
   };
 
   return (
-    <div className="flex w-full flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:flex-row sm:flex-wrap sm:items-end sm:gap-6">
+    <div className="flex w-full flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:gap-6">
       <FilterSelect
         label="Category"
         value={value.category}
@@ -34,10 +34,11 @@ function DiseaseFilters({ value, onChange }) {
         aria-pressed={value.contagiousOnly}
         onClick={toggleContagious}
         className={cn(
-          "inline-flex h-10 items-center gap-2 rounded-lg border px-4 text-sm font-medium transition-colors",
+          "transition-premium inline-flex h-10 items-center gap-2 rounded-full border px-4 text-sm font-medium",
+          "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600",
           value.contagiousOnly
-            ? "border-blue-200 bg-blue-50 text-blue-700"
-            : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50",
+            ? "border-amber-200 bg-amber-100 text-amber-700"
+            : "border-slate-200 bg-white text-slate-600 hover:border-amber-200 hover:bg-amber-50",
         )}
       >
         <Biohazard className="h-4 w-4" aria-hidden="true" />
