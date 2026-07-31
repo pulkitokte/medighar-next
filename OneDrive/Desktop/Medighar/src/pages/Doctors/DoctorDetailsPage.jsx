@@ -42,7 +42,9 @@ function StarRating({ value, size = "h-4 w-4" }) {
           key={star}
           className={cn(
             size,
-            star <= Math.round(value) ? "fill-amber-400 text-amber-400" : "text-slate-300",
+            star <= Math.round(value)
+              ? "fill-amber-400 text-amber-400"
+              : "text-slate-300",
           )}
         />
       ))}
@@ -64,7 +66,9 @@ function RatingInput({ value, onChange }) {
           <Star
             className={cn(
               "h-6 w-6",
-              star <= value ? "fill-amber-400 text-amber-400" : "text-slate-300",
+              star <= value
+                ? "fill-amber-400 text-amber-400"
+                : "text-slate-300",
             )}
           />
         </button>
@@ -82,7 +86,10 @@ function DistributionRow({ star, count, total }) {
         {star} star{star === 1 ? "" : "s"}
       </span>
       <div className="h-2 flex-1 overflow-hidden rounded-full bg-white">
-        <div className="h-full rounded-full bg-amber-400" style={{ width: `${percentage}%` }} />
+        <div
+          className="h-full rounded-full bg-amber-400"
+          style={{ width: `${percentage}%` }}
+        />
       </div>
       <span className="w-8 shrink-0 text-right text-slate-500">{count}</span>
     </div>
@@ -104,7 +111,9 @@ function ReviewCard({ review, onDelete }) {
             {review.name?.charAt(0)?.toUpperCase() ?? "?"}
           </span>
           <div>
-            <p className="text-sm font-semibold text-slate-900">{review.name}</p>
+            <p className="text-sm font-semibold text-slate-900">
+              {review.name}
+            </p>
             <p className="text-xs text-slate-500">{formattedDate}</p>
           </div>
         </div>
@@ -132,7 +141,9 @@ function DoctorDetailsPage() {
   const { doctor, treatsDiseases, notFound } = useDoctorDetails();
   const navigate = useNavigate();
 
-  const { reviews, stats, submitReview, removeReview } = useDoctorReviews(doctor?.id);
+  const { reviews, stats, submitReview, removeReview } = useDoctorReviews(
+    doctor?.id,
+  );
 
   const [formValues, setFormValues] = useState(INITIAL_REVIEW_FORM);
   const [formErrors, setFormErrors] = useState({});
@@ -168,7 +179,10 @@ function DoctorDetailsPage() {
   if (!doctor) return null;
 
   return (
-    <Section paddingY="py-14 sm:py-20" className="bg-gradient-to-b from-sky-50/50 via-white to-white">
+    <Section
+      paddingY="py-14 sm:py-20"
+      className="bg-gradient-to-b from-sky-50/50 via-white to-white"
+    >
       <Container className="flex flex-col gap-12">
         <Breadcrumb
           items={[
@@ -211,15 +225,24 @@ function DoctorDetailsPage() {
 
               <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-sm text-slate-500 sm:justify-start">
                 <span className="flex items-center gap-1.5">
-                  <Clock className="h-4 w-4 text-slate-400" aria-hidden="true" />
+                  <Clock
+                    className="h-4 w-4 text-slate-400"
+                    aria-hidden="true"
+                  />
                   {doctor.experienceYears} yrs experience
                 </span>
                 <span className="flex items-center gap-1.5">
-                  <MapPin className="h-4 w-4 text-slate-400" aria-hidden="true" />
+                  <MapPin
+                    className="h-4 w-4 text-slate-400"
+                    aria-hidden="true"
+                  />
                   {doctor.city}
                 </span>
                 <span className="flex items-center gap-1.5">
-                  <Languages className="h-4 w-4 text-slate-400" aria-hidden="true" />
+                  <Languages
+                    className="h-4 w-4 text-slate-400"
+                    aria-hidden="true"
+                  />
                   {doctor.languages.join(", ")}
                 </span>
               </div>
@@ -246,25 +269,54 @@ function DoctorDetailsPage() {
 
         {/* Information Cards */}
         <section className="flex flex-col gap-4">
-          <h2 className="text-base font-semibold text-slate-900">Consultation Details</h2>
+          <h2 className="text-base font-semibold text-slate-900">
+            Consultation Details
+          </h2>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <InfoCard icon={Clock} label="Experience" value={`${doctor.experienceYears} yrs`} />
-            <InfoCard icon={Star} label="Rating" value={`${doctor.rating.toFixed(1)} / 5.0`} />
-            <InfoCard icon={IndianRupee} label="Consultation Fee" value={`\u20B9${doctor.fee}`} />
+            <InfoCard
+              icon={Clock}
+              label="Experience"
+              value={`${doctor.experienceYears} yrs`}
+            />
+            <InfoCard
+              icon={Star}
+              label="Rating"
+              value={`${doctor.rating.toFixed(1)} / 5.0`}
+            />
+            <InfoCard
+              icon={IndianRupee}
+              label="Consultation Fee"
+              value={`\u20B9${doctor.fee}`}
+            />
             <InfoCard icon={MapPin} label="City" value={doctor.city} />
-            <InfoCard icon={HeartPulse} label="Healthcare System" value={doctor.healthcareSystem} />
-            <InfoCard icon={Languages} label="Languages" value={doctor.languages.join(", ")} />
+            <InfoCard
+              icon={HeartPulse}
+              label="Healthcare System"
+              value={doctor.healthcareSystem}
+            />
+            <InfoCard
+              icon={Languages}
+              label="Languages"
+              value={doctor.languages.join(", ")}
+            />
           </div>
         </section>
 
         <TextSection title="About Doctor" content={doctor.biography} />
 
-        <ListSection icon={CalendarClock} title="Availability" items={doctor.availability} />
+        <ListSection
+          icon={CalendarClock}
+          title="Availability"
+          items={doctor.availability}
+        />
 
         {/* Reviews */}
         <section className="flex flex-col gap-6">
           <h2 className="flex items-center gap-2 text-base font-semibold text-slate-900">
-            <MessageSquareText className="h-5 w-5 text-sky-600" aria-hidden="true" />
+            <MessageSquareText
+              className="h-5 w-5 text-sky-600"
+              aria-hidden="true"
+            />
             Ratings &amp; Reviews
           </h2>
 
@@ -281,7 +333,12 @@ function DoctorDetailsPage() {
 
             <div className="card-surface flex flex-col gap-2 border border-slate-100 bg-white p-6">
               {[5, 4, 3, 2, 1].map((star) => (
-                <DistributionRow key={star} star={star} count={stats.distribution[star]} total={stats.total} />
+                <DistributionRow
+                  key={star}
+                  star={star}
+                  count={stats.distribution[star]}
+                  total={stats.total}
+                />
               ))}
             </div>
           </div>
@@ -290,12 +347,21 @@ function DoctorDetailsPage() {
             onSubmit={handleReviewSubmit}
             className="card-surface flex flex-col gap-4 border border-slate-100 bg-white p-6"
           >
-            <h3 className="text-sm font-semibold text-slate-900">Write a Review</h3>
+            <h3 className="text-sm font-semibold text-slate-900">
+              Write a Review
+            </h3>
 
             <div className="flex flex-col gap-1.5">
-              <span className="text-sm font-medium text-slate-700">Your Rating</span>
-              <RatingInput value={formValues.rating} onChange={(value) => updateField("rating", value)} />
-              {formErrors.rating && <p className="text-xs text-red-600">{formErrors.rating}</p>}
+              <span className="text-sm font-medium text-slate-700">
+                Your Rating
+              </span>
+              <RatingInput
+                value={formValues.rating}
+                onChange={(value) => updateField("rating", value)}
+              />
+              {formErrors.rating && (
+                <p className="text-xs text-red-600">{formErrors.rating}</p>
+              )}
             </div>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -307,7 +373,9 @@ function DoctorDetailsPage() {
                   onChange={(event) => updateField("name", event.target.value)}
                   className="transition-premium h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 focus:border-sky-400 focus:outline-none"
                 />
-                {formErrors.name && <p className="text-xs text-red-600">{formErrors.name}</p>}
+                {formErrors.name && (
+                  <p className="text-xs text-red-600">{formErrors.name}</p>
+                )}
               </label>
 
               <label className="flex flex-col gap-1.5 text-sm">
@@ -318,7 +386,9 @@ function DoctorDetailsPage() {
                   onChange={(event) => updateField("title", event.target.value)}
                   className="transition-premium h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 focus:border-sky-400 focus:outline-none"
                 />
-                {formErrors.title && <p className="text-xs text-red-600">{formErrors.title}</p>}
+                {formErrors.title && (
+                  <p className="text-xs text-red-600">{formErrors.title}</p>
+                )}
               </label>
             </div>
 
@@ -330,11 +400,16 @@ function DoctorDetailsPage() {
                 rows={4}
                 className="transition-premium rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-sky-400 focus:outline-none"
               />
-              {formErrors.text && <p className="text-xs text-red-600">{formErrors.text}</p>}
+              {formErrors.text && (
+                <p className="text-xs text-red-600">{formErrors.text}</p>
+              )}
             </label>
 
             <div>
-              <Button type="submit" className="rounded-full bg-sky-600 hover:bg-sky-700">
+              <Button
+                type="submit"
+                className="rounded-full bg-sky-600 hover:bg-sky-700"
+              >
                 Submit Review
               </Button>
             </div>
@@ -345,7 +420,11 @@ function DoctorDetailsPage() {
               <EmptyRelationship message="No reviews yet. Be the first to review this doctor." />
             ) : (
               reviews.map((review) => (
-                <ReviewCard key={review.id} review={review} onDelete={removeReview} />
+                <ReviewCard
+                  key={review.id}
+                  review={review}
+                  onDelete={removeReview}
+                />
               ))
             )}
           </div>
