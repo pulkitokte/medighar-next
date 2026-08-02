@@ -23,13 +23,6 @@ import Button from "@/shared/components/ui/Button.jsx";
 import EmptyRelationship from "@/shared/components/ui/EmptyRelationship.jsx";
 import { useDashboard } from "@/hooks/useDashboard.js";
 
-/**
- * Premium pastel color tokens per module family, matching the
- * approved Medighhar design language:
- * Doctors→Sky, Medicines→Pista, Diseases→Apricot, Pharmacy→Lavender,
- * Dashboard→Mint Emerald, Timeline→Clay, Notifications→Mustard,
- * Medical Records→Slate Blue, Family→Coral.
- */
 const TONE_STYLES = {
   sky: { surface: "bg-sky-50", icon: "text-sky-600", iconBg: "bg-sky-100", ring: "hover:border-sky-200" },
   pista: { surface: "bg-lime-50", icon: "text-lime-700", iconBg: "bg-lime-100", ring: "hover:border-lime-200" },
@@ -109,7 +102,7 @@ function QuickActionCard({ action }) {
       )}
     >
       <span className={cn("flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl", styles.iconBg)}>
-        <Icon className={cn("h-5.5 w-5.5", styles.icon)} aria-hidden="true" />
+        <Icon className={cn("h-5 w-5", styles.icon)} aria-hidden="true" />
       </span>
       <span className="min-w-0 flex-1">
         <span className="block text-sm font-semibold text-slate-900">{action.label}</span>

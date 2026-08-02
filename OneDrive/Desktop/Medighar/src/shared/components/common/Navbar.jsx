@@ -208,7 +208,7 @@ function MobileNavLink({ link, onNavigate }) {
         )
       }
     >
-      <Icon className="h-4.5 w-4.5 shrink-0" aria-hidden="true" />
+      <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
       {link.label}
     </NavLink>
   );
