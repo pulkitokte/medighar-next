@@ -30,19 +30,22 @@ function PharmaciesPage() {
   } = usePharmacies();
 
   return (
-    <Section paddingY="py-16 sm:py-20">
+    <Section
+      paddingY="py-14 sm:py-20"
+      className="bg-gradient-to-b from-violet-50/40 via-white to-white"
+    >
       <Container className="flex flex-col gap-10">
         <PageHeading
           title="Find a Pharmacy"
-          subtitle="Locate pharmacies near you for quick and convenient access to medicines."
+          subtitle="Discover trusted, verified pharmacies near you for quick and convenient access to medicines."
           center
         />
 
-        <div className="mx-auto w-full max-w-2xl">
+        <div className="card-surface mx-auto flex w-full max-w-4xl flex-col gap-5 border border-violet-100 bg-white/90 p-5 sm:p-6">
           <PharmacySearchBar value={searchQuery} onChange={setSearchQuery} />
+          <div className="h-px w-full bg-violet-50" aria-hidden="true" />
+          <PharmacyFilters value={filters} onChange={setFilters} />
         </div>
-
-        <PharmacyFilters value={filters} onChange={setFilters} />
 
         <div className="flex flex-col gap-6">
           <PharmacySort value={sortBy} onChange={setSortBy} />
