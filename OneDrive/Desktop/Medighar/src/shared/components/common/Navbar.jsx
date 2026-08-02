@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { NavLink } from "react-router-dom";
 import {
   Home,
@@ -6,6 +6,7 @@ import {
   Pill,
   Activity,
   Store,
+  LayoutDashboard,
   Bookmark,
   History,
   GitCompare,
@@ -13,7 +14,6 @@ import {
   Bell,
   BellRing,
   FileText,
-  LayoutDashboard,
   Calendar,
   BarChart3,
   IdCard,
@@ -24,36 +24,60 @@ import {
   BookUser,
   Menu,
   X,
+  ChevronDown,
 } from "lucide-react";
 import { cn } from "@/shared/lib/cn.js";
 import Logo from "@/shared/components/common/Logo.jsx";
 import Button from "@/shared/components/ui/Button.jsx";
 
-const NAV_LINKS = [
+const PRIMARY_LINKS = [
   { label: "Home", to: "/", icon: Home },
   { label: "Doctors", to: "/doctors", icon: Stethoscope },
   { label: "Medicines", to: "/medicines", icon: Pill },
   { label: "Diseases", to: "/diseases", icon: Activity },
   { label: "Pharmacy", to: "/pharmacy", icon: Store },
-  { label: "Saved", to: "/saved", icon: Bookmark },
-  { label: "Recent", to: "/recent", icon: History },
-  { label: "Compare", to: "/compare", icon: GitCompare },
-  { label: "Appointments", to: "/appointments", icon: CalendarClock },
-  { label: "Reminders", to: "/reminders", icon: Bell },
-  { label: "Medical Records", to: "/medical-records", icon: FileText },
   { label: "Dashboard", to: "/dashboard", icon: LayoutDashboard },
-  { label: "Calendar", to: "/calendar", icon: Calendar },
-  { label: "Insights", to: "/insights", icon: BarChart3 },
-  { label: "Medical ID", to: "/medical-profile", icon: IdCard },
-  { label: "Family", to: "/family", icon: Users },
-  { label: "Timeline", to: "/timeline", icon: Clock3 },
-  { label: "Notifications", to: "/notifications", icon: BellRing },
-  { label: "Health Reports", to: "/reports", icon: FileBarChart },
-  { label: "Settings", to: "/settings", icon: Settings },
-  { label: "Health Passport", to: "/passport", icon: BookUser },
 ];
 
-function DesktopNavLink({ link }) {
+const SECONDARY_GROUPS = [
+  {
+    label: "Personal",
+    links: [
+      { label: "Saved", to: "/saved", icon: Bookmark },
+      { label: "Recently Viewed", to: "/recent", icon: History },
+      { label: "Compare Medicines", to: "/compare", icon: GitCompare },
+    ],
+  },
+  {
+    label: "Care",
+    links: [
+      { label: "Appointments", to: "/appointments", icon: CalendarClock },
+      { label: "Reminders", to: "/reminders", icon: Bell },
+      { label: "Medical Records", to: "/medical-records", icon: FileText },
+      { label: "Medical ID", to: "/medical-profile", icon: IdCard },
+      { label: "Family", to: "/family", icon: Users },
+      { label: "Health Passport", to: "/passport", icon: BookUser },
+    ],
+  },
+  {
+    label: "Planning",
+    links: [
+      { label: "Health Calendar", to: "/calendar", icon: Calendar },
+      { label: "Health Insights", to: "/insights", icon: BarChart3 },
+      { label: "Health Timeline", to: "/timeline", icon: Clock3 },
+      { label: "Health Reports", to: "/reports", icon: FileBarChart },
+    ],
+  },
+  {
+    label: "Account",
+    links: [
+      { label: "Notifications", to: "/notifications", icon: BellRing },
+      { label: "Settings", to: "/settings", icon: Settings },
+    ],
+  },
+];
+
+function PrimaryNavLink({ link }) {
   const Icon = link.icon;
 
   return (
@@ -71,6 +95,100 @@ function DesktopNavLink({ link }) {
       <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
       {link.label}
     </NavLink>
+  );
+}
+
+function MoreMenuLink({ link, onNavigate }) {
+  const Icon = link.icon;
+
+  return (
+    <NavLink
+      to={link.to}
+      onClick={onNavigate}
+      className={({ isActive }) =>
+        cn(
+          "flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-slate-600",
+          "hover:bg-slate-50 hover:text-slate-900",
+          "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500",
+          isActive && "bg-blue-50 text-blue-700",
+        )
+      }
+    >
+      <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+      {link.label}
+    </NavLink>
+  );
+}
+
+function MoreMenu() {
+  const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef(null);
+  const menuId = "navbar-more-menu";
+
+  useEffect(() => {
+    if (!isOpen) return undefined;
+
+    function handlePointerDown(event) {
+      if (containerRef.current && !containerRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    }
+
+    function handleKeyDown(event) {
+      if (event.key === "Escape") setIsOpen(false);
+    }
+
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isOpen]);
+
+  return (
+    <div ref={containerRef} className="relative hidden md:block">
+      <button
+        type="button"
+        onClick={() => setIsOpen((previous) => !previous)}
+        aria-haspopup="true"
+        aria-expanded={isOpen}
+        aria-controls={menuId}
+        className={cn(
+          "transition-premium inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-medium text-slate-600",
+          "hover:bg-slate-100 hover:text-slate-900",
+          "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500",
+          isOpen && "bg-slate-100 text-slate-900",
+        )}
+      >
+        More
+        <ChevronDown
+          className={cn("h-4 w-4 transition-transform duration-200", isOpen && "rotate-180")}
+          aria-hidden="true"
+        />
+      </button>
+
+      {isOpen && (
+        <div
+          id={menuId}
+          className="absolute right-0 top-full z-50 mt-2 w-[560px] max-w-[90vw] rounded-2xl border border-slate-200 bg-white p-4 shadow-lg shadow-slate-900/10"
+        >
+          <div className="grid grid-cols-2 gap-x-6 gap-y-5">
+            {SECONDARY_GROUPS.map((group) => (
+              <div key={group.label} className="flex flex-col gap-1">
+                <span className="px-3 pb-1 text-xs font-semibold uppercase tracking-wide text-slate-400">
+                  {group.label}
+                </span>
+                {group.links.map((link) => (
+                  <MoreMenuLink key={link.to} link={link} onNavigate={() => setIsOpen(false)} />
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -124,11 +242,12 @@ function Navbar() {
 
         <nav
           aria-label="Primary navigation"
-          className="hide-scrollbar hidden min-w-0 flex-1 items-center gap-1 overflow-x-auto md:flex"
+          className="hidden min-w-0 flex-1 items-center gap-1 md:flex"
         >
-          {NAV_LINKS.map((link) => (
-            <DesktopNavLink key={link.to} link={link} />
+          {PRIMARY_LINKS.map((link) => (
+            <PrimaryNavLink key={link.to} link={link} />
           ))}
+          <MoreMenu />
         </nav>
 
         <div className="ml-auto flex shrink-0 items-center gap-2">
@@ -175,16 +294,22 @@ function Navbar() {
               </button>
             </div>
 
-            <nav
-              aria-label="Mobile navigation"
-              className="flex flex-col gap-1 p-3"
-            >
-              {NAV_LINKS.map((link) => (
-                <MobileNavLink
-                  key={link.to}
-                  link={link}
-                  onNavigate={() => setIsMobileMenuOpen(false)}
-                />
+            <nav aria-label="Mobile navigation" className="flex flex-col gap-6 p-3">
+              <div className="flex flex-col gap-1">
+                {PRIMARY_LINKS.map((link) => (
+                  <MobileNavLink key={link.to} link={link} onNavigate={() => setIsMobileMenuOpen(false)} />
+                ))}
+              </div>
+
+              {SECONDARY_GROUPS.map((group) => (
+                <div key={group.label} className="flex flex-col gap-1">
+                  <span className="px-4 pb-1 text-xs font-semibold uppercase tracking-wide text-slate-400">
+                    {group.label}
+                  </span>
+                  {group.links.map((link) => (
+                    <MobileNavLink key={link.to} link={link} onNavigate={() => setIsMobileMenuOpen(false)} />
+                  ))}
+                </div>
               ))}
             </nav>
 
