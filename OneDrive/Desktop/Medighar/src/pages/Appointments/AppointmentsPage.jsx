@@ -1,10 +1,13 @@
-import { CalendarClock, Clock, Video, User } from "lucide-react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { CalendarClock, Clock, Video, User, RotateCcw } from "lucide-react";
 import Section from "@/shared/components/ui/Section.jsx";
 import Container from "@/shared/components/ui/Container.jsx";
 import PageHeading from "@/shared/components/ui/PageHeading.jsx";
 import Button from "@/shared/components/ui/Button.jsx";
 import EmptyState from "@/shared/components/ui/EmptyState.jsx";
 import EmptyRelationship from "@/shared/components/ui/EmptyRelationship.jsx";
+import ConfirmDialog from "@/shared/components/ui/ConfirmDialog.jsx";
 import { useAppointments } from "@/hooks/useAppointments.js";
 import { CONSULTATION_TYPES } from "@/services/appointments/appointments.service.js";
 
@@ -24,12 +27,18 @@ function consultationTypeLabel(key) {
   return CONSULTATION_TYPES.find((type) => type.key === key)?.label ?? key;
 }
 
-function AppointmentCard({ appointment, onCancel }) {
+function AppointmentCard({ appointment, onRequestCancel }) {
+  const navigate = useNavigate();
+
   const formattedDate = new Date(appointment.date).toLocaleDateString("en-IN", {
     day: "numeric",
     month: "short",
     year: "numeric",
   });
+
+  const handleReschedule = () => {
+    navigate(`/appointments/book/${appointment.doctorId}`);
+  };
 
   return (
     <div className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -93,16 +102,32 @@ function AppointmentCard({ appointment, onCancel }) {
         <Button
           variant="outline"
           size="sm"
-          onClick={() => onCancel(appointment.id)}
+          onClick={() => onRequestCancel(appointment)}
         >
           Cancel Appointment
+        </Button>
+      )}
+
+      {appointment.status === "cancelled" && (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleReschedule}
+          leftIcon={<RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />}
+        >
+          Reschedule
         </Button>
       )}
     </div>
   );
 }
 
-function AppointmentsSection({ title, appointments, emptyMessage, onCancel }) {
+function AppointmentsSection({
+  title,
+  appointments,
+  emptyMessage,
+  onRequestCancel,
+}) {
   return (
     <section className="flex flex-col gap-4">
       <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
@@ -115,7 +140,7 @@ function AppointmentsSection({ title, appointments, emptyMessage, onCancel }) {
             <AppointmentCard
               key={appointment.id}
               appointment={appointment}
-              onCancel={onCancel}
+              onRequestCancel={onRequestCancel}
             />
           ))}
         </div>
@@ -126,6 +151,14 @@ function AppointmentsSection({ title, appointments, emptyMessage, onCancel }) {
 
 function AppointmentsPage() {
   const { upcoming, past, totalCount, cancel } = useAppointments();
+  const [pendingCancel, setPendingCancel] = useState(null);
+
+  const handleConfirmCancel = () => {
+    if (pendingCancel) {
+      cancel(pendingCancel.id);
+    }
+    setPendingCancel(null);
+  };
 
   return (
     <Section paddingY="py-16 sm:py-20">
@@ -148,16 +181,30 @@ function AppointmentsPage() {
               title="Upcoming Appointments"
               appointments={upcoming}
               emptyMessage="No upcoming appointments."
-              onCancel={cancel}
+              onRequestCancel={setPendingCancel}
             />
             <AppointmentsSection
               title="Past Appointments"
               appointments={past}
               emptyMessage="No past appointments."
-              onCancel={cancel}
+              onRequestCancel={setPendingCancel}
             />
           </div>
         )}
+
+        <ConfirmDialog
+          open={pendingCancel !== null}
+          title="Cancel this appointment?"
+          message={
+            pendingCancel
+              ? `This will cancel your appointment with ${pendingCancel.doctor?.name ?? "the doctor"} on ${new Date(pendingCancel.date).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}. You can rebook later from your Appointments page.`
+              : ""
+          }
+          confirmLabel="Cancel Appointment"
+          cancelLabel="Keep Appointment"
+          onConfirm={handleConfirmCancel}
+          onCancel={() => setPendingCancel(null)}
+        />
       </Container>
     </Section>
   );

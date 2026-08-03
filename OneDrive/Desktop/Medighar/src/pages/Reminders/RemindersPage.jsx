@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Bell,
   Pill,
@@ -13,6 +14,7 @@ import PageHeading from "@/shared/components/ui/PageHeading.jsx";
 import Button from "@/shared/components/ui/Button.jsx";
 import EmptyState from "@/shared/components/ui/EmptyState.jsx";
 import EmptyRelationship from "@/shared/components/ui/EmptyRelationship.jsx";
+import ConfirmDialog from "@/shared/components/ui/ConfirmDialog.jsx";
 import { useReminders } from "@/hooks/useReminders.js";
 import { useReminderForm } from "@/hooks/useReminderForm.js";
 import { useAppointments } from "@/hooks/useAppointments.js";
@@ -247,7 +249,7 @@ function AppointmentReminderFields({ values, errors, onChange, members }) {
   );
 }
 
-function ReminderCard({ reminder, onEnable, onDisable, onDelete }) {
+function ReminderCard({ reminder, onEnable, onDisable, onRequestDelete }) {
   const isAppointment = reminder.type === "appointment";
 
   return (
@@ -344,7 +346,7 @@ function ReminderCard({ reminder, onEnable, onDisable, onDelete }) {
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => onDelete(reminder.id)}
+          onClick={() => onRequestDelete(reminder)}
           leftIcon={<Trash2 className="h-3.5 w-3.5" aria-hidden="true" />}
         >
           Delete
@@ -360,7 +362,7 @@ function ReminderSection({
   emptyMessage,
   onEnable,
   onDisable,
-  onDelete,
+  onRequestDelete,
 }) {
   return (
     <section className="flex flex-col gap-4">
@@ -376,7 +378,7 @@ function ReminderSection({
               reminder={reminder}
               onEnable={onEnable}
               onDisable={onDisable}
-              onDelete={onDelete}
+              onRequestDelete={onRequestDelete}
             />
           ))}
         </div>
@@ -399,6 +401,21 @@ function RemindersPage() {
     updateAppointmentField,
     handleSubmit,
   } = useReminderForm();
+
+  const [pendingDelete, setPendingDelete] = useState(null);
+
+  const handleConfirmDelete = () => {
+    if (pendingDelete) {
+      remove(pendingDelete.id);
+    }
+    setPendingDelete(null);
+  };
+
+  const pendingDeleteLabel = pendingDelete
+    ? pendingDelete.type === "medicine"
+      ? (pendingDelete.medicine?.name ?? "this medicine reminder")
+      : `the reminder for ${pendingDelete.appointment?.doctor?.name ?? "your appointment"}`
+    : "";
 
   return (
     <Section paddingY="py-16 sm:py-20">
@@ -454,7 +471,7 @@ function RemindersPage() {
               emptyMessage="No upcoming reminders."
               onEnable={enable}
               onDisable={disable}
-              onDelete={remove}
+              onRequestDelete={setPendingDelete}
             />
             <ReminderSection
               title="Completed"
@@ -462,7 +479,7 @@ function RemindersPage() {
               emptyMessage="No completed reminders."
               onEnable={enable}
               onDisable={disable}
-              onDelete={remove}
+              onRequestDelete={setPendingDelete}
             />
             <ReminderSection
               title="Disabled"
@@ -470,10 +487,19 @@ function RemindersPage() {
               emptyMessage="No disabled reminders."
               onEnable={enable}
               onDisable={disable}
-              onDelete={remove}
+              onRequestDelete={setPendingDelete}
             />
           </div>
         )}
+
+        <ConfirmDialog
+          open={pendingDelete !== null}
+          title="Delete this reminder?"
+          message={`This will permanently delete ${pendingDeleteLabel}. This cannot be undone.`}
+          confirmLabel="Delete Reminder"
+          onConfirm={handleConfirmDelete}
+          onCancel={() => setPendingDelete(null)}
+        />
       </Container>
     </Section>
   );

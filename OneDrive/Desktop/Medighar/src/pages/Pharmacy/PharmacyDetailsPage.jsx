@@ -1,4 +1,3 @@
-import { cn } from "@/shared/lib/cn.js";
 import {
   BadgeCheck,
   Star,
@@ -41,8 +40,30 @@ function PharmacyDetailsPage() {
 
   if (!pharmacy) return null;
 
+  const handleCallPharmacy = () => {
+    if (typeof window !== "undefined" && pharmacy.phone) {
+      window.location.href = `tel:${pharmacy.phone.replace(/\s+/g, "")}`;
+    }
+  };
+
+  const handleGetDirections = () => {
+    if (typeof window === "undefined") return;
+
+    const query = encodeURIComponent(
+      `${pharmacy.name}, ${pharmacy.address}, ${pharmacy.city}`,
+    );
+    window.open(
+      `https://www.google.com/maps/search/?api=1&query=${query}`,
+      "_blank",
+      "noopener,noreferrer",
+    );
+  };
+
   return (
-    <Section paddingY="py-14 sm:py-20" className="bg-gradient-to-b from-violet-50/40 via-white to-white">
+    <Section
+      paddingY="py-14 sm:py-20"
+      className="bg-gradient-to-b from-violet-50/40 via-white to-white"
+    >
       <Container className="flex flex-col gap-12">
         <Breadcrumb
           items={[
@@ -85,19 +106,31 @@ function PharmacyDetailsPage() {
 
               <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-sm text-slate-500 sm:justify-start">
                 <span className="flex items-center gap-1.5">
-                  <MapPin className="h-4 w-4 text-slate-400" aria-hidden="true" />
+                  <MapPin
+                    className="h-4 w-4 text-slate-400"
+                    aria-hidden="true"
+                  />
                   {pharmacy.city}
                 </span>
                 <span className="flex items-center gap-1.5">
-                  <Star className="h-4 w-4 fill-amber-400 text-amber-400" aria-hidden="true" />
+                  <Star
+                    className="h-4 w-4 fill-amber-400 text-amber-400"
+                    aria-hidden="true"
+                  />
                   {pharmacy.rating.toFixed(1)} rating
                 </span>
               </div>
 
               <div className="flex flex-wrap items-center justify-center gap-4 pt-2 sm:justify-start">
-                <Button className="rounded-full bg-violet-600 hover:bg-violet-700">Call Pharmacy</Button>
+                <Button
+                  onClick={handleCallPharmacy}
+                  className="rounded-full bg-violet-600 hover:bg-violet-700"
+                >
+                  Call Pharmacy
+                </Button>
                 <Button
                   variant="outline"
+                  onClick={handleGetDirections}
                   className="rounded-full border-slate-200 hover:border-violet-200 hover:bg-violet-50"
                 >
                   Get Directions
@@ -109,9 +142,15 @@ function PharmacyDetailsPage() {
 
         {/* Contact & Details */}
         <section className="flex flex-col gap-4">
-          <h2 className="text-base font-semibold text-slate-900">Contact &amp; Details</h2>
+          <h2 className="text-base font-semibold text-slate-900">
+            Contact &amp; Details
+          </h2>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <InfoCard icon={Star} label="Rating" value={`${pharmacy.rating.toFixed(1)} / 5.0`} />
+            <InfoCard
+              icon={Star}
+              label="Rating"
+              value={`${pharmacy.rating.toFixed(1)} / 5.0`}
+            />
             <InfoCard icon={MapPin} label="City" value={pharmacy.city} />
             <InfoCard
               icon={Clock}
@@ -130,9 +169,21 @@ function PharmacyDetailsPage() {
 
         <TextSection title="About" content={pharmacy.description} />
 
-        <ListSection icon={ListChecks} title="Services" items={pharmacy.services} />
-        <ListSection icon={Wrench} title="Available Facilities" items={pharmacy.availableFacilities} />
-        <ListSection icon={ShieldCheck} title="Specialties" items={pharmacy.specialties} />
+        <ListSection
+          icon={ListChecks}
+          title="Services"
+          items={pharmacy.services}
+        />
+        <ListSection
+          icon={Wrench}
+          title="Available Facilities"
+          items={pharmacy.availableFacilities}
+        />
+        <ListSection
+          icon={ShieldCheck}
+          title="Specialties"
+          items={pharmacy.specialties}
+        />
 
         {/* Available Medicines */}
         <section className="flex flex-col gap-4">

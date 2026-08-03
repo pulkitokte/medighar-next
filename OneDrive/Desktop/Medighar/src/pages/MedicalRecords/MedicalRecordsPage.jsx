@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   FileText,
   Search,
@@ -14,6 +15,7 @@ import Button from "@/shared/components/ui/Button.jsx";
 import FilterSelect from "@/shared/components/ui/FilterSelect.jsx";
 import EmptyState from "@/shared/components/ui/EmptyState.jsx";
 import EmptyRelationship from "@/shared/components/ui/EmptyRelationship.jsx";
+import ConfirmDialog from "@/shared/components/ui/ConfirmDialog.jsx";
 import { useMedicalRecords } from "@/hooks/useMedicalRecords.js";
 import { useRecordForm } from "@/hooks/useRecordForm.js";
 import { useFamilyProfiles } from "@/hooks/useFamilyProfiles.js";
@@ -195,7 +197,7 @@ function RecordForm({
   );
 }
 
-function RecordCard({ record, onEdit, onDelete }) {
+function RecordCard({ record, onEdit, onRequestDelete }) {
   const formattedDate = new Date(record.date).toLocaleDateString("en-IN", {
     day: "numeric",
     month: "short",
@@ -252,7 +254,7 @@ function RecordCard({ record, onEdit, onDelete }) {
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => onDelete(record.id)}
+          onClick={() => onRequestDelete(record)}
           leftIcon={<Trash2 className="h-3.5 w-3.5" aria-hidden="true" />}
         >
           Delete
@@ -262,7 +264,7 @@ function RecordCard({ record, onEdit, onDelete }) {
   );
 }
 
-function RecordGrid({ records, onEdit, onDelete }) {
+function RecordGrid({ records, onEdit, onRequestDelete }) {
   return (
     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
       {records.map((record) => (
@@ -270,7 +272,7 @@ function RecordGrid({ records, onEdit, onDelete }) {
           key={record.id}
           record={record}
           onEdit={onEdit}
-          onDelete={onDelete}
+          onRequestDelete={onRequestDelete}
         />
       ))}
     </div>
@@ -305,9 +307,14 @@ function MedicalRecordsPage() {
     handleSubmit,
   } = useRecordForm();
 
-  const handleDelete = (id) => {
-    remove(id);
-    if (isEditing) resetForm();
+  const [pendingDelete, setPendingDelete] = useState(null);
+
+  const handleConfirmDelete = () => {
+    if (pendingDelete) {
+      remove(pendingDelete.id);
+      if (isEditing) resetForm();
+    }
+    setPendingDelete(null);
   };
 
   return (
@@ -348,7 +355,7 @@ function MedicalRecordsPage() {
                 <RecordGrid
                   records={recentRecords}
                   onEdit={startEdit}
-                  onDelete={handleDelete}
+                  onRequestDelete={setPendingDelete}
                 />
               )}
             </section>
@@ -421,7 +428,7 @@ function MedicalRecordsPage() {
                     <RecordGrid
                       records={groupedByYear[year]}
                       onEdit={startEdit}
-                      onDelete={handleDelete}
+                      onRequestDelete={setPendingDelete}
                     />
                   </div>
                 ))
@@ -429,6 +436,19 @@ function MedicalRecordsPage() {
             </section>
           </>
         )}
+
+        <ConfirmDialog
+          open={pendingDelete !== null}
+          title="Delete this record?"
+          message={
+            pendingDelete
+              ? `"${pendingDelete.title}" will be permanently deleted. This cannot be undone.`
+              : ""
+          }
+          confirmLabel="Delete Record"
+          onConfirm={handleConfirmDelete}
+          onCancel={() => setPendingDelete(null)}
+        />
       </Container>
     </Section>
   );

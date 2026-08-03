@@ -1,12 +1,16 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Users, Pencil, Trash2, IdCard } from "lucide-react";
 import Section from "@/shared/components/ui/Section.jsx";
 import Container from "@/shared/components/ui/Container.jsx";
 import PageHeading from "@/shared/components/ui/PageHeading.jsx";
 import Button from "@/shared/components/ui/Button.jsx";
+import ConfirmDialog from "@/shared/components/ui/ConfirmDialog.jsx";
 import { useFamilyProfiles } from "@/hooks/useFamilyProfiles.js";
+import { useAppointments } from "@/hooks/useAppointments.js";
+import { useReminders } from "@/hooks/useReminders.js";
+import { useMedicalRecords } from "@/hooks/useMedicalRecords.js";
 import { RELATIONSHIPS } from "@/services/family/family.service.js";
-import { useState } from "react";
 
 const EMPTY_VALUES = {
   fullName: "",
@@ -152,7 +156,7 @@ function MemberForm({
   );
 }
 
-function MemberCard({ member, onEdit, onDelete }) {
+function MemberCard({ member, onEdit, onRequestDelete }) {
   const navigate = useNavigate();
 
   return (
@@ -199,7 +203,7 @@ function MemberCard({ member, onEdit, onDelete }) {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => onDelete(member.id)}
+              onClick={() => onRequestDelete(member)}
               leftIcon={<Trash2 className="h-3.5 w-3.5" aria-hidden="true" />}
             >
               Delete
@@ -214,10 +218,22 @@ function MemberCard({ member, onEdit, onDelete }) {
 function FamilyProfilesPage() {
   const { members, create, update, remove } = useFamilyProfiles();
 
+  // Reused, read-only, purely to compute a dependent-data warning before a
+  // destructive family-member delete. No new service/repository logic.
+  const { upcoming: upcomingAppointments, past: pastAppointments } =
+    useAppointments();
+  const {
+    upcoming: upcomingReminders,
+    completed: completedReminders,
+    disabled: disabledReminders,
+  } = useReminders();
+  const { filteredRecords } = useMedicalRecords();
+
   const [editingId, setEditingId] = useState(null);
   const [values, setValues] = useState(EMPTY_VALUES);
   const [errors, setErrors] = useState({});
   const [showForm, setShowForm] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState(null);
 
   const updateField = (field, value) => {
     setValues((previous) => ({ ...previous, [field]: value }));
@@ -258,6 +274,46 @@ function FamilyProfilesPage() {
     resetForm();
   };
 
+  const countDependentRecords = (memberId) => {
+    const appointmentsCount = [
+      ...upcomingAppointments,
+      ...pastAppointments,
+    ].filter(
+      (appointment) => (appointment.memberId ?? "me") === memberId,
+    ).length;
+    const remindersCount = [
+      ...upcomingReminders,
+      ...completedReminders,
+      ...disabledReminders,
+    ].filter((reminder) => (reminder.memberId ?? "me") === memberId).length;
+    const recordsCount = filteredRecords.filter(
+      (record) => (record.memberId ?? "me") === memberId,
+    ).length;
+
+    return {
+      appointmentsCount,
+      remindersCount,
+      recordsCount,
+      total: appointmentsCount + remindersCount + recordsCount,
+    };
+  };
+
+  const handleConfirmDelete = () => {
+    if (pendingDelete) {
+      remove(pendingDelete.id);
+      if (editingId === pendingDelete.id) resetForm();
+    }
+    setPendingDelete(null);
+  };
+
+  const dependents = pendingDelete
+    ? countDependentRecords(pendingDelete.id)
+    : null;
+  const dependentWarning =
+    dependents && dependents.total > 0
+      ? `${pendingDelete.fullName} has ${dependents.total} linked record${dependents.total === 1 ? "" : "s"} (${dependents.appointmentsCount} appointment${dependents.appointmentsCount === 1 ? "" : "s"}, ${dependents.remindersCount} reminder${dependents.remindersCount === 1 ? "" : "s"}, ${dependents.recordsCount} medical record${dependents.recordsCount === 1 ? "" : "s"}). These will remain but will no longer show this member's name.`
+      : null;
+
   return (
     <Section paddingY="py-16 sm:py-20">
       <Container className="flex flex-col gap-10">
@@ -294,10 +350,24 @@ function FamilyProfilesPage() {
               key={member.id}
               member={member}
               onEdit={startEdit}
-              onDelete={remove}
+              onRequestDelete={setPendingDelete}
             />
           ))}
         </div>
+
+        <ConfirmDialog
+          open={pendingDelete !== null}
+          title="Remove this family member?"
+          message={
+            pendingDelete
+              ? `${pendingDelete.fullName} will be removed from your family list. This cannot be undone.`
+              : ""
+          }
+          warning={dependentWarning}
+          confirmLabel="Remove Member"
+          onConfirm={handleConfirmDelete}
+          onCancel={() => setPendingDelete(null)}
+        />
       </Container>
     </Section>
   );
