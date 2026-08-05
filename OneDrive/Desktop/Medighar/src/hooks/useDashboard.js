@@ -18,6 +18,8 @@ import { getDoctorById } from "@/services/doctors/doctors.service.js";
 import {
   resolveRecentEntries,
   buildActivityTimeline,
+  buildSetupChecklist,
+  buildSmartSuggestions,
   QUICK_ACTIONS,
 } from "@/services/dashboard/dashboard.service.js";
 
@@ -99,6 +101,31 @@ export function useDashboard() {
     unreadNotificationsCount: notificationStats.unread,
   };
 
+  const setupChecklist = useMemo(
+    () =>
+      buildSetupChecklist({
+        profileCompletion,
+        familyMembersCount: familyMembers.length,
+        appointmentsCount: allAppointments.length,
+        remindersCount: allReminders.length,
+        recordsCount,
+        savedCount: saved.totalCount,
+      }),
+    [
+      profileCompletion,
+      familyMembers.length,
+      allAppointments.length,
+      allReminders.length,
+      recordsCount,
+      saved.totalCount,
+    ],
+  );
+
+  const smartSuggestions = useMemo(
+    () => buildSmartSuggestions(setupChecklist),
+    [setupChecklist],
+  );
+
   return {
     overview,
     saved,
@@ -114,5 +141,8 @@ export function useDashboard() {
     profileCompletion,
     familyMembers: familyMembers.slice(0, FAMILY_PREVIEW_LIMIT),
     recentNotifications,
+    setupChecklist: setupChecklist.items,
+    setupProgress: setupChecklist.progress,
+    smartSuggestions,
   };
 }

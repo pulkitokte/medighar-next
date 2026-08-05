@@ -168,3 +168,106 @@ export function buildActivityTimeline(
     .sort((a, b) => b.timestamp - a.timestamp)
     .slice(0, limit);
 }
+
+/**
+ * Definitions for the Dashboard "Health Setup" checklist. Each item's
+ * `isComplete` function receives the same context object built from data
+ * useDashboard() already fetches — no new hooks or queries.
+ */
+const SETUP_CHECKLIST_DEFINITIONS = [
+  {
+    key: "medical-profile",
+    label: "Complete your Medical Profile",
+    description: "Add your medical ID details for quick access in emergencies.",
+    to: "/medical-profile",
+    ctaLabel: "Complete Profile",
+    isComplete: (ctx) => ctx.profileCompletion >= 100,
+  },
+  {
+    key: "family",
+    label: "Add a Family Member",
+    description: "Track health information for the people you care for.",
+    to: "/family",
+    ctaLabel: "Add Family Member",
+    isComplete: (ctx) => ctx.familyMembersCount > 0,
+  },
+  {
+    key: "appointment",
+    label: "Book your first Appointment",
+    description: "Find a doctor and schedule a consultation.",
+    to: "/doctors",
+    ctaLabel: "Find a Doctor",
+    isComplete: (ctx) => ctx.appointmentsCount > 0,
+  },
+  {
+    key: "reminder",
+    label: "Set a Reminder",
+    description: "Never miss a medicine dose or appointment.",
+    to: "/reminders",
+    ctaLabel: "Set a Reminder",
+    isComplete: (ctx) => ctx.remindersCount > 0,
+  },
+  {
+    key: "record",
+    label: "Add a Medical Record",
+    description: "Keep prescriptions and reports in one place.",
+    to: "/medical-records",
+    ctaLabel: "Add a Record",
+    isComplete: (ctx) => ctx.recordsCount > 0,
+  },
+  {
+    key: "saved",
+    label: "Save a Doctor or Medicine",
+    description: "Bookmark items you want to find quickly later.",
+    to: "/doctors",
+    ctaLabel: "Browse Doctors",
+    isComplete: (ctx) => ctx.savedCount > 0,
+  },
+];
+
+/**
+ * Builds the Health Setup checklist and its overall completion
+ * percentage from data the Dashboard already has. This is the single
+ * source of truth for "setup completeness" — buildSmartSuggestions()
+ * below reuses it rather than recomputing the same conditions.
+ * @param {{profileCompletion:number, familyMembersCount:number, appointmentsCount:number, remindersCount:number, recordsCount:number, savedCount:number}} context
+ * @returns {{items: object[], progress: number}}
+ */
+export function buildSetupChecklist(context) {
+  const items = SETUP_CHECKLIST_DEFINITIONS.map((definition) => ({
+    key: definition.key,
+    label: definition.label,
+    description: definition.description,
+    to: definition.to,
+    ctaLabel: definition.ctaLabel,
+    completed: definition.isComplete(context),
+  }));
+
+  const completedCount = items.filter((item) => item.completed).length;
+  const progress = Math.round((completedCount / items.length) * 100);
+
+  return { items, progress };
+}
+
+const MAX_SUGGESTIONS = 3;
+
+/**
+ * Builds lightweight Dashboard suggestion cards from the same checklist
+ * items — each suggestion automatically disappears once its underlying
+ * checklist item is completed, since it's simply omitted from the
+ * incomplete-items list.
+ * @param {{items: object[]}} checklist result from buildSetupChecklist()
+ * @returns {object[]}
+ */
+export function buildSmartSuggestions({ items }) {
+  return items
+    .filter((item) => !item.completed)
+    .slice(0, MAX_SUGGESTIONS)
+    .map((item) => ({
+      key: item.key,
+      label: item.label,
+      description: item.description,
+      to: item.to,
+      ctaLabel: item.ctaLabel,
+    }));
+}
