@@ -110,6 +110,8 @@ function HealthTimelinePage() {
     error,
   } = useHealthTimeline();
 
+  const navigate = useNavigate();
+
   return (
     <Section paddingY="py-16 sm:py-20">
       <Container className="flex flex-col gap-10">
@@ -201,6 +203,8 @@ function HealthTimelinePage() {
             icon={Clock3}
             title="No timeline events found."
             description="Book an appointment, add a medical record, or set a reminder to see activity here."
+            action={() => navigate("/doctors")}
+            actionLabel="Book an Appointment"
           />
         ) : (
           <ol

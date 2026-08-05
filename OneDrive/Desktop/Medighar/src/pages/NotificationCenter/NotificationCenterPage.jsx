@@ -194,6 +194,7 @@ function NotificationCenterPage() {
     error,
   } = useNotifications();
 
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("notifications");
   const [statusMessage, setStatusMessage] = useState("");
 
@@ -374,6 +375,8 @@ function NotificationCenterPage() {
                 icon={Bell}
                 title="No notifications."
                 description="You're all caught up. New activity will show up here automatically."
+                action={() => navigate("/dashboard")}
+                actionLabel="Go to Dashboard"
               />
             ) : (
               <div className="flex flex-col gap-8">

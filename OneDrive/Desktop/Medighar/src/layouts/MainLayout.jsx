@@ -1,11 +1,14 @@
 import { useEffect } from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import Navbar from "@/shared/components/common/Navbar.jsx";
 import CommandPalette from "@/shared/components/ui/CommandPalette.jsx";
 import { useUserPreferences } from "@/hooks/useUserPreferences.js";
+import { useFeatureDiscovery } from "@/hooks/useFeatureDiscovery.js";
 
 function MainLayout() {
   const { preferences } = useUserPreferences();
+  const { markVisited } = useFeatureDiscovery();
+  const location = useLocation();
 
   useEffect(() => {
     const root = document.documentElement;
@@ -22,6 +25,10 @@ function MainLayout() {
     preferences.compactMode,
   ]);
 
+  useEffect(() => {
+    markVisited(location.pathname);
+  }, [location.pathname, markVisited]);
+
   return (
     <main id="main-content" className="min-h-screen bg-slate-50 text-slate-900">
       <a
@@ -32,6 +39,7 @@ function MainLayout() {
       </a>
 
       <Navbar />
+      <CommandPalette />
       <Outlet />
     </main>
   );

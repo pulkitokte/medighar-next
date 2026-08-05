@@ -29,6 +29,7 @@ import {
 import { cn } from "@/shared/lib/cn.js";
 import Logo from "@/shared/components/common/Logo.jsx";
 import Button from "@/shared/components/ui/Button.jsx";
+import { useFeatureDiscovery } from "@/hooks/useFeatureDiscovery.js";
 
 const PRIMARY_LINKS = [
   { label: "Home", to: "/", icon: Home },
@@ -100,6 +101,7 @@ function PrimaryNavLink({ link }) {
 
 function MoreMenuLink({ link, onNavigate }) {
   const Icon = link.icon;
+  const { isNew } = useFeatureDiscovery();
 
   return (
     <NavLink
@@ -116,6 +118,11 @@ function MoreMenuLink({ link, onNavigate }) {
     >
       <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
       {link.label}
+      {isNew(link.to) && (
+        <span className="ml-auto shrink-0 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-700">
+          New
+        </span>
+      )}
     </NavLink>
   );
 }
@@ -129,7 +136,10 @@ function MoreMenu() {
     if (!isOpen) return undefined;
 
     function handlePointerDown(event) {
-      if (containerRef.current && !containerRef.current.contains(event.target)) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target)
+      ) {
         setIsOpen(false);
       }
     }
@@ -164,7 +174,10 @@ function MoreMenu() {
       >
         More
         <ChevronDown
-          className={cn("h-4 w-4 transition-transform duration-200", isOpen && "rotate-180")}
+          className={cn(
+            "h-4 w-4 transition-transform duration-200",
+            isOpen && "rotate-180",
+          )}
           aria-hidden="true"
         />
       </button>
@@ -181,7 +194,11 @@ function MoreMenu() {
                   {group.label}
                 </span>
                 {group.links.map((link) => (
-                  <MoreMenuLink key={link.to} link={link} onNavigate={() => setIsOpen(false)} />
+                  <MoreMenuLink
+                    key={link.to}
+                    link={link}
+                    onNavigate={() => setIsOpen(false)}
+                  />
                 ))}
               </div>
             ))}
@@ -194,6 +211,7 @@ function MoreMenu() {
 
 function MobileNavLink({ link, onNavigate }) {
   const Icon = link.icon;
+  const { isNew } = useFeatureDiscovery();
 
   return (
     <NavLink
@@ -210,6 +228,11 @@ function MobileNavLink({ link, onNavigate }) {
     >
       <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
       {link.label}
+      {isNew(link.to) && (
+        <span className="ml-auto shrink-0 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-700">
+          New
+        </span>
+      )}
     </NavLink>
   );
 }
@@ -294,10 +317,17 @@ function Navbar() {
               </button>
             </div>
 
-            <nav aria-label="Mobile navigation" className="flex flex-col gap-6 p-3">
+            <nav
+              aria-label="Mobile navigation"
+              className="flex flex-col gap-6 p-3"
+            >
               <div className="flex flex-col gap-1">
                 {PRIMARY_LINKS.map((link) => (
-                  <MobileNavLink key={link.to} link={link} onNavigate={() => setIsMobileMenuOpen(false)} />
+                  <MobileNavLink
+                    key={link.to}
+                    link={link}
+                    onNavigate={() => setIsMobileMenuOpen(false)}
+                  />
                 ))}
               </div>
 
@@ -307,7 +337,11 @@ function Navbar() {
                     {group.label}
                   </span>
                   {group.links.map((link) => (
-                    <MobileNavLink key={link.to} link={link} onNavigate={() => setIsMobileMenuOpen(false)} />
+                    <MobileNavLink
+                      key={link.to}
+                      link={link}
+                      onNavigate={() => setIsMobileMenuOpen(false)}
+                    />
                   ))}
                 </div>
               ))}

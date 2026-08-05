@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   FileText,
   Search,
@@ -296,6 +297,7 @@ function MedicalRecordsPage() {
   } = useMedicalRecords();
 
   const { members } = useFamilyProfiles();
+  const navigate = useNavigate();
 
   const {
     values,
@@ -341,6 +343,8 @@ function MedicalRecordsPage() {
             icon={ClipboardList}
             title="No medical records yet."
             description="Add a prescription, lab report, or other medical record above to see it here."
+            action={() => navigate("/doctors")}
+            actionLabel="Browse Doctors"
           />
         ) : (
           <>

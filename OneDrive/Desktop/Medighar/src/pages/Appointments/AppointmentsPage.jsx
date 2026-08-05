@@ -152,6 +152,7 @@ function AppointmentsSection({
 function AppointmentsPage() {
   const { upcoming, past, totalCount, cancel } = useAppointments();
   const [pendingCancel, setPendingCancel] = useState(null);
+  const navigate = useNavigate();
 
   const handleConfirmCancel = () => {
     if (pendingCancel) {
@@ -174,6 +175,8 @@ function AppointmentsPage() {
             icon={CalendarClock}
             title="No appointments yet."
             description="Book an appointment from any doctor's profile to see it here."
+            action={() => navigate("/doctors")}
+            actionLabel="Find a Doctor"
           />
         ) : (
           <div className="flex flex-col gap-12">

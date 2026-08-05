@@ -14,6 +14,9 @@ import {
   Star,
   IdCard,
   Users,
+  CheckCircle2,
+  Circle,
+  Sparkles,
 } from "lucide-react";
 import { cn } from "@/shared/lib/cn.js";
 import Section from "@/shared/components/ui/Section.jsx";
@@ -43,6 +46,15 @@ const QUICK_ACTION_TONES = {
   "reminder-center": "pista",
   "generate-report": "clay",
   "health-passport": "mint",
+};
+
+const SETUP_ITEM_ICONS = {
+  "medical-profile": IdCard,
+  family: Users,
+  appointment: CalendarClock,
+  reminder: Bell,
+  record: FileText,
+  saved: Bookmark,
 };
 
 function formatDate(dateString) {
@@ -179,6 +191,100 @@ function TimelineRow({ event, isLast }) {
   );
 }
 
+function SetupProgressCard({ progress }) {
+  return (
+    <div className="card-surface flex flex-col gap-3 border border-slate-100 bg-white p-6">
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="flex items-center gap-2 text-base font-semibold text-slate-900">
+          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-100">
+            <Sparkles className="h-4 w-4 text-emerald-600" aria-hidden="true" />
+          </span>
+          Health Setup Progress
+        </h2>
+        <span className="text-sm font-semibold text-emerald-600">{progress}%</span>
+      </div>
+      <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
+        <div
+          className="h-full rounded-full bg-emerald-500 transition-all duration-500"
+          style={{ width: `${progress}%` }}
+        />
+      </div>
+      <p className="text-sm text-slate-500">
+        Complete a few quick steps to get the most out of Medighar.
+      </p>
+    </div>
+  );
+}
+
+function ChecklistItemRow({ item }) {
+  const navigate = useNavigate();
+  const Icon = SETUP_ITEM_ICONS[item.key] ?? FileText;
+
+  return (
+    <div className="transition-premium flex items-center justify-between gap-3 rounded-2xl border border-slate-100 bg-white p-4 hover:shadow-sm">
+      <div className="flex min-w-0 items-center gap-3">
+        {item.completed ? (
+          <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-500" aria-hidden="true" />
+        ) : (
+          <Circle className="h-5 w-5 shrink-0 text-slate-300" aria-hidden="true" />
+        )}
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100">
+          <Icon className="h-4.5 w-4.5 text-slate-500" aria-hidden="true" />
+        </span>
+        <div className="min-w-0">
+          <p
+            className={cn(
+              "truncate text-sm font-medium",
+              item.completed ? "text-slate-400 line-through" : "text-slate-900",
+            )}
+          >
+            {item.label}
+          </p>
+          <p className="truncate text-xs text-slate-500">{item.description}</p>
+        </div>
+      </div>
+
+      {!item.completed && (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => navigate(item.to)}
+          className="shrink-0 rounded-full"
+        >
+          {item.ctaLabel}
+        </Button>
+      )}
+    </div>
+  );
+}
+
+function SuggestionCard({ suggestion }) {
+  const navigate = useNavigate();
+  const Icon = SETUP_ITEM_ICONS[suggestion.key] ?? FileText;
+
+  return (
+    <button
+      type="button"
+      onClick={() => navigate(suggestion.to)}
+      className="card-surface card-surface-hover transition-premium flex items-start gap-4 border border-dashed border-emerald-200 bg-emerald-50/40 p-5 text-left hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500"
+    >
+      <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-100">
+        <Icon className="h-5 w-5 text-emerald-600" aria-hidden="true" />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-sm font-semibold text-slate-900">{suggestion.label}</span>
+        <span className="mt-0.5 block text-xs leading-relaxed text-slate-500">
+          {suggestion.description}
+        </span>
+        <span className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-emerald-600">
+          {suggestion.ctaLabel}
+          <ChevronRight className="h-3 w-3" aria-hidden="true" />
+        </span>
+      </span>
+    </button>
+  );
+}
+
 function DashboardPage() {
   const {
     overview,
@@ -192,6 +298,9 @@ function DashboardPage() {
     profileCompletion,
     familyMembers,
     recentNotifications,
+    setupChecklist,
+    setupProgress,
+    smartSuggestions,
   } = useDashboard();
 
   return (
@@ -202,6 +311,37 @@ function DashboardPage() {
           subtitle="A calm, complete view of your health activity — all in one place."
           center
         />
+
+        {setupProgress < 100 && (
+          <section aria-label="Health setup" className="flex flex-col gap-5">
+            <SetupProgressCard progress={setupProgress} />
+
+            {smartSuggestions.length > 0 && (
+              <div className="flex flex-col gap-4">
+                <h2 className="flex items-center gap-2 text-base font-semibold text-slate-900">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-100">
+                    <Sparkles className="h-4 w-4 text-emerald-600" aria-hidden="true" />
+                  </span>
+                  Suggested for You
+                </h2>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {smartSuggestions.map((suggestion) => (
+                    <SuggestionCard key={suggestion.key} suggestion={suggestion} />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="flex flex-col gap-4">
+              <h2 className="text-base font-semibold text-slate-900">Health Setup Checklist</h2>
+              <div className="flex flex-col gap-3">
+                {setupChecklist.map((item) => (
+                  <ChecklistItemRow key={item.key} item={item} />
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
 
         <section aria-label="Health overview" className="flex flex-col gap-5">
           <h2 className="text-base font-semibold text-slate-900">Health Overview</h2>
