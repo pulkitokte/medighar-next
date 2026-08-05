@@ -1,17 +1,33 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppointments } from "@/hooks/useAppointments.js";
 import { useMedicalRecords } from "@/hooks/useMedicalRecords.js";
 import { useFamilyProfiles } from "@/hooks/useFamilyProfiles.js";
 import { useHealthTimeline } from "@/hooks/useHealthTimeline.js";
+import { useSavedItems } from "@/hooks/useSavedItems.js";
 import { getDoctors } from "@/services/doctors/doctors.service.js";
 import { getMedicines } from "@/services/medicines/medicines.service.js";
 import { getDiseases } from "@/services/diseases/diseases.service.js";
 import { getPharmacies } from "@/services/pharmacy/pharmacy.service.js";
 import {
+  getAllRecentEntries,
+  subscribeToRecent,
+} from "@/services/recent/recent.service.js";
+import { resolveRecentEntries } from "@/services/dashboard/dashboard.service.js";
+import {
   buildSearchIndex,
   filterSearchResults,
+  buildBoostedIds,
+  buildSuggestedResults,
   QUICK_ACTIONS,
+  BROWSE_SUGGESTIONS,
 } from "@/services/search/search.service.js";
 import {
   getRecentSearches,
@@ -21,13 +37,15 @@ import {
 } from "@/services/search/search.repository.js";
 
 const DEBOUNCE_MS = 200;
+const EMPTY_SNAPSHOT = "[]";
+const SUGGESTION_RECENT_RESOLVE_LIMIT = 8;
 
 /**
  * Owns all state and behavior for the Global Command Palette: open/close,
- * query, debounced filtering, keyboard navigation, and recent searches.
- * Reuses existing services (for static entity lists) and existing hooks
- * (for dynamic per-user data) rather than fetching or duplicating any
- * data itself.
+ * query, debounced filtering, ranking context, keyboard navigation,
+ * recent searches, and empty-state suggestions. Reuses existing services
+ * (for static entity lists) and existing hooks (for dynamic per-user
+ * data) rather than fetching or duplicating any data itself.
  * @returns {object}
  */
 export function useGlobalSearch() {
@@ -54,10 +72,27 @@ export function useGlobalSearch() {
   const { filteredRecords } = useMedicalRecords();
   const { members: familyMembers } = useFamilyProfiles();
   const { events: timelineEvents } = useHealthTimeline();
+  const saved = useSavedItems();
 
   const allAppointments = useMemo(
     () => [...upcomingAppointments, ...pastAppointments],
     [upcomingAppointments, pastAppointments],
+  );
+
+  // Recently viewed entities: reused via the existing recent.service.js
+  // store and the existing resolveRecentEntries resolver already used by
+  // useDashboard.js, rather than re-implementing entity resolution here.
+  const recentSnapshot = useSyncExternalStoreCompat(subscribeToRecent, () =>
+    JSON.stringify(getAllRecentEntries()),
+  );
+  const recentEntriesRaw = useMemo(
+    () => JSON.parse(recentSnapshot),
+    [recentSnapshot],
+  );
+  const recentEntries = useMemo(
+    () =>
+      resolveRecentEntries(recentEntriesRaw, SUGGESTION_RECENT_RESOLVE_LIMIT),
+    [recentEntriesRaw],
   );
 
   // Debounce the raw query.
@@ -96,13 +131,56 @@ export function useGlobalSearch() {
     ],
   );
 
+  const boostedIds = useMemo(
+    () =>
+      buildBoostedIds({
+        recentEntries,
+        savedDoctors: saved.savedDoctors,
+        savedMedicines: saved.savedMedicines,
+        savedDiseases: saved.savedDiseases,
+        savedPharmacies: saved.savedPharmacies,
+      }),
+    [
+      recentEntries,
+      saved.savedDoctors,
+      saved.savedMedicines,
+      saved.savedDiseases,
+      saved.savedPharmacies,
+    ],
+  );
+
   const { groups, flat } = useMemo(
-    () => filterSearchResults(searchIndex, debouncedQuery),
-    [searchIndex, debouncedQuery],
+    () => filterSearchResults(searchIndex, debouncedQuery, boostedIds),
+    [searchIndex, debouncedQuery, boostedIds],
+  );
+
+  const suggestionGroups = useMemo(() => {
+    const groupsObj = { "Quick Actions": QUICK_ACTIONS };
+
+    buildSuggestedResults({
+      recentEntries,
+      savedDoctors: saved.savedDoctors,
+      savedMedicines: saved.savedMedicines,
+    }).forEach((item) => {
+      if (!groupsObj[item.category]) groupsObj[item.category] = [];
+      groupsObj[item.category].push(item);
+    });
+
+    return groupsObj;
+  }, [recentEntries, saved.savedDoctors, saved.savedMedicines]);
+
+  const suggestionsFlat = useMemo(
+    () => Object.values(suggestionGroups).flat(),
+    [suggestionGroups],
   );
 
   const hasQuery = debouncedQuery.trim().length > 0;
-  const visibleResults = hasQuery ? flat : QUICK_ACTIONS;
+  const showEmptyResults = hasQuery && flat.length === 0;
+  const visibleResults = hasQuery
+    ? showEmptyResults
+      ? BROWSE_SUGGESTIONS
+      : flat
+    : suggestionsFlat;
 
   // Reset active index whenever the visible result set changes.
   useEffect(() => {
@@ -161,6 +239,15 @@ export function useGlobalSearch() {
     [visibleResults.length],
   );
 
+  const setActiveIndexToStart = useCallback(() => setActiveIndex(0), []);
+
+  const setActiveIndexToEnd = useCallback(() => {
+    setActiveIndex((previous) => {
+      void previous;
+      return Math.max(visibleResults.length - 1, 0);
+    });
+  }, [visibleResults.length]);
+
   const clearRecent = useCallback(() => clearRecentSearches(), []);
 
   // Global keyboard shortcuts: Cmd/Ctrl+K toggles from anywhere, "/" opens
@@ -208,14 +295,30 @@ export function useGlobalSearch() {
     query,
     setQuery,
     hasQuery,
+    showEmptyResults,
     groups,
+    suggestionGroups,
+    browseSuggestions: BROWSE_SUGGESTIONS,
     visibleResults,
     activeIndex,
     setActiveIndex,
     moveActiveIndex,
+    setActiveIndexToStart,
+    setActiveIndexToEnd,
     selectResult,
     recentSearches,
     selectRecentSearch,
     clearRecent,
   };
+}
+
+/**
+ * Minimal useSyncExternalStore wrapper matching the exact subscribe/
+ * getSnapshot shape already used by useDashboard.js for the same
+ * recent-entries store, with the same "[]" server snapshot fallback.
+ * Kept local to avoid importing React internals differently than the
+ * rest of the app already does.
+ */
+function useSyncExternalStoreCompat(subscribe, getSnapshot) {
+  return useSyncExternalStore(subscribe, getSnapshot, () => EMPTY_SNAPSHOT);
 }
