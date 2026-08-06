@@ -3,6 +3,7 @@ import Section from "@/shared/components/ui/Section.jsx";
 import Container from "@/shared/components/ui/Container.jsx";
 import PageHeading from "@/shared/components/ui/PageHeading.jsx";
 import Pagination from "@/shared/components/ui/Pagination.jsx";
+import SearchHint from "@/shared/components/ui/SearchHint.jsx";
 import DiseaseSearchBar from "@/features/diseases/components/DiseaseSearchBar.jsx";
 import DiseaseFilters from "@/features/diseases/components/DiseaseFilters.jsx";
 import DiseaseSort from "@/features/diseases/components/DiseaseSort.jsx";
@@ -30,7 +31,10 @@ function DiseasesPage() {
   } = useDiseases();
 
   return (
-    <Section paddingY="py-14 sm:py-20" className="bg-gradient-to-b from-amber-50/40 via-white to-white">
+    <Section
+      paddingY="py-14 sm:py-20"
+      className="bg-gradient-to-b from-amber-50/40 via-white to-white"
+    >
       <Container className="flex flex-col gap-10">
         <PageHeading
           title="Explore Diseases"
@@ -44,11 +48,18 @@ function DiseasesPage() {
           <DiseaseFilters value={filters} onChange={setFilters} />
         </div>
 
+        <div className="flex justify-center">
+          <SearchHint />
+        </div>
+
         <div className="flex flex-col gap-6">
           <DiseaseSort value={sortBy} onChange={setSortBy} />
 
           {loading ? (
-            <LoadingState title="Loading diseases..." description="Finding the best matches for you." />
+            <LoadingState
+              title="Loading diseases..."
+              description="Finding the best matches for you."
+            />
           ) : error ? (
             <ErrorState
               title="Unable to load diseases"

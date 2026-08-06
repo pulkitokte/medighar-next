@@ -54,6 +54,18 @@ function CommandPalette() {
     }
   }, [isOpen]);
 
+  // Lock background scrolling while the palette is open, mirroring the
+  // same body-overflow-lock pattern the mobile nav menu already uses in
+  // Navbar.jsx, and restore it on close/unmount.
+  useEffect(() => {
+    if (!isOpen) return undefined;
+
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const handleInputKeyDown = (event) => {
@@ -115,6 +127,8 @@ function CommandPalette() {
             ref={inputRef}
             type="text"
             role="combobox"
+            inputMode="search"
+            enterKeyHint="search"
             aria-expanded={isOpen}
             aria-controls={LISTBOX_ID}
             aria-activedescendant={activeId}
@@ -136,7 +150,7 @@ function CommandPalette() {
           </button>
         </div>
 
-        <div className="max-h-[70vh] overflow-y-auto p-3 sm:max-h-[60vh]">
+        <div className="max-h-[70vh] overflow-y-auto overscroll-contain p-3 sm:max-h-[60vh]">
           <div aria-live="polite" className="sr-only">
             {statusMessage}
           </div>

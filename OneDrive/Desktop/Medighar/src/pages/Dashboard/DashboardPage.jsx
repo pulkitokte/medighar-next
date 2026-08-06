@@ -24,18 +24,64 @@ import Container from "@/shared/components/ui/Container.jsx";
 import PageHeading from "@/shared/components/ui/PageHeading.jsx";
 import Button from "@/shared/components/ui/Button.jsx";
 import EmptyRelationship from "@/shared/components/ui/EmptyRelationship.jsx";
+import SearchHint from "@/shared/components/ui/SearchHint.jsx";
 import { useDashboard } from "@/hooks/useDashboard.js";
 
 const TONE_STYLES = {
-  sky: { surface: "bg-sky-50", icon: "text-sky-600", iconBg: "bg-sky-100", ring: "hover:border-sky-200" },
-  pista: { surface: "bg-lime-50", icon: "text-lime-700", iconBg: "bg-lime-100", ring: "hover:border-lime-200" },
-  apricot: { surface: "bg-orange-50", icon: "text-orange-600", iconBg: "bg-orange-100", ring: "hover:border-orange-200" },
-  lavender: { surface: "bg-violet-50", icon: "text-violet-600", iconBg: "bg-violet-100", ring: "hover:border-violet-200" },
-  mint: { surface: "bg-emerald-50", icon: "text-emerald-600", iconBg: "bg-emerald-100", ring: "hover:border-emerald-200" },
-  clay: { surface: "bg-amber-50", icon: "text-amber-700", iconBg: "bg-amber-100", ring: "hover:border-amber-200" },
-  mustard: { surface: "bg-yellow-50", icon: "text-yellow-700", iconBg: "bg-yellow-100", ring: "hover:border-yellow-200" },
-  slateBlue: { surface: "bg-indigo-50", icon: "text-indigo-600", iconBg: "bg-indigo-100", ring: "hover:border-indigo-200" },
-  coral: { surface: "bg-rose-50", icon: "text-rose-600", iconBg: "bg-rose-100", ring: "hover:border-rose-200" },
+  sky: {
+    surface: "bg-sky-50",
+    icon: "text-sky-600",
+    iconBg: "bg-sky-100",
+    ring: "hover:border-sky-200",
+  },
+  pista: {
+    surface: "bg-lime-50",
+    icon: "text-lime-700",
+    iconBg: "bg-lime-100",
+    ring: "hover:border-lime-200",
+  },
+  apricot: {
+    surface: "bg-orange-50",
+    icon: "text-orange-600",
+    iconBg: "bg-orange-100",
+    ring: "hover:border-orange-200",
+  },
+  lavender: {
+    surface: "bg-violet-50",
+    icon: "text-violet-600",
+    iconBg: "bg-violet-100",
+    ring: "hover:border-violet-200",
+  },
+  mint: {
+    surface: "bg-emerald-50",
+    icon: "text-emerald-600",
+    iconBg: "bg-emerald-100",
+    ring: "hover:border-emerald-200",
+  },
+  clay: {
+    surface: "bg-amber-50",
+    icon: "text-amber-700",
+    iconBg: "bg-amber-100",
+    ring: "hover:border-amber-200",
+  },
+  mustard: {
+    surface: "bg-yellow-50",
+    icon: "text-yellow-700",
+    iconBg: "bg-yellow-100",
+    ring: "hover:border-yellow-200",
+  },
+  slateBlue: {
+    surface: "bg-indigo-50",
+    icon: "text-indigo-600",
+    iconBg: "bg-indigo-100",
+    ring: "hover:border-indigo-200",
+  },
+  coral: {
+    surface: "bg-rose-50",
+    icon: "text-rose-600",
+    iconBg: "bg-rose-100",
+    ring: "hover:border-rose-200",
+  },
 };
 
 const QUICK_ACTION_TONES = {
@@ -58,7 +104,11 @@ const SETUP_ITEM_ICONS = {
 };
 
 function formatDate(dateString) {
-  return new Date(dateString).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+  return new Date(dateString).toLocaleDateString("en-IN", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
 }
 
 function formatDateTime(timestamp) {
@@ -87,10 +137,17 @@ function StatTile({ icon: Icon, label, value, to, tone = "mint" }) {
         styles.ring,
       )}
     >
-      <span className={cn("flex h-11 w-11 items-center justify-center rounded-2xl", styles.iconBg)}>
+      <span
+        className={cn(
+          "flex h-11 w-11 items-center justify-center rounded-2xl",
+          styles.iconBg,
+        )}
+      >
         <Icon className={cn("h-5 w-5", styles.icon)} aria-hidden="true" />
       </span>
-      <span className="text-2xl font-semibold tracking-tight text-slate-900">{value}</span>
+      <span className="text-2xl font-semibold tracking-tight text-slate-900">
+        {value}
+      </span>
       <span className="text-sm text-slate-500">{label}</span>
     </button>
   );
@@ -113,35 +170,66 @@ function QuickActionCard({ action }) {
         styles.ring,
       )}
     >
-      <span className={cn("flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl", styles.iconBg)}>
+      <span
+        className={cn(
+          "flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl",
+          styles.iconBg,
+        )}
+      >
         <Icon className={cn("h-5 w-5", styles.icon)} aria-hidden="true" />
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block text-sm font-semibold text-slate-900">{action.label}</span>
-        <span className="mt-0.5 block text-xs leading-relaxed text-slate-500">{action.description}</span>
+        <span className="block text-sm font-semibold text-slate-900">
+          {action.label}
+        </span>
+        <span className="mt-0.5 block text-xs leading-relaxed text-slate-500">
+          {action.description}
+        </span>
       </span>
-      <ChevronRight className="mt-1 h-4 w-4 shrink-0 text-slate-300" aria-hidden="true" />
+      <ChevronRight
+        className="mt-1 h-4 w-4 shrink-0 text-slate-300"
+        aria-hidden="true"
+      />
     </button>
   );
 }
 
-function ListRow({ icon: Icon, title, subtitle, to, actionLabel = "View", tone = "mint" }) {
+function ListRow({
+  icon: Icon,
+  title,
+  subtitle,
+  to,
+  actionLabel = "View",
+  tone = "mint",
+}) {
   const navigate = useNavigate();
   const styles = TONE_STYLES[tone];
 
   return (
     <div className="transition-premium flex items-center justify-between gap-3 rounded-2xl border border-slate-100 bg-white p-4 hover:shadow-sm">
       <div className="flex min-w-0 items-center gap-3">
-        <span className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-xl", styles.iconBg)}>
+        <span
+          className={cn(
+            "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl",
+            styles.iconBg,
+          )}
+        >
           <Icon className={cn("h-4.5 w-4.5", styles.icon)} aria-hidden="true" />
         </span>
         <div className="min-w-0">
           <p className="truncate text-sm font-medium text-slate-900">{title}</p>
-          {subtitle && <p className="truncate text-xs text-slate-500">{subtitle}</p>}
+          {subtitle && (
+            <p className="truncate text-xs text-slate-500">{subtitle}</p>
+          )}
         </div>
       </div>
 
-      <Button variant="outline" size="sm" onClick={() => navigate(to)} className="shrink-0 rounded-full">
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => navigate(to)}
+        className="shrink-0 rounded-full"
+      >
         {actionLabel}
       </Button>
     </div>
@@ -154,7 +242,12 @@ function DashboardSection({ title, tone, icon: Icon, children }) {
   return (
     <section className="flex flex-col gap-4">
       <h2 className="flex items-center gap-2 text-base font-semibold text-slate-900">
-        <span className={cn("flex h-7 w-7 items-center justify-center rounded-lg", styles.iconBg)}>
+        <span
+          className={cn(
+            "flex h-7 w-7 items-center justify-center rounded-lg",
+            styles.iconBg,
+          )}
+        >
           <Icon className={cn("h-4 w-4", styles.icon)} aria-hidden="true" />
         </span>
         {title}
@@ -201,7 +294,9 @@ function SetupProgressCard({ progress }) {
           </span>
           Health Setup Progress
         </h2>
-        <span className="text-sm font-semibold text-emerald-600">{progress}%</span>
+        <span className="text-sm font-semibold text-emerald-600">
+          {progress}%
+        </span>
       </div>
       <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
         <div
@@ -224,9 +319,15 @@ function ChecklistItemRow({ item }) {
     <div className="transition-premium flex items-center justify-between gap-3 rounded-2xl border border-slate-100 bg-white p-4 hover:shadow-sm">
       <div className="flex min-w-0 items-center gap-3">
         {item.completed ? (
-          <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-500" aria-hidden="true" />
+          <CheckCircle2
+            className="h-5 w-5 shrink-0 text-emerald-500"
+            aria-hidden="true"
+          />
         ) : (
-          <Circle className="h-5 w-5 shrink-0 text-slate-300" aria-hidden="true" />
+          <Circle
+            className="h-5 w-5 shrink-0 text-slate-300"
+            aria-hidden="true"
+          />
         )}
         <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100">
           <Icon className="h-4.5 w-4.5 text-slate-500" aria-hidden="true" />
@@ -272,7 +373,9 @@ function SuggestionCard({ suggestion }) {
         <Icon className="h-5 w-5 text-emerald-600" aria-hidden="true" />
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block text-sm font-semibold text-slate-900">{suggestion.label}</span>
+        <span className="block text-sm font-semibold text-slate-900">
+          {suggestion.label}
+        </span>
         <span className="mt-0.5 block text-xs leading-relaxed text-slate-500">
           {suggestion.description}
         </span>
@@ -312,6 +415,10 @@ function DashboardPage() {
           center
         />
 
+        <div className="flex justify-center">
+          <SearchHint />
+        </div>
+
         {setupProgress < 100 && (
           <section aria-label="Health setup" className="flex flex-col gap-5">
             <SetupProgressCard progress={setupProgress} />
@@ -320,20 +427,28 @@ function DashboardPage() {
               <div className="flex flex-col gap-4">
                 <h2 className="flex items-center gap-2 text-base font-semibold text-slate-900">
                   <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-100">
-                    <Sparkles className="h-4 w-4 text-emerald-600" aria-hidden="true" />
+                    <Sparkles
+                      className="h-4 w-4 text-emerald-600"
+                      aria-hidden="true"
+                    />
                   </span>
                   Suggested for You
                 </h2>
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {smartSuggestions.map((suggestion) => (
-                    <SuggestionCard key={suggestion.key} suggestion={suggestion} />
+                    <SuggestionCard
+                      key={suggestion.key}
+                      suggestion={suggestion}
+                    />
                   ))}
                 </div>
               </div>
             )}
 
             <div className="flex flex-col gap-4">
-              <h2 className="text-base font-semibold text-slate-900">Health Setup Checklist</h2>
+              <h2 className="text-base font-semibold text-slate-900">
+                Health Setup Checklist
+              </h2>
               <div className="flex flex-col gap-3">
                 {setupChecklist.map((item) => (
                   <ChecklistItemRow key={item.key} item={item} />
@@ -344,10 +459,24 @@ function DashboardPage() {
         )}
 
         <section aria-label="Health overview" className="flex flex-col gap-5">
-          <h2 className="text-base font-semibold text-slate-900">Health Overview</h2>
+          <h2 className="text-base font-semibold text-slate-900">
+            Health Overview
+          </h2>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 xl:grid-cols-8">
-            <StatTile icon={Bookmark} label="Saved Items" value={overview.savedCount} to="/saved" tone="lavender" />
-            <StatTile icon={History} label="Recently Viewed" value={overview.recentCount} to="/recent" tone="slateBlue" />
+            <StatTile
+              icon={Bookmark}
+              label="Saved Items"
+              value={overview.savedCount}
+              to="/saved"
+              tone="lavender"
+            />
+            <StatTile
+              icon={History}
+              label="Recently Viewed"
+              value={overview.recentCount}
+              to="/recent"
+              tone="slateBlue"
+            />
             <StatTile
               icon={CalendarClock}
               label="Upcoming Appointments"
@@ -355,10 +484,34 @@ function DashboardPage() {
               to="/appointments"
               tone="sky"
             />
-            <StatTile icon={Bell} label="Active Reminders" value={overview.activeRemindersCount} to="/reminders" tone="pista" />
-            <StatTile icon={FileText} label="Medical Records" value={overview.recordsCount} to="/medical-records" tone="slateBlue" />
-            <StatTile icon={IdCard} label="Medical ID Complete" value={`${profileCompletion}%`} to="/medical-profile" tone="mint" />
-            <StatTile icon={Users} label="Family Members" value={overview.familyMembersCount} to="/family" tone="coral" />
+            <StatTile
+              icon={Bell}
+              label="Active Reminders"
+              value={overview.activeRemindersCount}
+              to="/reminders"
+              tone="pista"
+            />
+            <StatTile
+              icon={FileText}
+              label="Medical Records"
+              value={overview.recordsCount}
+              to="/medical-records"
+              tone="slateBlue"
+            />
+            <StatTile
+              icon={IdCard}
+              label="Medical ID Complete"
+              value={`${profileCompletion}%`}
+              to="/medical-profile"
+              tone="mint"
+            />
+            <StatTile
+              icon={Users}
+              label="Family Members"
+              value={overview.familyMembersCount}
+              to="/family"
+              tone="coral"
+            />
             <StatTile
               icon={BellRing}
               label="Unread Notifications"
@@ -370,7 +523,9 @@ function DashboardPage() {
         </section>
 
         <section aria-label="Quick actions" className="flex flex-col gap-5">
-          <h2 className="text-base font-semibold text-slate-900">Quick Actions</h2>
+          <h2 className="text-base font-semibold text-slate-900">
+            Quick Actions
+          </h2>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {quickActions.map((action) => (
               <QuickActionCard key={action.key} action={action} />
@@ -379,7 +534,11 @@ function DashboardPage() {
         </section>
 
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-2">
-          <DashboardSection title="Upcoming Appointments" icon={CalendarClock} tone="sky">
+          <DashboardSection
+            title="Upcoming Appointments"
+            icon={CalendarClock}
+            tone="sky"
+          >
             {upcomingAppointments.length === 0 ? (
               <EmptyRelationship message="No upcoming appointments." />
             ) : (
@@ -388,7 +547,9 @@ function DashboardPage() {
                   <ListRow
                     key={appointment.id}
                     icon={Stethoscope}
-                    title={appointment.doctor?.name ?? "Doctor no longer listed"}
+                    title={
+                      appointment.doctor?.name ?? "Doctor no longer listed"
+                    }
                     subtitle={`${formatDate(appointment.date)} · ${appointment.timeSlot}`}
                     to="/appointments"
                     actionLabel="Quick View"
@@ -410,8 +571,9 @@ function DashboardPage() {
                     icon={reminder.type === "medicine" ? Pill : CalendarClock}
                     title={
                       reminder.type === "medicine"
-                        ? reminder.medicine?.name ?? "Medicine reminder"
-                        : reminder.appointment?.doctor?.name ?? "Appointment reminder"
+                        ? (reminder.medicine?.name ?? "Medicine reminder")
+                        : (reminder.appointment?.doctor?.name ??
+                          "Appointment reminder")
                     }
                     subtitle={
                       reminder.type === "medicine"
@@ -428,7 +590,11 @@ function DashboardPage() {
             )}
           </DashboardSection>
 
-          <DashboardSection title="Recent Medical Records" icon={FileText} tone="slateBlue">
+          <DashboardSection
+            title="Recent Medical Records"
+            icon={FileText}
+            tone="slateBlue"
+          >
             {recentRecords.length === 0 ? (
               <EmptyRelationship message="No medical records yet." />
             ) : (
@@ -447,21 +613,37 @@ function DashboardPage() {
             )}
           </DashboardSection>
 
-          <DashboardSection title="Recently Viewed" icon={History} tone="lavender">
+          <DashboardSection
+            title="Recently Viewed"
+            icon={History}
+            tone="lavender"
+          >
             {recentEntries.length === 0 ? (
               <EmptyRelationship message="No recently viewed items." />
             ) : (
               <div className="flex flex-col gap-3">
                 {recentEntries.map((entry) => {
-                  const ENTRY_ICONS = { doctor: Stethoscope, medicine: Pill, disease: Activity, pharmacy: Store };
-                  const ENTRY_TONES = { doctor: "sky", medicine: "pista", disease: "apricot", pharmacy: "lavender" };
+                  const ENTRY_ICONS = {
+                    doctor: Stethoscope,
+                    medicine: Pill,
+                    disease: Activity,
+                    pharmacy: Store,
+                  };
+                  const ENTRY_TONES = {
+                    doctor: "sky",
+                    medicine: "pista",
+                    disease: "apricot",
+                    pharmacy: "lavender",
+                  };
 
                   return (
                     <ListRow
                       key={`${entry.type}-${entry.id}`}
                       icon={ENTRY_ICONS[entry.type] ?? History}
                       title={entry.entity?.name}
-                      subtitle={entry.type.charAt(0).toUpperCase() + entry.type.slice(1)}
+                      subtitle={
+                        entry.type.charAt(0).toUpperCase() + entry.type.slice(1)
+                      }
                       to={entry.to}
                       tone={ENTRY_TONES[entry.type] ?? "lavender"}
                     />
@@ -471,7 +653,11 @@ function DashboardPage() {
             )}
           </DashboardSection>
 
-          <DashboardSection title="Recent Notifications" icon={BellRing} tone="mustard">
+          <DashboardSection
+            title="Recent Notifications"
+            icon={BellRing}
+            tone="mustard"
+          >
             {recentNotifications.length === 0 ? (
               <EmptyRelationship message="No notifications yet." />
             ) : (
@@ -511,12 +697,38 @@ function DashboardPage() {
         </div>
 
         <section aria-label="Saved items" className="flex flex-col gap-5">
-          <h2 className="text-base font-semibold text-slate-900">Saved Items</h2>
+          <h2 className="text-base font-semibold text-slate-900">
+            Saved Items
+          </h2>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-            <StatTile icon={Stethoscope} label="Doctors" value={saved.savedDoctors.length} to="/saved" tone="sky" />
-            <StatTile icon={Pill} label="Medicines" value={saved.savedMedicines.length} to="/saved" tone="pista" />
-            <StatTile icon={Activity} label="Diseases" value={saved.savedDiseases.length} to="/saved" tone="apricot" />
-            <StatTile icon={Store} label="Pharmacies" value={saved.savedPharmacies.length} to="/saved" tone="lavender" />
+            <StatTile
+              icon={Stethoscope}
+              label="Doctors"
+              value={saved.savedDoctors.length}
+              to="/saved"
+              tone="sky"
+            />
+            <StatTile
+              icon={Pill}
+              label="Medicines"
+              value={saved.savedMedicines.length}
+              to="/saved"
+              tone="pista"
+            />
+            <StatTile
+              icon={Activity}
+              label="Diseases"
+              value={saved.savedDiseases.length}
+              to="/saved"
+              tone="apricot"
+            />
+            <StatTile
+              icon={Store}
+              label="Pharmacies"
+              value={saved.savedPharmacies.length}
+              to="/saved"
+              tone="lavender"
+            />
           </div>
         </section>
 
@@ -532,7 +744,11 @@ function DashboardPage() {
           ) : (
             <ol className="flex flex-col">
               {timeline.map((event, index) => (
-                <TimelineRow key={event.id} event={event} isLast={index === timeline.length - 1} />
+                <TimelineRow
+                  key={event.id}
+                  event={event}
+                  isLast={index === timeline.length - 1}
+                />
               ))}
             </ol>
           )}

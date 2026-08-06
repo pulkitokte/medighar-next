@@ -3,6 +3,7 @@ import Section from "@/shared/components/ui/Section.jsx";
 import Container from "@/shared/components/ui/Container.jsx";
 import PageHeading from "@/shared/components/ui/PageHeading.jsx";
 import Pagination from "@/shared/components/ui/Pagination.jsx";
+import SearchHint from "@/shared/components/ui/SearchHint.jsx";
 import MedicineSearchBar from "@/features/medicine/components/MedicineSearchBar.jsx";
 import MedicineFilters from "@/features/medicine/components/MedicineFilters.jsx";
 import MedicineSort from "@/features/medicine/components/MedicineSort.jsx";
@@ -30,7 +31,10 @@ function MedicinesPage() {
   } = useMedicines();
 
   return (
-    <Section paddingY="py-14 sm:py-20" className="bg-gradient-to-b from-lime-50/50 via-white to-white">
+    <Section
+      paddingY="py-14 sm:py-20"
+      className="bg-gradient-to-b from-lime-50/50 via-white to-white"
+    >
       <Container className="flex flex-col gap-10">
         <PageHeading
           title="Find Your Medicine"
@@ -44,11 +48,18 @@ function MedicinesPage() {
           <MedicineFilters value={filters} onChange={setFilters} />
         </div>
 
+        <div className="flex justify-center">
+          <SearchHint />
+        </div>
+
         <div className="flex flex-col gap-6">
           <MedicineSort value={sortBy} onChange={setSortBy} />
 
           {loading ? (
-            <LoadingState title="Loading medicines..." description="Finding the best matches for you." />
+            <LoadingState
+              title="Loading medicines..."
+              description="Finding the best matches for you."
+            />
           ) : error ? (
             <ErrorState
               title="Unable to load medicines"

@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import Section from "@/shared/components/ui/Section.jsx";
 import Container from "@/shared/components/ui/Container.jsx";
 import PageHeading from "@/shared/components/ui/PageHeading.jsx";
+import SearchHint from "@/shared/components/ui/SearchHint.jsx";
 import SearchBar from "@/features/search/components/SearchBar.jsx";
 import SearchCategoryTabs from "@/features/search/components/SearchCategoryTabs.jsx";
 import SearchFilters from "@/features/search/components/SearchFilters.jsx";
@@ -64,6 +65,14 @@ function SearchPage() {
             onChange={setQuery}
             placeholder={activeCategoryData?.placeholder}
           />
+        </motion.div>
+
+        <motion.div
+          initial={fadeUp.initial}
+          animate={fadeUp.animate}
+          transition={{ duration: 0.4, ease: "easeOut", delay: 0.075 }}
+        >
+          <SearchHint label="Prefer to search everything at once?" />
         </motion.div>
 
         <motion.div

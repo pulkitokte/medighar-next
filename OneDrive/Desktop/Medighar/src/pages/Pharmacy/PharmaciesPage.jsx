@@ -3,6 +3,7 @@ import Section from "@/shared/components/ui/Section.jsx";
 import Container from "@/shared/components/ui/Container.jsx";
 import PageHeading from "@/shared/components/ui/PageHeading.jsx";
 import Pagination from "@/shared/components/ui/Pagination.jsx";
+import SearchHint from "@/shared/components/ui/SearchHint.jsx";
 import PharmacySearchBar from "@/features/pharmacy/components/PharmacySearchBar.jsx";
 import PharmacyFilters from "@/features/pharmacy/components/PharmacyFilters.jsx";
 import PharmacySort from "@/features/pharmacy/components/PharmacySort.jsx";
@@ -45,6 +46,10 @@ function PharmaciesPage() {
           <PharmacySearchBar value={searchQuery} onChange={setSearchQuery} />
           <div className="h-px w-full bg-violet-50" aria-hidden="true" />
           <PharmacyFilters value={filters} onChange={setFilters} />
+        </div>
+
+        <div className="flex justify-center">
+          <SearchHint />
         </div>
 
         <div className="flex flex-col gap-6">

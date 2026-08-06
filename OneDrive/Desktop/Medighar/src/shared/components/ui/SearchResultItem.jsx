@@ -35,7 +35,8 @@ function highlightMatch(text, query) {
  * Presentational row for a single search result inside the Command
  * Palette. No real DOM focus is placed on this element — active state is
  * tracked via aria-activedescendant on the parent input, per the
- * accessible combobox pattern.
+ * accessible combobox pattern. Padding is sized for comfortable touch
+ * targets on mobile as well as desktop pointer use.
  * @param {{
  *   result: object,
  *   query?: string,
@@ -66,7 +67,7 @@ function SearchResultItem({
         onSelect(result);
       }}
       className={cn(
-        "flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-sm",
+        "flex cursor-pointer items-center gap-3 rounded-lg px-3 py-3 text-sm",
         isActive
           ? "bg-blue-50 text-blue-900"
           : "text-slate-700 hover:bg-slate-50",
