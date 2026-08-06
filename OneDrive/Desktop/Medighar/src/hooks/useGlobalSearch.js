@@ -1,30 +1,9 @@
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  useSyncExternalStore,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAppointments } from "@/hooks/useAppointments.js";
-import { useMedicalRecords } from "@/hooks/useMedicalRecords.js";
-import { useFamilyProfiles } from "@/hooks/useFamilyProfiles.js";
-import { useHealthTimeline } from "@/hooks/useHealthTimeline.js";
-import { useSavedItems } from "@/hooks/useSavedItems.js";
-import { getDoctors } from "@/services/doctors/doctors.service.js";
-import { getMedicines } from "@/services/medicines/medicines.service.js";
-import { getDiseases } from "@/services/diseases/diseases.service.js";
-import { getPharmacies } from "@/services/pharmacy/pharmacy.service.js";
+import { useSearchData } from "@/hooks/useSearchData.js";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue.js";
 import {
-  getAllRecentEntries,
-  subscribeToRecent,
-} from "@/services/recent/recent.service.js";
-import { resolveRecentEntries } from "@/services/dashboard/dashboard.service.js";
-import {
-  buildSearchIndex,
   filterSearchResults,
-  buildBoostedIds,
   buildSuggestedResults,
   QUICK_ACTIONS,
   BROWSE_SUGGESTIONS,
@@ -37,8 +16,6 @@ import {
 } from "@/services/search/search.repository.js";
 
 const DEBOUNCE_MS = 200;
-const EMPTY_SNAPSHOT = "[]";
-const SUGGESTION_RECENT_RESOLVE_LIMIT = 8;
 
 /**
  * Window event name used by any page-level "Search across Medighar"
@@ -64,10 +41,10 @@ export function requestGlobalSearchOpen() {
 /**
  * Owns all state and behavior for the Global Command Palette: open/close,
  * query, debounced filtering, ranking context, keyboard navigation,
- * recent searches, empty-state suggestions, and focus recovery. Reuses
- * existing services (for static entity lists) and existing hooks (for
- * dynamic per-user data) rather than fetching or duplicating any data
- * itself.
+ * recent searches, empty-state suggestions, and focus recovery. Data
+ * assembly (the real search index and ranking boost sets) is delegated
+ * entirely to useSearchData() — the same hook Site Search consumes — so
+ * this hook owns only palette-specific UI state, not data-gathering.
  * @returns {object}
  */
 export function useGlobalSearch() {
@@ -75,7 +52,6 @@ export function useGlobalSearch() {
 
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const [debouncedQuery, setDebouncedQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
   const [recentSearches, setRecentSearches] = useState(() =>
     getRecentSearches(),
@@ -87,96 +63,13 @@ export function useGlobalSearch() {
   // than always dropping focus back to body.
   const previousFocusRef = useRef(null);
 
-  // Static entity lists: fetched once via existing services, memoized for
-  // the lifetime of the palette instance.
-  const doctors = useMemo(() => getDoctors(), []);
-  const medicines = useMemo(() => getMedicines(), []);
-  const diseases = useMemo(() => getDiseases(), []);
-  const pharmacies = useMemo(() => getPharmacies(), []);
-
-  // Dynamic per-user data: reused directly from existing hooks.
-  const { upcoming: upcomingAppointments, past: pastAppointments } =
-    useAppointments();
-  const { filteredRecords } = useMedicalRecords();
-  const { members: familyMembers } = useFamilyProfiles();
-  const { events: timelineEvents } = useHealthTimeline();
-  const saved = useSavedItems();
-
-  const allAppointments = useMemo(
-    () => [...upcomingAppointments, ...pastAppointments],
-    [upcomingAppointments, pastAppointments],
-  );
-
-  // Recently viewed entities: reused via the existing recent.service.js
-  // store and the existing resolveRecentEntries resolver already used by
-  // useDashboard.js, rather than re-implementing entity resolution here.
-  const recentSnapshot = useSyncExternalStore(
-    subscribeToRecent,
-    () => JSON.stringify(getAllRecentEntries()),
-    () => EMPTY_SNAPSHOT,
-  );
-  const recentEntriesRaw = useMemo(
-    () => JSON.parse(recentSnapshot),
-    [recentSnapshot],
-  );
-  const recentEntries = useMemo(
-    () =>
-      resolveRecentEntries(recentEntriesRaw, SUGGESTION_RECENT_RESOLVE_LIMIT),
-    [recentEntriesRaw],
-  );
-
-  // Debounce the raw query.
-  useEffect(() => {
-    const timeout = setTimeout(() => setDebouncedQuery(query), DEBOUNCE_MS);
-    return () => clearTimeout(timeout);
-  }, [query]);
+  const { searchIndex, boostedIds, recentEntries, saved } = useSearchData();
+  const debouncedQuery = useDebouncedValue(query, DEBOUNCE_MS);
 
   useEffect(
     () =>
       subscribeToRecentSearches(() => setRecentSearches(getRecentSearches())),
     [],
-  );
-
-  const searchIndex = useMemo(
-    () =>
-      buildSearchIndex({
-        doctors,
-        medicines,
-        diseases,
-        pharmacies,
-        appointments: allAppointments,
-        records: filteredRecords,
-        familyMembers,
-        timelineEvents,
-      }),
-    [
-      doctors,
-      medicines,
-      diseases,
-      pharmacies,
-      allAppointments,
-      filteredRecords,
-      familyMembers,
-      timelineEvents,
-    ],
-  );
-
-  const boostedIds = useMemo(
-    () =>
-      buildBoostedIds({
-        recentEntries,
-        savedDoctors: saved.savedDoctors,
-        savedMedicines: saved.savedMedicines,
-        savedDiseases: saved.savedDiseases,
-        savedPharmacies: saved.savedPharmacies,
-      }),
-    [
-      recentEntries,
-      saved.savedDoctors,
-      saved.savedMedicines,
-      saved.savedDiseases,
-      saved.savedPharmacies,
-    ],
   );
 
   const { groups, flat } = useMemo(
@@ -238,7 +131,6 @@ export function useGlobalSearch() {
   const close = useCallback(() => {
     setIsOpen(false);
     setQuery("");
-    setDebouncedQuery("");
     setActiveIndex(0);
     restorePreviousFocus();
   }, [restorePreviousFocus]);
@@ -247,7 +139,6 @@ export function useGlobalSearch() {
     setIsOpen((previous) => {
       if (previous) {
         setQuery("");
-        setDebouncedQuery("");
         setActiveIndex(0);
         restorePreviousFocus();
         return false;
@@ -273,7 +164,6 @@ export function useGlobalSearch() {
 
   const selectRecentSearch = useCallback((recentQuery) => {
     setQuery(recentQuery);
-    setDebouncedQuery(recentQuery);
   }, []);
 
   const moveActiveIndex = useCallback(

@@ -3,6 +3,14 @@ import Button from "@/shared/components/ui/Button.jsx";
 import ResultBadge from "@/features/search/components/ResultBadge.jsx";
 import { highlightText } from "@/features/search/utils/highlightText.js";
 
+/**
+ * The whole card is the interactive target (not just the CTA button),
+ * matching how every other clickable card in the app behaves (see
+ * StatTile / QuickActionCard in DashboardPage.jsx). Previously this card
+ * had no onSelect wiring at all and wasn't keyboard-operable — fixed here
+ * as a correctness fix, not a visual redesign; no className/layout below
+ * has changed.
+ */
 function ResultCard({
   icon: Icon,
   title,
@@ -11,13 +19,29 @@ function ResultCard({
   metadata = [],
   cta,
   query = "",
+  onSelect,
   className,
 }) {
+  const handleKeyDown = (event) => {
+    if (!onSelect) return;
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      onSelect();
+    }
+  };
+
   return (
     <div
+      role={onSelect ? "button" : undefined}
+      tabIndex={onSelect ? 0 : undefined}
+      onClick={onSelect}
+      onKeyDown={handleKeyDown}
+      aria-label={onSelect ? title : undefined}
       className={cn(
         "flex h-full flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition",
         "hover:-translate-y-1 hover:shadow-lg",
+        onSelect &&
+          "cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500",
         className,
       )}
     >

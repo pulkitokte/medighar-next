@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import ResultCard from "@/features/search/components/ResultCard.jsx";
 import ResultSectionHeader from "@/features/search/components/ResultSectionHeader.jsx";
 
-function SearchResults({ results, query = "" }) {
+function SearchResults({ results, query = "", onSelect }) {
   return (
     <div className="flex w-full flex-col gap-6">
       <ResultSectionHeader count={results.length} />
@@ -27,6 +27,7 @@ function SearchResults({ results, query = "" }) {
               metadata={result.metadata}
               cta={result.cta}
               query={query}
+              onSelect={onSelect ? () => onSelect(result) : undefined}
             />
           </motion.div>
         ))}
