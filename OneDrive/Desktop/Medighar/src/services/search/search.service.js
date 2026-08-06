@@ -25,12 +25,12 @@ import { safeSearch } from "@/shared/lib/search.js";
 import { groupByField } from "@/shared/lib/repositoryHelpers.js";
 
 /**
- * Pure aggregation, filtering, ranking, and suggestion logic for the
- * Global Command Palette. This service owns no storage of its own beyond
- * recent searches (handled entirely by search.repository.js). Every
- * searchable entity comes from already-resolved data supplied by the
- * caller (existing services and hooks) — this file never fetches data
- * itself and duplicates no other module's business logic.
+ * Pure aggregation, filtering, ranking, dedup, and suggestion logic for
+ * the Global Command Palette. This service owns no storage of its own
+ * beyond recent searches (handled entirely by search.repository.js).
+ * Every searchable entity comes from already-resolved data supplied by
+ * the caller (existing services and hooks) — this file never fetches
+ * data itself and duplicates no other module's business logic.
  */
 
 export const RESULTS_PER_CATEGORY = 6;
@@ -283,6 +283,29 @@ const RECENT_ENTRY_ICONS = {
 const SUGGESTED_RECENT_LIMIT = 4;
 const SUGGESTED_SAVED_LIMIT = 3;
 
+/**
+ * Categories that represent literal 1:1 page links rather than a
+ * collection of distinct entities. Route-based dedup is scoped to just
+ * these two categories, since e.g. every Appointments result legitimately
+ * shares one destination route by design and must never be collapsed.
+ */
+const DEDUPE_ROUTE_CATEGORIES = new Set(["Quick Actions", "Navigation"]);
+
+/**
+ * Small tiebreaker weight so that, when the same route is reachable from
+ * both a Quick Action and a Navigation link with an otherwise identical
+ * match score, the Quick Action (the more actionable entry) wins. Kept
+ * fractional so it only breaks ties and never crosses a full rank tier.
+ */
+const CATEGORY_PRIORITY = {
+  "Quick Actions": 9,
+  Navigation: 10,
+};
+
+function getCategoryPriority(category) {
+  return CATEGORY_PRIORITY[category] ?? 0;
+}
+
 export function buildDoctorResults(doctors = []) {
   return doctors.map((doctor) => ({
     id: `doctor-${doctor.id}`,
@@ -473,10 +496,34 @@ export function buildBoostedIds({
 }
 
 /**
+ * Removes duplicate results that point at the same route, but only
+ * within DEDUPE_ROUTE_CATEGORIES (Quick Actions / Navigation). Every
+ * other category is left untouched, since categories like Appointments
+ * or Medical Records legitimately contain many distinct results that
+ * share one destination route by design. Assumes `results` is already
+ * ranked best-first; keeps the first (best) occurrence of each route.
+ * @param {Array<object>} results
+ * @returns {Array<object>}
+ */
+function dedupeByRoute(results) {
+  const seenRoutes = new Set();
+
+  return results.filter((item) => {
+    if (!DEDUPE_ROUTE_CATEGORIES.has(item.category)) return true;
+
+    if (seenRoutes.has(item.route)) return false;
+    seenRoutes.add(item.route);
+    return true;
+  });
+}
+
+/**
  * Filters the search index by query, ranks matches (match quality first,
- * then a small boost for recently-viewed/saved items), groups by
- * category, and caps per category. Reuses the existing generic safeSearch
- * and groupByField helpers rather than reimplementing filtering/grouping.
+ * then a small boost for recently-viewed/saved items, then a category
+ * tiebreaker), removes same-route duplicates between Quick Actions and
+ * Navigation, groups by category, and caps per category. Reuses the
+ * existing generic safeSearch and groupByField helpers rather than
+ * reimplementing filtering/grouping.
  * @param {Array<object>} index
  * @param {string} query
  * @param {{ recentIds: Set<string>, savedIds: Set<string> }} [boostedIds]
@@ -500,13 +547,18 @@ export function filterSearchResults(
     const rank = computeMatchRank(item, normalizedQuery);
     const recentBoost = boostedIds.recentIds.has(item.id) ? 2 : 0;
     const savedBoost = boostedIds.savedIds.has(item.id) ? 1 : 0;
-    return { item, score: rank * 10 - recentBoost - savedBoost };
+    const categoryTiebreak = getCategoryPriority(item.category) * 0.01;
+    return {
+      item,
+      score: rank * 10 - recentBoost - savedBoost + categoryTiebreak,
+    };
   });
 
   scored.sort((a, b) => a.score - b.score);
   const ranked = scored.map((entry) => entry.item);
+  const deduped = dedupeByRoute(ranked);
 
-  const grouped = groupByField(ranked, "category");
+  const grouped = groupByField(deduped, "category");
 
   const capped = {};
   Object.entries(grouped).forEach(([category, results]) => {
@@ -521,8 +573,10 @@ export function filterSearchResults(
 /**
  * Builds the empty-query suggestion sections: Recently Viewed items and
  * Saved Doctors/Medicines, from data already resolved by existing hooks
- * (useRecent / useSavedItems). Returns a flat array; the caller groups it
- * by `category` for rendering, same as filterSearchResults's output.
+ * (useRecent / useSavedItems). An item that is both recently viewed and
+ * saved is only shown under its Saved section, not both. Returns a flat
+ * array; the caller groups it by `category` for rendering, same as
+ * filterSearchResults's output.
  * @param {{
  *   recentEntries?: Array<{type: string, id: string|number, entity?: object, to?: string}>,
  *   savedDoctors?: Array<object>,
@@ -535,7 +589,13 @@ export function buildSuggestedResults({
   savedDoctors = [],
   savedMedicines = [],
 } = {}) {
+  const savedEntityKeys = new Set([
+    ...savedDoctors.map((doctor) => `doctor-${doctor.id}`),
+    ...savedMedicines.map((medicine) => `medicine-${medicine.id}`),
+  ]);
+
   const recentlyViewed = recentEntries
+    .filter((entry) => !savedEntityKeys.has(`${entry.type}-${entry.id}`))
     .slice(0, SUGGESTED_RECENT_LIMIT)
     .filter((entry) => Boolean(entry.entity?.name))
     .map((entry) => ({

@@ -2,7 +2,6 @@ import {
   useCallback,
   useEffect,
   useMemo,
-  useRef,
   useState,
   useSyncExternalStore,
 } from "react";
@@ -82,8 +81,10 @@ export function useGlobalSearch() {
   // Recently viewed entities: reused via the existing recent.service.js
   // store and the existing resolveRecentEntries resolver already used by
   // useDashboard.js, rather than re-implementing entity resolution here.
-  const recentSnapshot = useSyncExternalStoreCompat(subscribeToRecent, () =>
-    JSON.stringify(getAllRecentEntries()),
+  const recentSnapshot = useSyncExternalStore(
+    subscribeToRecent,
+    () => JSON.stringify(getAllRecentEntries()),
+    () => EMPTY_SNAPSHOT,
   );
   const recentEntriesRaw = useMemo(
     () => JSON.parse(recentSnapshot),
@@ -242,10 +243,7 @@ export function useGlobalSearch() {
   const setActiveIndexToStart = useCallback(() => setActiveIndex(0), []);
 
   const setActiveIndexToEnd = useCallback(() => {
-    setActiveIndex((previous) => {
-      void previous;
-      return Math.max(visibleResults.length - 1, 0);
-    });
+    setActiveIndex(Math.max(visibleResults.length - 1, 0));
   }, [visibleResults.length]);
 
   const clearRecent = useCallback(() => clearRecentSearches(), []);
@@ -310,15 +308,4 @@ export function useGlobalSearch() {
     selectRecentSearch,
     clearRecent,
   };
-}
-
-/**
- * Minimal useSyncExternalStore wrapper matching the exact subscribe/
- * getSnapshot shape already used by useDashboard.js for the same
- * recent-entries store, with the same "[]" server snapshot fallback.
- * Kept local to avoid importing React internals differently than the
- * rest of the app already does.
- */
-function useSyncExternalStoreCompat(subscribe, getSnapshot) {
-  return useSyncExternalStore(subscribe, getSnapshot, () => EMPTY_SNAPSHOT);
 }
