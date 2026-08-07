@@ -8,6 +8,7 @@ function EmptySearchState({ query = "" }) {
   return (
     <div className="flex flex-col items-center gap-6 py-16 text-center">
       <motion.div
+        aria-hidden="true"
         animate={{ y: [0, -8, 0] }}
         transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
         className="relative flex h-32 w-32 items-center justify-center"
@@ -21,7 +22,11 @@ function EmptySearchState({ query = "" }) {
         </div>
       </motion.div>
 
-      <div className="flex flex-col items-center gap-1">
+      <div
+        role="status"
+        aria-live="polite"
+        className="flex flex-col items-center gap-1"
+      >
         <p className="text-base font-medium text-slate-900 sm:text-lg">
           {hasQuery ? "No results found" : "Nothing to show yet"}
         </p>

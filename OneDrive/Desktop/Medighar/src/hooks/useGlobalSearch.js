@@ -2,18 +2,14 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSearchData } from "@/hooks/useSearchData.js";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue.js";
+import { useRecentSearchQueries } from "@/hooks/useRecentSearchQueries.js";
 import {
   filterSearchResults,
   buildSuggestedResults,
   QUICK_ACTIONS,
   BROWSE_SUGGESTIONS,
 } from "@/services/search/search.service.js";
-import {
-  getRecentSearches,
-  addRecentSearch,
-  clearRecentSearches,
-  subscribeToRecentSearches,
-} from "@/services/search/search.repository.js";
+import { addRecentSearch } from "@/services/search/search.repository.js";
 
 const DEBOUNCE_MS = 200;
 
@@ -42,9 +38,9 @@ export function requestGlobalSearchOpen() {
  * Owns all state and behavior for the Global Command Palette: open/close,
  * query, debounced filtering, ranking context, keyboard navigation,
  * recent searches, empty-state suggestions, and focus recovery. Data
- * assembly (the real search index and ranking boost sets) is delegated
- * entirely to useSearchData() — the same hook Site Search consumes — so
- * this hook owns only palette-specific UI state, not data-gathering.
+ * assembly is delegated to useSearchData() and recent-query state to
+ * useRecentSearchQueries() — the same two hooks Site Search consumes —
+ * so this hook owns only palette-specific UI state.
  * @returns {object}
  */
 export function useGlobalSearch() {
@@ -53,9 +49,6 @@ export function useGlobalSearch() {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
-  const [recentSearches, setRecentSearches] = useState(() =>
-    getRecentSearches(),
-  );
 
   // Tracks whatever element had focus just before the palette opened
   // (the Ctrl+K/"/" shortcut leaves body focused; a SearchHint button
@@ -64,13 +57,8 @@ export function useGlobalSearch() {
   const previousFocusRef = useRef(null);
 
   const { searchIndex, boostedIds, recentEntries, saved } = useSearchData();
+  const { recentSearches, clearRecent } = useRecentSearchQueries();
   const debouncedQuery = useDebouncedValue(query, DEBOUNCE_MS);
-
-  useEffect(
-    () =>
-      subscribeToRecentSearches(() => setRecentSearches(getRecentSearches())),
-    [],
-  );
 
   const { groups, flat } = useMemo(
     () => filterSearchResults(searchIndex, debouncedQuery, boostedIds),
@@ -184,8 +172,6 @@ export function useGlobalSearch() {
   const setActiveIndexToEnd = useCallback(() => {
     setActiveIndex(Math.max(visibleResults.length - 1, 0));
   }, [visibleResults.length]);
-
-  const clearRecent = useCallback(() => clearRecentSearches(), []);
 
   // Global keyboard shortcuts: Cmd/Ctrl+K toggles from anywhere, "/" opens
   // when not typing inside an input/textarea/contenteditable element,

@@ -2,7 +2,11 @@ import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSearchData } from "@/hooks/useSearchData.js";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue.js";
-import { filterSearchResults } from "@/services/search/search.service.js";
+import { useRecentSearchQueries } from "@/hooks/useRecentSearchQueries.js";
+import {
+  filterSearchResults,
+  buildSuggestedResults,
+} from "@/services/search/search.service.js";
 import { addRecentSearch } from "@/services/search/search.repository.js";
 
 const DEBOUNCE_MS = 200;
@@ -14,19 +18,16 @@ const DEBOUNCE_MS = 200;
  * browsing entities, not general app navigation, matching the page's
  * original intent.
  */
-const PAGE_SEARCH_CATEGORIES = [
-  "Doctors",
-  "Medicines",
-  "Diseases",
-  "Pharmacies",
-];
+const PAGE_SEARCH_CATEGORIES = ["Doctors", "Medicines", "Diseases", "Pharmacies"];
 
 /**
- * Owns state and behavior for the Search page: query, category tab, and
- * results. Consumes the exact same search pipeline as the Command
- * Palette (useSearchData + filterSearchResults) rather than a separate
- * implementation, so ranking, matching, boosting, and category grouping
- * are identical between the two surfaces.
+ * Owns state and behavior for the Search page: query, category tab,
+ * results, and pre-query discovery content (recent searches, suggested
+ * items). Consumes the exact same search pipeline as the Command Palette
+ * (useSearchData + useRecentSearchQueries + filterSearchResults /
+ * buildSuggestedResults) rather than a separate implementation, so
+ * ranking, matching, boosting, category naming, and recent-search
+ * behavior are identical between the two surfaces.
  * @returns {object}
  */
 export function useSiteSearch() {
@@ -36,7 +37,8 @@ export function useSiteSearch() {
   const [activeCategory, setActiveCategory] = useState("all");
   const debouncedQuery = useDebouncedValue(query, DEBOUNCE_MS);
 
-  const { searchIndex, boostedIds } = useSearchData();
+  const { searchIndex, boostedIds, recentEntries, saved } = useSearchData();
+  const { recentSearches, clearRecent } = useRecentSearchQueries();
 
   const { flat } = useMemo(
     () => filterSearchResults(searchIndex, debouncedQuery, boostedIds),
@@ -52,6 +54,16 @@ export function useSiteSearch() {
     return entityResults.filter((item) => item.category === activeCategory);
   }, [flat, activeCategory]);
 
+  const suggestedResults = useMemo(
+    () =>
+      buildSuggestedResults({
+        recentEntries,
+        savedDoctors: saved.savedDoctors,
+        savedMedicines: saved.savedMedicines,
+      }),
+    [recentEntries, saved.savedDoctors, saved.savedMedicines],
+  );
+
   const hasQuery = debouncedQuery.trim().length > 0;
 
   const selectResult = (result) => {
@@ -64,13 +76,21 @@ export function useSiteSearch() {
     navigate(result.route);
   };
 
+  const selectRecentSearch = (recentQuery) => {
+    setQuery(recentQuery);
+  };
+
   return {
     query,
     setQuery,
     activeCategory,
     setActiveCategory,
     results,
+    suggestedResults,
     hasQuery,
     selectResult,
+    recentSearches,
+    clearRecent,
+    selectRecentSearch,
   };
 }
