@@ -1,15 +1,17 @@
 import { cn } from "@/shared/lib/cn.js";
-import Button from "@/shared/components/ui/Button.jsx";
 import ResultBadge from "@/features/search/components/ResultBadge.jsx";
-import { highlightText } from "@/features/search/utils/highlightText.js";
+import { highlightText } from "@/shared/lib/highlightText.js";
 
 /**
- * The whole card is the interactive target (not just the CTA button),
- * matching how every other clickable card in the app behaves (see
- * StatTile / QuickActionCard in DashboardPage.jsx). Previously this card
- * had no onSelect wiring at all and wasn't keyboard-operable — fixed here
- * as a correctness fix, not a visual redesign; no className/layout below
- * has changed.
+ * The whole card is the interactive target (not just the CTA), matching
+ * how every other clickable card in the app behaves (see StatTile /
+ * QuickActionCard in DashboardPage.jsx). The CTA is rendered as a
+ * non-interactive visual label rather than a real <Button> — nesting a
+ * second focusable/clickable control inside an element that already
+ * carries role="button" would be a genuine nested-interactive-controls
+ * violation and would duplicate the card's own click/Enter/Space
+ * handling. The label's styling is copied verbatim from Button's
+ * outline/sm/fullWidth combination so the visual result is unchanged.
  */
 function ResultCard({
   icon: Icon,
@@ -30,13 +32,15 @@ function ResultCard({
     }
   };
 
+  const accessibleLabel = [title, cta].filter(Boolean).join(". ");
+
   return (
     <div
       role={onSelect ? "button" : undefined}
       tabIndex={onSelect ? 0 : undefined}
       onClick={onSelect}
       onKeyDown={handleKeyDown}
-      aria-label={onSelect ? title : undefined}
+      aria-label={onSelect ? accessibleLabel : undefined}
       className={cn(
         "flex h-full flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition",
         "hover:-translate-y-1 hover:shadow-lg",
@@ -79,9 +83,12 @@ function ResultCard({
 
       {cta && (
         <div className="mt-auto pt-2">
-          <Button variant="outline" size="sm" fullWidth>
+          <span
+            aria-hidden="true"
+            className="inline-flex h-8 w-full items-center justify-center gap-1.5 rounded-lg border border-slate-300 px-3 text-sm font-medium text-slate-900 transition-colors"
+          >
             {cta}
-          </Button>
+          </span>
         </div>
       )}
     </div>

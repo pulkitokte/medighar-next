@@ -1,42 +1,15 @@
 import { cn } from "@/shared/lib/cn.js";
-
-/**
- * Highlights the first case-insensitive occurrence of `query` inside
- * `text` using a semantic <mark> element. Returns the original text
- * unchanged when there's no query or no match, so this is always safe
- * to call unconditionally.
- * @param {string} text
- * @param {string} query
- * @returns {string|Array<string|JSX.Element>}
- */
-function highlightMatch(text, query) {
-  if (!text) return text;
-
-  const trimmedQuery = query.trim();
-  if (!trimmedQuery) return text;
-
-  const matchIndex = text.toLowerCase().indexOf(trimmedQuery.toLowerCase());
-  if (matchIndex === -1) return text;
-
-  const before = text.slice(0, matchIndex);
-  const match = text.slice(matchIndex, matchIndex + trimmedQuery.length);
-  const after = text.slice(matchIndex + trimmedQuery.length);
-
-  return (
-    <>
-      {before}
-      <mark className="rounded-[2px] bg-amber-100 text-inherit">{match}</mark>
-      {after}
-    </>
-  );
-}
+import { highlightText } from "@/shared/lib/highlightText.js";
 
 /**
  * Presentational row for a single search result inside the Command
  * Palette. No real DOM focus is placed on this element — active state is
  * tracked via aria-activedescendant on the parent input, per the
  * accessible combobox pattern. Padding is sized for comfortable touch
- * targets on mobile as well as desktop pointer use.
+ * targets on mobile as well as desktop pointer use. Highlighting is
+ * shared with Site Search's ResultCard via highlightText() in
+ * shared/lib, so matched text looks and behaves identically on both
+ * search surfaces.
  * @param {{
  *   result: object,
  *   query?: string,
@@ -87,11 +60,11 @@ function SearchResultItem({
 
       <div className="min-w-0 flex-1">
         <p className="truncate font-medium text-slate-900">
-          {highlightMatch(result.title, query)}
+          {highlightText(result.title, query)}
         </p>
         {result.subtitle && (
           <p className="truncate text-xs text-slate-500">
-            {highlightMatch(result.subtitle, query)}
+            {highlightText(result.subtitle, query)}
           </p>
         )}
       </div>
