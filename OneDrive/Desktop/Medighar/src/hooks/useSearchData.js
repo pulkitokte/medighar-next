@@ -29,6 +29,13 @@ const RECENT_RESOLVE_LIMIT = 8;
  * duplicated here beyond what those modules already own. Extracted so
  * that adding a new search surface never means re-implementing this
  * assembly step.
+ *
+ * Uses allRecords (the complete medical-record dataset) rather than
+ * filteredRecords, since search must be able to find any record
+ * regardless of whatever search/filter/sort state a separate
+ * useMedicalRecords() instance on the Medical Records page happens to be
+ * in — see useMedicalRecords.js for the full allRecords/filteredRecords
+ * contract.
  * @returns {{
  *   searchIndex: Array<object>,
  *   boostedIds: { recentIds: Set<string>, savedIds: Set<string> },
@@ -47,7 +54,7 @@ export function useSearchData() {
   // Dynamic per-user data: reused directly from existing hooks.
   const { upcoming: upcomingAppointments, past: pastAppointments } =
     useAppointments();
-  const { filteredRecords } = useMedicalRecords();
+  const { allRecords } = useMedicalRecords();
   const { members: familyMembers } = useFamilyProfiles();
   const { events: timelineEvents } = useHealthTimeline();
   const saved = useSavedItems();
@@ -82,7 +89,7 @@ export function useSearchData() {
         diseases,
         pharmacies,
         appointments: allAppointments,
-        records: filteredRecords,
+        records: allRecords,
         familyMembers,
         timelineEvents,
       }),
@@ -92,7 +99,7 @@ export function useSearchData() {
       diseases,
       pharmacies,
       allAppointments,
-      filteredRecords,
+      allRecords,
       familyMembers,
       timelineEvents,
     ],
