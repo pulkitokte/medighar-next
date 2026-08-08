@@ -38,9 +38,21 @@ const SORT_OPTIONS = [
   { key: "oldest", label: "Oldest" },
 ];
 
+/**
+ * role="alert" makes this an assertive live region on its own — no
+ * separate aria-live attribute is needed alongside it, and adding both
+ * would be redundant per the ARIA spec. This means a validation error
+ * is announced to screen readers the moment it appears (e.g. right after
+ * a failed submit), without requiring the user to discover it visually
+ * or manually navigate to the field.
+ */
 function FieldError({ message }) {
   if (!message) return null;
-  return <p className="mt-1 text-xs text-red-600">{message}</p>;
+  return (
+    <p role="alert" className="mt-1 text-xs text-red-600">
+      {message}
+    </p>
+  );
 }
 
 function RecordForm({
@@ -57,9 +69,9 @@ function RecordForm({
       onSubmit={onSubmit}
       className="mx-auto flex w-full max-w-3xl flex-col gap-6 rounded-2xl border border-slate-200 bg-white p-6"
     >
-      <h3 className="text-base font-semibold text-slate-900">
+      <h2 className="text-base font-semibold text-slate-900">
         {isEditing ? "Edit Record" : "Add Medical Record"}
-      </h3>
+      </h2>
 
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <label className="flex flex-col gap-1.5 text-sm">
@@ -447,6 +459,11 @@ function MedicalRecordsPage() {
           message={
             pendingDelete
               ? `"${pendingDelete.title}" will be permanently deleted. This cannot be undone.`
+              : ""
+          }
+          warning={
+            pendingDelete
+              ? "This will also remove it from your Health Timeline history, and from your Health Passport summary if it's referenced there (for example, as a vaccination or a keyword-matched procedure)."
               : ""
           }
           confirmLabel="Delete Record"
