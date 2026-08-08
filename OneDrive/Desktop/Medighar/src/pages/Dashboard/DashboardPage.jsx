@@ -25,7 +25,9 @@ import PageHeading from "@/shared/components/ui/PageHeading.jsx";
 import Button from "@/shared/components/ui/Button.jsx";
 import EmptyRelationship from "@/shared/components/ui/EmptyRelationship.jsx";
 import SearchHint from "@/shared/components/ui/SearchHint.jsx";
+import WelcomeCard from "@/shared/components/ui/WelcomeCard.jsx";
 import { useDashboard } from "@/hooks/useDashboard.js";
+import { useFirstVisit } from "@/hooks/useFirstVisit.js";
 
 const TONE_STYLES = {
   sky: {
@@ -406,6 +408,8 @@ function DashboardPage() {
     smartSuggestions,
   } = useDashboard();
 
+  const { hasSeenWelcome, dismiss } = useFirstVisit();
+
   return (
     <Section paddingY="py-14 sm:py-20">
       <Container className="flex flex-col gap-14">
@@ -414,6 +418,8 @@ function DashboardPage() {
           subtitle="A calm, complete view of your health activity — all in one place."
           center
         />
+
+        {!hasSeenWelcome && <WelcomeCard onDismiss={dismiss} />}
 
         <div className="flex justify-center">
           <SearchHint />
