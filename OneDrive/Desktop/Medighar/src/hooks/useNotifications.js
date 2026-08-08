@@ -47,7 +47,7 @@ export function useNotifications() {
     completed: completedReminders,
     disabled: disabledReminders,
   } = useReminders();
-  const { filteredRecords } = useMedicalRecords();
+  const { allRecords } = useMedicalRecords();
   const { members } = useFamilyProfiles();
 
   const readSnapshot = useSyncExternalStore(
@@ -117,7 +117,7 @@ export function useNotifications() {
         {
           appointments: allAppointments,
           reminders: allReminders,
-          records: filteredRecords,
+          records: allRecords,
           memberProfiles,
           familyMembers: members,
           reportLogs,
@@ -140,7 +140,7 @@ export function useNotifications() {
     [
       allAppointments,
       allReminders,
-      filteredRecords,
+      allRecords,
       memberProfiles,
       members,
       reportLogs,
@@ -157,7 +157,7 @@ export function useNotifications() {
       buildActivityFeed(allNotifications, {
         appointments: allAppointments,
         reminders: allReminders,
-        records: filteredRecords,
+        records: allRecords,
         memberProfiles,
         familyMembers: members,
         reportLogs,
@@ -167,7 +167,7 @@ export function useNotifications() {
       allNotifications,
       allAppointments,
       allReminders,
-      filteredRecords,
+      allRecords,
       memberProfiles,
       members,
       reportLogs,

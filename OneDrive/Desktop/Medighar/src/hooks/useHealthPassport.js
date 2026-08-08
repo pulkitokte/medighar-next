@@ -45,7 +45,7 @@ export function useHealthPassport() {
     completed: completedReminders,
     disabled: disabledReminders,
   } = useReminders();
-  const { filteredRecords } = useMedicalRecords();
+  const { allRecords } = useMedicalRecords();
 
   const memberAppointments = useMemo(
     () =>
@@ -64,11 +64,8 @@ export function useHealthPassport() {
     [upcomingReminders, completedReminders, disabledReminders, memberId],
   );
   const memberRecords = useMemo(
-    () =>
-      filteredRecords.filter(
-        (record) => (record.memberId ?? "me") === memberId,
-      ),
-    [filteredRecords, memberId],
+    () => allRecords.filter((record) => (record.memberId ?? "me") === memberId),
+    [allRecords, memberId],
   );
 
   const recentAppointment = useMemo(() => {

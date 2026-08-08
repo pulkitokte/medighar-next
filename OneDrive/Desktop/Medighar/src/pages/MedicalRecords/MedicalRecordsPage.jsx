@@ -526,3 +526,4 @@ function MedicalRecordsPage() {
 }
 
 export default MedicalRecordsPage;
+useNotifications.js

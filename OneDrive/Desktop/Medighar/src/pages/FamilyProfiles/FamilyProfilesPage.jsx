@@ -227,7 +227,7 @@ function FamilyProfilesPage() {
     completed: completedReminders,
     disabled: disabledReminders,
   } = useReminders();
-  const { filteredRecords } = useMedicalRecords();
+  const { allRecords } = useMedicalRecords();
 
   const [editingId, setEditingId] = useState(null);
   const [values, setValues] = useState(EMPTY_VALUES);
@@ -286,7 +286,7 @@ function FamilyProfilesPage() {
       ...completedReminders,
       ...disabledReminders,
     ].filter((reminder) => (reminder.memberId ?? "me") === memberId).length;
-    const recordsCount = filteredRecords.filter(
+    const recordsCount = allRecords.filter(
       (record) => (record.memberId ?? "me") === memberId,
     ).length;
 

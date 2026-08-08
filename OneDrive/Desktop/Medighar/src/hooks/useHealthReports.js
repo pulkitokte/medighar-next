@@ -35,7 +35,7 @@ export function useHealthReports() {
     completed: completedReminders,
     disabled: disabledReminders,
   } = useReminders();
-  const { filteredRecords } = useMedicalRecords();
+  const { allRecords } = useMedicalRecords();
   const { members } = useFamilyProfiles();
   const insights = useHealthInsights();
   const { events: timelineEvents } = useHealthTimeline();
@@ -79,7 +79,7 @@ export function useHealthReports() {
         sources: {
           appointments: allAppointments,
           reminders: allReminders,
-          records: filteredRecords,
+          records: allRecords,
           familyMembers: members,
           memberProfiles,
           recentEvents: timelineEvents,
@@ -94,7 +94,7 @@ export function useHealthReports() {
       dateTo,
       allAppointments,
       allReminders,
-      filteredRecords,
+      allRecords,
       members,
       memberProfiles,
       timelineEvents,

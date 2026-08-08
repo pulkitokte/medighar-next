@@ -59,6 +59,7 @@ export function useMedicalRecords() {
   const remove = useCallback((id) => deleteRecord(id), []);
 
   return {
+    allRecords,
     filteredRecords,
     recentRecords,
     groupedByYear,

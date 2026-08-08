@@ -34,7 +34,7 @@ export function useHealthCalendar() {
     completed: completedReminders,
     disabled: disabledReminders,
   } = useReminders();
-  const { filteredRecords } = useMedicalRecords();
+  const { allRecords } = useMedicalRecords();
   const { members } = useFamilyProfiles();
 
   const allAppointments = useMemo(
@@ -86,7 +86,7 @@ export function useHealthCalendar() {
       {
         appointments: allAppointments,
         reminders: allReminders,
-        records: filteredRecords,
+        records: allRecords,
       },
       viewRange.start,
       viewRange.end,
@@ -97,7 +97,7 @@ export function useHealthCalendar() {
   }, [
     allAppointments,
     allReminders,
-    filteredRecords,
+    allRecords,
     viewRange,
     showAppointments,
     showReminders,
@@ -120,7 +120,7 @@ export function useHealthCalendar() {
       {
         appointments: allAppointments,
         reminders: allReminders,
-        records: filteredRecords,
+        records: allRecords,
       },
       lookaheadRange.start,
       lookaheadRange.end,
@@ -131,7 +131,7 @@ export function useHealthCalendar() {
   }, [
     allAppointments,
     allReminders,
-    filteredRecords,
+    allRecords,
     lookaheadRange,
     showAppointments,
     showReminders,

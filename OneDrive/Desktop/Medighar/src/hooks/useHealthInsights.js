@@ -25,7 +25,7 @@ const EMPTY_SNAPSHOT = "[]";
 export function useHealthInsights() {
   const appointments = useAppointments();
   const reminders = useReminders();
-  const { filteredRecords } = useMedicalRecords();
+  const { allRecords } = useMedicalRecords();
   const saved = useSavedItems();
   const { completion: profileCompletion } = useMedicalProfile();
   const { members } = useFamilyProfiles();
@@ -79,7 +79,7 @@ export function useHealthInsights() {
           completed: reminders.completed,
           disabled: reminders.disabled,
         },
-        records: filteredRecords,
+        records: allRecords,
         activity: {
           recentCount: recentEntries.length,
           reviewCount: reviewsFlat.length,
@@ -89,7 +89,7 @@ export function useHealthInsights() {
         timelineSources: {
           appointments: allAppointments,
           reminders: allReminders,
-          records: filteredRecords,
+          records: allRecords,
           recentEntries: [],
           reviews: reviewsFlat,
         },
@@ -100,7 +100,7 @@ export function useHealthInsights() {
       reminders.upcoming,
       reminders.completed,
       reminders.disabled,
-      filteredRecords,
+      allRecords,
       recentEntries,
       reviewsFlat,
       saved.totalCount,

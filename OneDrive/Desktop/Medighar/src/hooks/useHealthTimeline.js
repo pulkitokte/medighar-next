@@ -35,7 +35,7 @@ export function useHealthTimeline() {
     completed: completedReminders,
     disabled: disabledReminders,
   } = useReminders();
-  const { filteredRecords } = useMedicalRecords();
+  const { allRecords } = useMedicalRecords();
   const { members } = useFamilyProfiles();
 
   const profilesSnapshot = useSyncExternalStore(
@@ -93,7 +93,7 @@ export function useHealthTimeline() {
       const events = buildTimelineEvents({
         appointments: allAppointments,
         reminders: allReminders,
-        records: filteredRecords,
+        records: allRecords,
         memberProfiles,
         familyMembers: members,
         reportLogs,
@@ -112,7 +112,7 @@ export function useHealthTimeline() {
   }, [
     allAppointments,
     allReminders,
-    filteredRecords,
+    allRecords,
     memberProfiles,
     members,
     reportLogs,
