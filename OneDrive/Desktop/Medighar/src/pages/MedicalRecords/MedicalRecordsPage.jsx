@@ -441,7 +441,13 @@ function MedicalRecordsPage() {
               <FilterSelect
                 label="Family Member"
                 value={memberFilter}
-                options={["All", ...members.map((member) => member.id)]}
+                options={[
+                  { value: "All", label: "All" },
+                  ...members.map((member) => ({
+                    value: member.id,
+                    label: member.fullName,
+                  })),
+                ]}
                 onChange={setMemberFilter}
               />
 
