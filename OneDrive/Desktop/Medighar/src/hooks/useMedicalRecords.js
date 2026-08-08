@@ -4,6 +4,7 @@ import {
   subscribeToRecords,
   searchRecords,
   filterRecordsByType,
+  filterRecordsByMember,
   sortRecords,
   groupRecordsByYear,
   deleteRecord,
@@ -30,13 +31,15 @@ export function useMedicalRecords() {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState("All");
+  const [memberFilter, setMemberFilter] = useState("All");
   const [sortBy, setSortBy] = useState("newest");
 
   const filteredRecords = useMemo(() => {
     const searched = searchRecords(allRecords, searchQuery);
-    const filtered = filterRecordsByType(searched, typeFilter);
-    return sortRecords(filtered, sortBy);
-  }, [allRecords, searchQuery, typeFilter, sortBy]);
+    const typeFiltered = filterRecordsByType(searched, typeFilter);
+    const memberFiltered = filterRecordsByMember(typeFiltered, memberFilter);
+    return sortRecords(memberFiltered, sortBy);
+  }, [allRecords, searchQuery, typeFilter, memberFilter, sortBy]);
 
   const recentRecords = useMemo(
     () => sortRecords(allRecords, "newest").slice(0, RECENT_LIMIT),
@@ -65,6 +68,8 @@ export function useMedicalRecords() {
     setSearchQuery,
     typeFilter,
     setTypeFilter,
+    memberFilter,
+    setMemberFilter,
     sortBy,
     setSortBy,
     remove,

@@ -7,6 +7,7 @@ import {
   Pencil,
   Trash2,
   ClipboardList,
+  Plus,
 } from "lucide-react";
 import { cn } from "@/shared/lib/cn.js";
 import Section from "@/shared/components/ui/Section.jsx";
@@ -152,7 +153,8 @@ function RecordForm({
 
         <label className="flex flex-col gap-1.5 text-sm">
           <span className="font-medium text-slate-700">
-            Attachment File Name
+            Attachment Reference
+            <span className="ml-1 font-normal text-slate-400">(optional)</span>
           </span>
           <input
             type="text"
@@ -163,12 +165,14 @@ function RecordForm({
             }
             className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 focus:border-blue-400 focus:outline-none"
           />
+          <span className="text-xs text-slate-400">
+            Note a file name for your own reference. Medighar doesn&rsquo;t
+            upload or store the actual file yet.
+          </span>
         </label>
 
         <label className="flex flex-col gap-1.5 text-sm">
-          <span className="font-medium text-slate-700">
-            Attachment File Type
-          </span>
+          <span className="font-medium text-slate-700">Reference Type</span>
           <select
             value={values.attachmentFileType}
             onChange={(event) =>
@@ -176,7 +180,7 @@ function RecordForm({
             }
             className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:border-blue-400 focus:outline-none"
           >
-            <option value="">Select file type</option>
+            <option value="">Select reference type</option>
             {ATTACHMENT_FILE_TYPES.map((fileType) => (
               <option key={fileType} value={fileType}>
                 {fileType}
@@ -247,8 +251,8 @@ function RecordCard({ record, onEdit, onRequestDelete }) {
       <div className="flex items-center gap-1.5 text-sm text-slate-500">
         <Paperclip className="h-4 w-4 shrink-0" aria-hidden="true" />
         {record.attachment
-          ? `${record.attachment.fileName} (${record.attachment.fileType})`
-          : "No attachment"}
+          ? `Reference: ${record.attachment.fileName} (${record.attachment.fileType})`
+          : "No attachment reference"}
       </div>
 
       {record.notes && (
@@ -303,6 +307,8 @@ function MedicalRecordsPage() {
     setSearchQuery,
     typeFilter,
     setTypeFilter,
+    memberFilter,
+    setMemberFilter,
     sortBy,
     setSortBy,
     remove,
@@ -310,6 +316,8 @@ function MedicalRecordsPage() {
 
   const { members } = useFamilyProfiles();
   const navigate = useNavigate();
+
+  const [showForm, setShowForm] = useState(false);
 
   const {
     values,
@@ -319,14 +327,31 @@ function MedicalRecordsPage() {
     startEdit,
     resetForm,
     handleSubmit,
-  } = useRecordForm();
+  } = useRecordForm({ onSuccess: () => setShowForm(false) });
 
   const [pendingDelete, setPendingDelete] = useState(null);
+
+  const handleToggleForm = () => {
+    if (showForm) {
+      resetForm();
+      setShowForm(false);
+    } else {
+      setShowForm(true);
+    }
+  };
+
+  const handleStartEdit = (record) => {
+    startEdit(record);
+    setShowForm(true);
+  };
 
   const handleConfirmDelete = () => {
     if (pendingDelete) {
       remove(pendingDelete.id);
-      if (isEditing) resetForm();
+      if (isEditing) {
+        resetForm();
+        setShowForm(false);
+      }
     }
     setPendingDelete(null);
   };
@@ -340,21 +365,33 @@ function MedicalRecordsPage() {
           center
         />
 
-        <RecordForm
-          values={values}
-          errors={errors}
-          isEditing={isEditing}
-          onChange={updateField}
-          onSubmit={handleSubmit}
-          onCancel={resetForm}
-          members={members}
-        />
+        <div className="mx-auto flex w-full max-w-3xl justify-center">
+          <Button
+            variant="outline"
+            onClick={handleToggleForm}
+            leftIcon={<Plus className="h-4 w-4" aria-hidden="true" />}
+          >
+            {showForm ? "Hide Form" : "Add Medical Record"}
+          </Button>
+        </div>
+
+        {showForm && (
+          <RecordForm
+            values={values}
+            errors={errors}
+            isEditing={isEditing}
+            onChange={updateField}
+            onSubmit={handleSubmit}
+            onCancel={handleToggleForm}
+            members={members}
+          />
+        )}
 
         {totalCount === 0 ? (
           <EmptyState
             icon={ClipboardList}
             title="No medical records yet."
-            description="Add a prescription, lab report, or other medical record above to see it here."
+            description="Add a prescription, lab report, or other medical record to see it here."
             action={() => navigate("/doctors")}
             actionLabel="Browse Doctors"
           />
@@ -370,7 +407,7 @@ function MedicalRecordsPage() {
               ) : (
                 <RecordGrid
                   records={recentRecords}
-                  onEdit={startEdit}
+                  onEdit={handleStartEdit}
                   onRequestDelete={setPendingDelete}
                 />
               )}
@@ -399,6 +436,13 @@ function MedicalRecordsPage() {
                 value={typeFilter}
                 options={["All", ...RECORD_TYPES]}
                 onChange={setTypeFilter}
+              />
+
+              <FilterSelect
+                label="Family Member"
+                value={memberFilter}
+                options={["All", ...members.map((member) => member.id)]}
+                onChange={setMemberFilter}
               />
 
               <div className="flex flex-col gap-1.5 text-sm">
@@ -443,7 +487,7 @@ function MedicalRecordsPage() {
                     </h3>
                     <RecordGrid
                       records={groupedByYear[year]}
-                      onEdit={startEdit}
+                      onEdit={handleStartEdit}
                       onRequestDelete={setPendingDelete}
                     />
                   </div>

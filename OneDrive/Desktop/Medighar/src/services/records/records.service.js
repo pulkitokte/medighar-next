@@ -128,6 +128,19 @@ export function filterRecordsByType(records, type) {
   return filterByEquality(records, "type", type);
 }
 
+/**
+ * Filters records to a single family member. Reuses the existing
+ * filterByEquality helper (same as filterRecordsByType) rather than
+ * introducing a bespoke comparison, and reuses each record's existing
+ * memberId field rather than any new data.
+ * @param {Array<object>} records
+ * @param {string} memberId member id, or "All" to bypass filtering
+ * @returns {Array<object>}
+ */
+export function filterRecordsByMember(records, memberId) {
+  return filterByEquality(records, "memberId", memberId);
+}
+
 export function sortRecords(records, sortBy) {
   return sortItems(records, sortBy, SORT_COMPARATORS);
 }

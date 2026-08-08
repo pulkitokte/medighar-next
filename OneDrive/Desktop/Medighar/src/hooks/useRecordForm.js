@@ -16,7 +16,14 @@ const INITIAL_VALUES = {
   attachmentFileType: "",
 };
 
-export function useRecordForm() {
+/**
+ * @param {{ onSuccess?: () => void }} [options] Optional callback invoked
+ *   after a successful create or update (but not on validation failure).
+ *   Lets the page react to submit success — e.g. collapsing the form —
+ *   without needing to inspect internal hook state after calling
+ *   handleSubmit.
+ */
+export function useRecordForm({ onSuccess } = {}) {
   const [editingId, setEditingId] = useState(null);
   const [values, setValues] = useState(INITIAL_VALUES);
   const [errors, setErrors] = useState({});
@@ -61,8 +68,9 @@ export function useRecordForm() {
       }
 
       resetForm();
+      onSuccess?.();
     },
-    [editingId, values, resetForm],
+    [editingId, values, resetForm, onSuccess],
   );
 
   return {
