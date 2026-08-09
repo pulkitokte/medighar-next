@@ -8,6 +8,7 @@ import {
   Trash2,
   ClipboardList,
   Plus,
+  FolderHeart,
 } from "lucide-react";
 import { cn } from "@/shared/lib/cn.js";
 import Section from "@/shared/components/ui/Section.jsx";
@@ -18,6 +19,7 @@ import FilterSelect from "@/shared/components/ui/FilterSelect.jsx";
 import EmptyState from "@/shared/components/ui/EmptyState.jsx";
 import EmptyRelationship from "@/shared/components/ui/EmptyRelationship.jsx";
 import ConfirmDialog from "@/shared/components/ui/ConfirmDialog.jsx";
+import DiscoveryHint from "@/shared/components/ui/DiscoveryHint.jsx";
 import { useMedicalRecords } from "@/hooks/useMedicalRecords.js";
 import { useRecordForm } from "@/hooks/useRecordForm.js";
 import { useFamilyProfiles } from "@/hooks/useFamilyProfiles.js";
@@ -363,6 +365,13 @@ function MedicalRecordsPage() {
           title="Medical Records"
           subtitle="Keep track of your prescriptions, reports, and medical history in one place."
           center
+        />
+
+        <DiscoveryHint
+          hintKey="medical-records"
+          icon={FolderHeart}
+          title="Keep everything in one place"
+          description="Add prescriptions, lab reports, and scans as you receive them — they'll show up here, on your Health Timeline, and in your Health Passport automatically."
         />
 
         <div className="mx-auto flex w-full max-w-3xl justify-center">

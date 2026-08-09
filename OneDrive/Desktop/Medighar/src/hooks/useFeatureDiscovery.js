@@ -3,14 +3,20 @@ import {
   getVisitedFeatures,
   markFeatureVisited,
   isFeatureNew,
+  hasSeenHint,
+  markHintSeen,
   subscribeToVisitedFeatures,
 } from "@/services/discovery/discovery.service.js";
 
 const EMPTY_SNAPSHOT = "[]";
 
 /**
- * Exposes first-visit "New" badge state to the UI. Reused by Navbar (to
- * render badges) and MainLayout (to mark routes visited on navigation).
+ * Exposes first-visit "New" badge state and contextual discovery-hint
+ * state to the UI, both backed by the same underlying visited-features
+ * store (see discovery.service.js for how the two concepts stay
+ * distinct). Reused by Navbar (badges) and MainLayout (route tracking)
+ * for the former, and by individual pages (e.g. DiscoveryHint mounts)
+ * for the latter.
  */
 export function useFeatureDiscovery() {
   const snapshot = useSyncExternalStore(
@@ -28,5 +34,19 @@ export function useFeatureDiscovery() {
     [snapshot],
   );
 
-  return { isNew, markVisited: markFeatureVisited };
+  const isHintSeen = useCallback(
+    (hintKey) => {
+      // snapshot dependency keeps this recomputed on every visited-list change
+      void snapshot;
+      return hasSeenHint(hintKey);
+    },
+    [snapshot],
+  );
+
+  return {
+    isNew,
+    markVisited: markFeatureVisited,
+    isHintSeen,
+    dismissHint: markHintSeen,
+  };
 }

@@ -1,9 +1,10 @@
-import { Stethoscope } from "lucide-react";
+import { Stethoscope, ShieldCheck } from "lucide-react";
 import Section from "@/shared/components/ui/Section.jsx";
 import Container from "@/shared/components/ui/Container.jsx";
 import PageHeading from "@/shared/components/ui/PageHeading.jsx";
 import Pagination from "@/shared/components/ui/Pagination.jsx";
 import SearchHint from "@/shared/components/ui/SearchHint.jsx";
+import DiscoveryHint from "@/shared/components/ui/DiscoveryHint.jsx";
 import DoctorSearchBar from "@/features/doctors/components/DoctorSearchBar.jsx";
 import DoctorFilters from "@/features/doctors/components/DoctorFilters.jsx";
 import DoctorSort from "@/features/doctors/components/DoctorSort.jsx";
@@ -40,6 +41,13 @@ function DoctorsPage() {
           title="Find Your Doctor"
           subtitle="Browse qualified, verified doctors across specialties, cities and healthcare systems."
           center
+        />
+
+        <DiscoveryHint
+          hintKey="doctors"
+          icon={ShieldCheck}
+          title="Every doctor here is verified"
+          description="Filter by specialty, city, or healthcare system to find the right fit — each profile shows their credentials before you book."
         />
 
         <div className="card-surface mx-auto flex w-full max-w-4xl flex-col gap-5 border border-sky-100 bg-white/90 p-5 sm:p-6">

@@ -65,3 +65,38 @@ export function isFeatureNew(path) {
   if (!DISCOVERABLE_FEATURES.includes(path)) return false;
   return !getVisitedFeatures().includes(path);
 }
+
+/**
+ * Prefix distinguishing a contextual discovery hint's dismissal key from
+ * a real route path in the same underlying storage array. This keeps
+ * "hint dismissed" and "route visited for nav badge purposes" as
+ * genuinely separate concepts — see hasSeenHint/markHintSeen below —
+ * while reusing the exact same generic repository rather than
+ * introducing a second localStorage key or persistence mechanism.
+ * A hint key can never collide with a real route path (which always
+ * starts with "/"), and is never matched by DISCOVERABLE_FEATURES, so it
+ * can never accidentally affect Navbar's "New" badge logic above.
+ */
+const HINT_KEY_PREFIX = "hint:";
+
+/**
+ * Whether the contextual discovery hint identified by hintKey has
+ * already been dismissed.
+ * @param {string} hintKey e.g. "doctors", "medical-records"
+ * @returns {boolean}
+ */
+export function hasSeenHint(hintKey) {
+  return getVisitedFeatures().includes(`${HINT_KEY_PREFIX}${hintKey}`);
+}
+
+/**
+ * Marks a contextual discovery hint as permanently dismissed.
+ * @param {string} hintKey e.g. "doctors", "medical-records"
+ */
+export function markHintSeen(hintKey) {
+  const storageKey = `${HINT_KEY_PREFIX}${hintKey}`;
+  const current = getVisitedFeatures();
+  if (current.includes(storageKey)) return;
+
+  setStoredVisitedFeatures([...current, storageKey]);
+}
