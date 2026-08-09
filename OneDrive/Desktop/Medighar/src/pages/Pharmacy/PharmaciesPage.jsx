@@ -1,9 +1,10 @@
-import { Store } from "lucide-react";
+import { Store, Truck } from "lucide-react";
 import Section from "@/shared/components/ui/Section.jsx";
 import Container from "@/shared/components/ui/Container.jsx";
 import PageHeading from "@/shared/components/ui/PageHeading.jsx";
 import Pagination from "@/shared/components/ui/Pagination.jsx";
 import SearchHint from "@/shared/components/ui/SearchHint.jsx";
+import DiscoveryHint from "@/shared/components/ui/DiscoveryHint.jsx";
 import PharmacySearchBar from "@/features/pharmacy/components/PharmacySearchBar.jsx";
 import PharmacyFilters from "@/features/pharmacy/components/PharmacyFilters.jsx";
 import PharmacySort from "@/features/pharmacy/components/PharmacySort.jsx";
@@ -40,6 +41,13 @@ function PharmaciesPage() {
           title="Find a Pharmacy"
           subtitle="Discover trusted, verified pharmacies near you for quick and convenient access to medicines."
           center
+        />
+
+        <DiscoveryHint
+          hintKey="pharmacy"
+          icon={Truck}
+          title="Filter for pharmacies that deliver"
+          description="Use the city and home delivery filters to find a pharmacy that's convenient for you — including ones that can deliver to your door."
         />
 
         <div className="card-surface mx-auto flex w-full max-w-4xl flex-col gap-5 border border-violet-100 bg-white/90 p-5 sm:p-6">
