@@ -15,6 +15,7 @@ import {
   Syringe,
   Users,
   ShieldCheck,
+  RefreshCw,
 } from "lucide-react";
 import { cn } from "@/shared/lib/cn.js";
 import Section from "@/shared/components/ui/Section.jsx";
@@ -22,6 +23,7 @@ import Container from "@/shared/components/ui/Container.jsx";
 import PageHeading from "@/shared/components/ui/PageHeading.jsx";
 import Button from "@/shared/components/ui/Button.jsx";
 import EmptyRelationship from "@/shared/components/ui/EmptyRelationship.jsx";
+import DiscoveryHint from "@/shared/components/ui/DiscoveryHint.jsx";
 import { useHealthPassport } from "@/hooks/useHealthPassport.js";
 
 function PassportSection({ title, icon: Icon, children, empty }) {
@@ -110,6 +112,13 @@ function HealthPassportPage() {
           title="Health Passport"
           subtitle="Your complete medical summary, ready for emergencies."
           center
+        />
+
+        <DiscoveryHint
+          hintKey="passport"
+          icon={RefreshCw}
+          title="Your Passport updates automatically"
+          description="This summary already reflects your Medical Profile, Reminders, Medical Records, and Family Profiles as you update them — you don't need to enter anything here directly, and nothing below is hidden until you click Generate."
         />
 
         <p role="status" aria-live="polite" className="sr-only">

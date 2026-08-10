@@ -6,6 +6,7 @@ import Container from "@/shared/components/ui/Container.jsx";
 import PageHeading from "@/shared/components/ui/PageHeading.jsx";
 import Button from "@/shared/components/ui/Button.jsx";
 import ConfirmDialog from "@/shared/components/ui/ConfirmDialog.jsx";
+import DiscoveryHint from "@/shared/components/ui/DiscoveryHint.jsx";
 import { useFamilyProfiles } from "@/hooks/useFamilyProfiles.js";
 import { useAppointments } from "@/hooks/useAppointments.js";
 import { useReminders } from "@/hooks/useReminders.js";
@@ -321,6 +322,13 @@ function FamilyProfilesPage() {
           title="Family Health Profiles"
           subtitle="Manage medical information for yourself and your family members."
           center
+        />
+
+        <DiscoveryHint
+          hintKey="family"
+          icon={Users}
+          title="Keep everyone's health organized separately"
+          description="Add family members here, and their appointments, reminders, and medical records will stay organized under their own name throughout Medighar."
         />
 
         <div className="mx-auto flex w-full max-w-3xl justify-center">
