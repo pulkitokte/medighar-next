@@ -15,6 +15,7 @@ import Button from "@/shared/components/ui/Button.jsx";
 import EmptyState from "@/shared/components/ui/EmptyState.jsx";
 import EmptyRelationship from "@/shared/components/ui/EmptyRelationship.jsx";
 import ConfirmDialog from "@/shared/components/ui/ConfirmDialog.jsx";
+import DiscoveryHint from "@/shared/components/ui/DiscoveryHint.jsx";
 import { useReminders } from "@/hooks/useReminders.js";
 import { useReminderForm } from "@/hooks/useReminderForm.js";
 import { useAppointments } from "@/hooks/useAppointments.js";
@@ -424,6 +425,13 @@ function RemindersPage() {
           title="Reminder Center"
           subtitle="Never miss a dose or an appointment."
           center
+        />
+
+        <DiscoveryHint
+          hintKey="reminders"
+          icon={Bell}
+          title="Two kinds of reminders"
+          description="Set medicine reminders anytime. Appointment reminders need an existing appointment first — book one from a doctor's profile if you don't have one yet."
         />
 
         <form
