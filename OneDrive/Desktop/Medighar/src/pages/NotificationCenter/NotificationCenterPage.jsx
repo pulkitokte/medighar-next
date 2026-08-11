@@ -8,6 +8,7 @@ import {
   Trash2,
   X,
   Activity,
+  Layers,
 } from "lucide-react";
 import { cn } from "@/shared/lib/cn.js";
 import Section from "@/shared/components/ui/Section.jsx";
@@ -18,6 +19,7 @@ import LoadingState from "@/shared/components/ui/LoadingState.jsx";
 import ErrorState from "@/shared/components/ui/ErrorState.jsx";
 import EmptyState from "@/shared/components/ui/EmptyState.jsx";
 import EmptyRelationship from "@/shared/components/ui/EmptyRelationship.jsx";
+import DiscoveryHint from "@/shared/components/ui/DiscoveryHint.jsx";
 import { useNotifications } from "@/hooks/useNotifications.js";
 import {
   FILTER_OPTIONS,
@@ -270,6 +272,13 @@ function NotificationCenterPage() {
             </Button>
           </div>
         </section>
+
+        <DiscoveryHint
+          hintKey="notifications"
+          icon={Layers}
+          title="Two different views of your activity"
+          description="Notifications are alerts you can mark as read or dismiss. Activity Feed is a complete, read-only log of everything happening across Medighar, for reference."
+        />
 
         <div
           role="tablist"

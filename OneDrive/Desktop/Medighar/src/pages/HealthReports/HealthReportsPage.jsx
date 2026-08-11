@@ -8,12 +8,14 @@ import {
   Activity,
   Trophy,
   Printer,
+  Eye,
 } from "lucide-react";
 import Section from "@/shared/components/ui/Section.jsx";
 import Container from "@/shared/components/ui/Container.jsx";
 import PageHeading from "@/shared/components/ui/PageHeading.jsx";
 import Button from "@/shared/components/ui/Button.jsx";
 import EmptyRelationship from "@/shared/components/ui/EmptyRelationship.jsx";
+import DiscoveryHint from "@/shared/components/ui/DiscoveryHint.jsx";
 import { useHealthReports } from "@/hooks/useHealthReports.js";
 import {
   REPORT_TYPES,
@@ -81,6 +83,13 @@ function HealthReportsPage() {
           title="Health Reports"
           subtitle="Generate a printable summary of your health activity."
           center
+        />
+
+        <DiscoveryHint
+          hintKey="reports"
+          icon={Eye}
+          title="The preview updates as you choose options"
+          description="This report already reflects your Report Type, Member, and Date Range selections below. Click Generate Report to log it and unlock Print / Export PDF."
         />
 
         <div className="mx-auto flex w-full max-w-4xl flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-6 print:hidden">
