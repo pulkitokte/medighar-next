@@ -38,6 +38,7 @@ function MemberForm({
   onChange,
   onSubmit,
   onCancel,
+  bloodGroupLocked,
 }) {
   return (
     <form
@@ -92,7 +93,10 @@ function MemberForm({
           <select
             value={values.bloodGroup}
             onChange={(event) => onChange("bloodGroup", event.target.value)}
-            className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:border-blue-400 focus:outline-none"
+            disabled={bloodGroupLocked}
+            className={`h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:border-blue-400 focus:outline-none ${
+              bloodGroupLocked ? "cursor-not-allowed bg-slate-50 text-slate-400" : ""
+            }`}
           >
             <option value="">Select blood group</option>
             {BLOOD_GROUPS.map((group) => (
@@ -101,6 +105,12 @@ function MemberForm({
               </option>
             ))}
           </select>
+          {bloodGroupLocked && (
+            <span className="text-xs text-slate-500">
+              Managed by this member&rsquo;s Medical Profile. Use the
+              &ldquo;Medical Profile&rdquo; button on their card to change it.
+            </span>
+          )}
         </label>
 
         <label className="flex flex-col gap-1.5 text-sm">
@@ -235,6 +245,7 @@ function FamilyProfilesPage() {
   const [errors, setErrors] = useState({});
   const [showForm, setShowForm] = useState(false);
   const [pendingDelete, setPendingDelete] = useState(null);
+  const [bloodGroupLocked, setBloodGroupLocked] = useState(false);
 
   const updateField = (field, value) => {
     setValues((previous) => ({ ...previous, [field]: value }));
@@ -252,6 +263,7 @@ function FamilyProfilesPage() {
       notes: member.notes,
     });
     setErrors({});
+    setBloodGroupLocked(Boolean(member.bloodGroupManagedByMedicalProfile));
     setShowForm(true);
   };
 
@@ -259,6 +271,7 @@ function FamilyProfilesPage() {
     setEditingId(null);
     setValues(EMPTY_VALUES);
     setErrors({});
+    setBloodGroupLocked(false);
     setShowForm(false);
   };
 
@@ -349,6 +362,7 @@ function FamilyProfilesPage() {
             onChange={updateField}
             onSubmit={handleSubmit}
             onCancel={resetForm}
+            bloodGroupLocked={bloodGroupLocked}
           />
         )}
 
