@@ -414,7 +414,18 @@ function HealthPassportPage() {
           <PassportSection
             title="Insurance Details"
             icon={ShieldCheck}
-            empty="Not available yet."
+            empty={
+              // passportData.insurance is currently always null — no
+              // insurance data model exists anywhere in the application
+              // (see passport.service.js). This is not a per-user empty
+              // result like the sections above; it is an unbuilt
+              // capability, so the wording is deliberately different from
+              // "No insurance listed." to avoid implying the feature
+              // exists and simply has no data for this user.
+              passportData.insurance === null
+                ? "Insurance information isn't supported in Medighar yet."
+                : null
+            }
           >
             <div />
           </PassportSection>
