@@ -28,6 +28,22 @@ function isFilled(value) {
 }
 
 /**
+ * Composes a display emergency-contact string from a Medical Profile's
+ * separate name/number fields. Mirrors the exact composition
+ * buildMeMember() already uses for "me", so "me" and every other member
+ * end up formatted identically regardless of source.
+ * @param {object} profile
+ * @returns {string}
+ */
+function composeEmergencyContact(profile) {
+  if (!isFilled(profile?.emergencyContactName)) return "";
+
+  return `${profile.emergencyContactName}${
+    profile.emergencyContactNumber ? ` · ${profile.emergencyContactNumber}` : ""
+  }`;
+}
+
+/**
  * Resolves the authoritative blood group for a member id: if a Medical
  * Profile exists for that id and has a non-empty bloodGroup, that value
  * takes precedence — mirroring the derivation already used for "me" in
@@ -55,12 +71,38 @@ function resolveBloodGroup(memberId, fallbackBloodGroup) {
   };
 }
 
+/**
+ * Resolves the authoritative emergency contact for a member id, using
+ * the same precedence rule as resolveBloodGroup(): a Medical Profile's
+ * emergencyContactName/emergencyContactNumber take precedence when
+ * present, otherwise the family record's own free-text emergencyContact
+ * string is used. Authoritative-ness is keyed off emergencyContactName
+ * specifically, since medicalProfile.service.js's validateProfile
+ * requires both emergencyContactName and emergencyContactNumber to save
+ * a profile in the first place — a saved profile is never missing one
+ * while having the other. Pure read-layer resolution; writes nothing.
+ * @param {string} memberId
+ * @param {string} fallbackEmergencyContact
+ * @returns {{ emergencyContact: string, emergencyContactManagedByMedicalProfile: boolean }}
+ */
+function resolveEmergencyContact(memberId, fallbackEmergencyContact) {
+  const profile = getProfile(memberId);
+
+  if (profile && isFilled(profile.emergencyContactName)) {
+    return {
+      emergencyContact: composeEmergencyContact(profile),
+      emergencyContactManagedByMedicalProfile: true,
+    };
+  }
+
+  return {
+    emergencyContact: fallbackEmergencyContact || "",
+    emergencyContactManagedByMedicalProfile: false,
+  };
+}
+
 function buildMeMember() {
   const profile = getProfile(ME_MEMBER_ID);
-
-  const emergencyContact = profile?.emergencyContactName
-    ? `${profile.emergencyContactName}${profile.emergencyContactNumber ? ` · ${profile.emergencyContactNumber}` : ""}`
-    : "";
 
   return {
     id: ME_MEMBER_ID,
@@ -75,17 +117,20 @@ function buildMeMember() {
     // via updateMember/MemberForm.
     bloodGroupManagedByMedicalProfile: true,
     gender: profile?.gender || "",
-    emergencyContact,
+    emergencyContact: composeEmergencyContact(profile),
+    // Same reasoning as bloodGroupManagedByMedicalProfile above.
+    emergencyContactManagedByMedicalProfile: true,
     notes: "",
     isSelf: true,
   };
 }
 
 /**
- * Overlays the resolved (Medical-Profile-aware) blood group onto a raw
- * stored family member record, without mutating or persisting anything.
- * Every other field on the record — including gender, which is
- * intentionally NOT part of this resolution — passes through unchanged.
+ * Overlays the resolved (Medical-Profile-aware) blood group and
+ * emergency contact onto a raw stored family member record, without
+ * mutating or persisting anything. Every other field on the record —
+ * including gender, which is intentionally NOT part of this resolution —
+ * passes through unchanged.
  * @param {object} member
  * @returns {object}
  */
@@ -94,8 +139,16 @@ function resolveMember(member) {
     member.id,
     member.bloodGroup,
   );
+  const { emergencyContact, emergencyContactManagedByMedicalProfile } =
+    resolveEmergencyContact(member.id, member.emergencyContact);
 
-  return { ...member, bloodGroup, bloodGroupManagedByMedicalProfile };
+  return {
+    ...member,
+    bloodGroup,
+    bloodGroupManagedByMedicalProfile,
+    emergencyContact,
+    emergencyContactManagedByMedicalProfile,
+  };
 }
 
 export function getAllMembers() {
@@ -153,13 +206,13 @@ export function createMember(values) {
  * updatedAt on every edit so the Health Timeline can surface a
  * "Family Member Updated" event without any additional storage.
  *
- * Note: this still writes whatever bloodGroup value is submitted into
- * the raw family-member record, exactly as before. That write is
- * harmless even for a member whose blood group is Medical-Profile-
- * managed, since resolveMember() always overrides it on read — but the
- * UI layer (FamilyProfilesPage) additionally disables the blood-group
- * field for such members so this case should not normally occur via the
- * form.
+ * Note: this still writes whatever bloodGroup/emergencyContact values
+ * are submitted into the raw family-member record, exactly as before.
+ * Those writes are harmless even for a member whose fields are Medical-
+ * Profile-managed, since resolveMember() always overrides them on read —
+ * but the UI layer (FamilyProfilesPage) additionally disables both
+ * fields for such members so this case should not normally occur via
+ * the form.
  * @param {string} id
  * @param {object} values
  * @returns {{ success: boolean, errors?: Record<string, string>, member?: object }}
