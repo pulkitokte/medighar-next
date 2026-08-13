@@ -40,9 +40,22 @@ const EMPTY_VALUES = {
   notes: "",
 };
 
+/**
+ * role="alert" makes this an assertive live region on its own — no
+ * separate aria-live attribute is needed alongside it, and adding both
+ * would be redundant per the ARIA spec. This means a validation error is
+ * announced to screen readers the moment it appears, without requiring
+ * the user to discover it visually or manually navigate to the field.
+ * Mirrors the identical fix already applied to MedicalRecordsPage.jsx's,
+ * RemindersPage.jsx's, and FamilyProfilesPage.jsx's FieldError.
+ */
 function FieldError({ message }) {
   if (!message) return null;
-  return <p className="mt-1 text-xs text-red-600">{message}</p>;
+  return (
+    <p role="alert" className="mt-1 text-xs text-red-600">
+      {message}
+    </p>
+  );
 }
 
 function TextField({
