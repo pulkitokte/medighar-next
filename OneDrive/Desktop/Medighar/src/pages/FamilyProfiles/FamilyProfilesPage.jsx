@@ -28,17 +28,15 @@ const GENDER_OPTIONS = ["Male", "Female", "Other"];
 
 /**
  * role="alert" makes this an assertive live region on its own — no
- * separate aria-live attribute is needed alongside it, and adding both
- * would be redundant per the ARIA spec. This means a validation error is
- * announced to screen readers the moment it appears, without requiring
- * the user to discover it visually or manually navigate to the field.
- * Mirrors the identical fix already applied to MedicalRecordsPage.jsx's
- * and RemindersPage.jsx's FieldError.
+ * separate aria-live attribute is needed alongside it. The `id` prop
+ * lets each field's form control reference this exact error element via
+ * aria-describedby, giving assistive technology an explicit
+ * control-to-error relationship in addition to the live announcement.
  */
-function FieldError({ message }) {
+function FieldError({ id, message }) {
   if (!message) return null;
   return (
-    <p role="alert" className="mt-1 text-xs text-red-600">
+    <p id={id} role="alert" className="mt-1 text-xs text-red-600">
       {message}
     </p>
   );
@@ -67,19 +65,25 @@ function MemberForm({
         <label className="flex flex-col gap-1.5 text-sm">
           <span className="font-medium text-slate-700">Full Name</span>
           <input
+            id="fullName"
             type="text"
             value={values.fullName}
             onChange={(event) => onChange("fullName", event.target.value)}
+            aria-describedby={errors.fullName ? "fullName-error" : undefined}
             className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 focus:border-blue-400 focus:outline-none"
           />
-          <FieldError message={errors.fullName} />
+          <FieldError id="fullName-error" message={errors.fullName} />
         </label>
 
         <label className="flex flex-col gap-1.5 text-sm">
           <span className="font-medium text-slate-700">Relationship</span>
           <select
+            id="relationship"
             value={values.relationship}
             onChange={(event) => onChange("relationship", event.target.value)}
+            aria-describedby={
+              errors.relationship ? "relationship-error" : undefined
+            }
             className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:border-blue-400 focus:outline-none"
           >
             <option value="">Select relationship</option>
@@ -89,7 +93,7 @@ function MemberForm({
               </option>
             ))}
           </select>
-          <FieldError message={errors.relationship} />
+          <FieldError id="relationship-error" message={errors.relationship} />
         </label>
 
         <label className="flex flex-col gap-1.5 text-sm">

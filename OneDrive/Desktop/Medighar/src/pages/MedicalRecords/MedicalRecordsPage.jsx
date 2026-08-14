@@ -43,16 +43,15 @@ const SORT_OPTIONS = [
 
 /**
  * role="alert" makes this an assertive live region on its own — no
- * separate aria-live attribute is needed alongside it, and adding both
- * would be redundant per the ARIA spec. This means a validation error
- * is announced to screen readers the moment it appears (e.g. right after
- * a failed submit), without requiring the user to discover it visually
- * or manually navigate to the field.
+ * separate aria-live attribute is needed alongside it. The `id` prop
+ * lets each field's form control reference this exact error element via
+ * aria-describedby, giving assistive technology an explicit
+ * control-to-error relationship in addition to the live announcement.
  */
-function FieldError({ message }) {
+function FieldError({ id, message }) {
   if (!message) return null;
   return (
-    <p role="alert" className="mt-1 text-xs text-red-600">
+    <p id={id} role="alert" className="mt-1 text-xs text-red-600">
       {message}
     </p>
   );
@@ -95,19 +94,23 @@ function RecordForm({
         <label className="flex flex-col gap-1.5 text-sm">
           <span className="font-medium text-slate-700">Record Title</span>
           <input
+            id="title"
             type="text"
             value={values.title}
             onChange={(event) => onChange("title", event.target.value)}
+            aria-describedby={errors.title ? "title-error" : undefined}
             className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 focus:border-blue-400 focus:outline-none"
           />
-          <FieldError message={errors.title} />
+          <FieldError id="title-error" message={errors.title} />
         </label>
 
         <label className="flex flex-col gap-1.5 text-sm">
           <span className="font-medium text-slate-700">Record Type</span>
           <select
+            id="type"
             value={values.type}
             onChange={(event) => onChange("type", event.target.value)}
+            aria-describedby={errors.type ? "type-error" : undefined}
             className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:border-blue-400 focus:outline-none"
           >
             <option value="">Select record type</option>
@@ -117,40 +120,48 @@ function RecordForm({
               </option>
             ))}
           </select>
-          <FieldError message={errors.type} />
+          <FieldError id="type-error" message={errors.type} />
         </label>
 
         <label className="flex flex-col gap-1.5 text-sm">
           <span className="font-medium text-slate-700">Doctor Name</span>
           <input
+            id="doctorName"
             type="text"
             value={values.doctorName}
             onChange={(event) => onChange("doctorName", event.target.value)}
+            aria-describedby={
+              errors.doctorName ? "doctorName-error" : undefined
+            }
             className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 focus:border-blue-400 focus:outline-none"
           />
-          <FieldError message={errors.doctorName} />
+          <FieldError id="doctorName-error" message={errors.doctorName} />
         </label>
 
         <label className="flex flex-col gap-1.5 text-sm">
           <span className="font-medium text-slate-700">Hospital / Clinic</span>
           <input
+            id="hospital"
             type="text"
             value={values.hospital}
             onChange={(event) => onChange("hospital", event.target.value)}
+            aria-describedby={errors.hospital ? "hospital-error" : undefined}
             className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 focus:border-blue-400 focus:outline-none"
           />
-          <FieldError message={errors.hospital} />
+          <FieldError id="hospital-error" message={errors.hospital} />
         </label>
 
         <label className="flex flex-col gap-1.5 text-sm">
           <span className="font-medium text-slate-700">Record Date</span>
           <input
+            id="date"
             type="date"
             value={values.date}
             onChange={(event) => onChange("date", event.target.value)}
+            aria-describedby={errors.date ? "date-error" : undefined}
             className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 focus:border-blue-400 focus:outline-none"
           />
-          <FieldError message={errors.date} />
+          <FieldError id="date-error" message={errors.date} />
         </label>
 
         <label className="flex flex-col gap-1.5 text-sm">

@@ -42,17 +42,15 @@ const EMPTY_VALUES = {
 
 /**
  * role="alert" makes this an assertive live region on its own — no
- * separate aria-live attribute is needed alongside it, and adding both
- * would be redundant per the ARIA spec. This means a validation error is
- * announced to screen readers the moment it appears, without requiring
- * the user to discover it visually or manually navigate to the field.
- * Mirrors the identical fix already applied to MedicalRecordsPage.jsx's,
- * RemindersPage.jsx's, and FamilyProfilesPage.jsx's FieldError.
+ * separate aria-live attribute is needed alongside it. The `id` prop
+ * lets each field's form control reference this exact error element via
+ * aria-describedby, giving assistive technology an explicit
+ * control-to-error relationship in addition to the live announcement.
  */
-function FieldError({ message }) {
+function FieldError({ id, message }) {
   if (!message) return null;
   return (
-    <p role="alert" className="mt-1 text-xs text-red-600">
+    <p id={id} role="alert" className="mt-1 text-xs text-red-600">
       {message}
     </p>
   );
@@ -73,12 +71,14 @@ function TextField({
     >
       <span className="font-medium text-slate-700">{label}</span>
       <input
+        id={field}
         type={type}
         value={values[field]}
         onChange={(event) => onChange(field, event.target.value)}
+        aria-describedby={errors[field] ? `${field}-error` : undefined}
         className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 focus:border-blue-400 focus:outline-none"
       />
-      <FieldError message={errors[field]} />
+      <FieldError id={`${field}-error`} message={errors[field]} />
     </label>
   );
 }
@@ -88,8 +88,10 @@ function SelectField({ label, field, values, errors, onChange, options }) {
     <label className="flex flex-col gap-1.5 text-sm">
       <span className="font-medium text-slate-700">{label}</span>
       <select
+        id={field}
         value={values[field]}
         onChange={(event) => onChange(field, event.target.value)}
+        aria-describedby={errors[field] ? `${field}-error` : undefined}
         className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:border-blue-400 focus:outline-none"
       >
         <option value="">Select {label.toLowerCase()}</option>
@@ -99,7 +101,7 @@ function SelectField({ label, field, values, errors, onChange, options }) {
           </option>
         ))}
       </select>
-      <FieldError message={errors[field]} />
+      <FieldError id={`${field}-error`} message={errors[field]} />
     </label>
   );
 }

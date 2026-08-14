@@ -40,17 +40,15 @@ const STATUS_LABELS = {
 
 /**
  * role="alert" makes this an assertive live region on its own — no
- * separate aria-live attribute is needed alongside it, and adding both
- * would be redundant per the ARIA spec. This means a validation error is
- * announced to screen readers the moment it appears (e.g. right after a
- * failed submit), without requiring the user to discover it visually or
- * manually navigate to the field. Mirrors the identical fix already
- * applied to MedicalRecordsPage.jsx's FieldError.
+ * separate aria-live attribute is needed alongside it. The `id` prop
+ * lets each field's form control reference this exact error element via
+ * aria-describedby, giving assistive technology an explicit
+ * control-to-error relationship in addition to the live announcement.
  */
-function FieldError({ message }) {
+function FieldError({ id, message }) {
   if (!message) return null;
   return (
-    <p role="alert" className="mt-1 text-xs text-red-600">
+    <p id={id} role="alert" className="mt-1 text-xs text-red-600">
       {message}
     </p>
   );
@@ -61,8 +59,10 @@ function MemberSelect({ values, errors, onChange, members }) {
     <label className="flex flex-col gap-1.5 text-sm">
       <span className="font-medium text-slate-700">Family Member</span>
       <select
+        id="memberId"
         value={values.memberId}
         onChange={(event) => onChange("memberId", event.target.value)}
+        aria-describedby={errors.memberId ? "memberId-error" : undefined}
         className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:border-blue-400 focus:outline-none"
       >
         {members.map((member) => (
@@ -71,7 +71,7 @@ function MemberSelect({ values, errors, onChange, members }) {
           </option>
         ))}
       </select>
-      <FieldError message={errors.memberId} />
+      <FieldError id="memberId-error" message={errors.memberId} />
     </label>
   );
 }
@@ -125,8 +125,10 @@ function MedicineReminderFields({ values, errors, onChange, members }) {
       <label className="flex flex-col gap-1.5 text-sm">
         <span className="font-medium text-slate-700">Medicine</span>
         <select
+          id="medicineId"
           value={values.medicineId}
           onChange={(event) => onChange("medicineId", event.target.value)}
+          aria-describedby={errors.medicineId ? "medicineId-error" : undefined}
           className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:border-blue-400 focus:outline-none"
         >
           <option value="">Select medicine</option>
@@ -136,26 +138,30 @@ function MedicineReminderFields({ values, errors, onChange, members }) {
             </option>
           ))}
         </select>
-        <FieldError message={errors.medicineId} />
+        <FieldError id="medicineId-error" message={errors.medicineId} />
       </label>
 
       <label className="flex flex-col gap-1.5 text-sm">
         <span className="font-medium text-slate-700">Dosage</span>
         <input
+          id="dosage"
           type="text"
           placeholder="e.g. 1 tablet"
           value={values.dosage}
           onChange={(event) => onChange("dosage", event.target.value)}
+          aria-describedby={errors.dosage ? "dosage-error" : undefined}
           className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 focus:border-blue-400 focus:outline-none"
         />
-        <FieldError message={errors.dosage} />
+        <FieldError id="dosage-error" message={errors.dosage} />
       </label>
 
       <label className="flex flex-col gap-1.5 text-sm">
         <span className="font-medium text-slate-700">Frequency</span>
         <select
+          id="frequency"
           value={values.frequency}
           onChange={(event) => onChange("frequency", event.target.value)}
+          aria-describedby={errors.frequency ? "frequency-error" : undefined}
           className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:border-blue-400 focus:outline-none"
         >
           {FREQUENCY_OPTIONS.map((option) => (
@@ -164,40 +170,48 @@ function MedicineReminderFields({ values, errors, onChange, members }) {
             </option>
           ))}
         </select>
-        <FieldError message={errors.frequency} />
+        <FieldError id="frequency-error" message={errors.frequency} />
       </label>
 
       <label className="flex flex-col gap-1.5 text-sm">
         <span className="font-medium text-slate-700">Reminder Time</span>
         <input
+          id="reminderTime"
           type="time"
           value={values.reminderTime}
           onChange={(event) => onChange("reminderTime", event.target.value)}
+          aria-describedby={
+            errors.reminderTime ? "reminderTime-error" : undefined
+          }
           className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 focus:border-blue-400 focus:outline-none"
         />
-        <FieldError message={errors.reminderTime} />
+        <FieldError id="reminderTime-error" message={errors.reminderTime} />
       </label>
 
       <label className="flex flex-col gap-1.5 text-sm">
         <span className="font-medium text-slate-700">Start Date</span>
         <input
+          id="startDate"
           type="date"
           value={values.startDate}
           onChange={(event) => onChange("startDate", event.target.value)}
+          aria-describedby={errors.startDate ? "startDate-error" : undefined}
           className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 focus:border-blue-400 focus:outline-none"
         />
-        <FieldError message={errors.startDate} />
+        <FieldError id="startDate-error" message={errors.startDate} />
       </label>
 
       <label className="flex flex-col gap-1.5 text-sm">
         <span className="font-medium text-slate-700">End Date</span>
         <input
+          id="endDate"
           type="date"
           value={values.endDate}
           onChange={(event) => onChange("endDate", event.target.value)}
+          aria-describedby={errors.endDate ? "endDate-error" : undefined}
           className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 focus:border-blue-400 focus:outline-none"
         />
-        <FieldError message={errors.endDate} />
+        <FieldError id="endDate-error" message={errors.endDate} />
       </label>
     </div>
   );
@@ -218,8 +232,12 @@ function AppointmentReminderFields({ values, errors, onChange, members }) {
       <label className="flex flex-col gap-1.5 text-sm sm:col-span-2">
         <span className="font-medium text-slate-700">Appointment</span>
         <select
+          id="appointmentId"
           value={values.appointmentId}
           onChange={(event) => onChange("appointmentId", event.target.value)}
+          aria-describedby={
+            errors.appointmentId ? "appointmentId-error" : undefined
+          }
           className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:border-blue-400 focus:outline-none"
         >
           <option value="">Select an upcoming appointment</option>
@@ -235,7 +253,7 @@ function AppointmentReminderFields({ values, errors, onChange, members }) {
             </option>
           ))}
         </select>
-        <FieldError message={errors.appointmentId} />
+        <FieldError id="appointmentId-error" message={errors.appointmentId} />
         {upcoming.length === 0 && (
           <p className="mt-1 text-xs text-slate-500">
             You have no upcoming appointments to set a reminder for.
@@ -246,8 +264,10 @@ function AppointmentReminderFields({ values, errors, onChange, members }) {
       <label className="flex flex-col gap-1.5 text-sm">
         <span className="font-medium text-slate-700">Reminder Time</span>
         <select
+          id="leadTime"
           value={values.leadTime}
           onChange={(event) => onChange("leadTime", event.target.value)}
+          aria-describedby={errors.leadTime ? "leadTime-error" : undefined}
           className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:border-blue-400 focus:outline-none"
         >
           <option value="">Select when to be reminded</option>
@@ -257,7 +277,7 @@ function AppointmentReminderFields({ values, errors, onChange, members }) {
             </option>
           ))}
         </select>
-        <FieldError message={errors.leadTime} />
+        <FieldError id="leadTime-error" message={errors.leadTime} />
       </label>
     </div>
   );
