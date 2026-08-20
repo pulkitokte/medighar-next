@@ -1,3 +1,4 @@
+import { forwardRef } from "react";
 import { cn } from "@/shared/lib/cn.js";
 
 const VARIANT_CLASSES = {
@@ -14,23 +15,36 @@ const SIZE_CLASSES = {
   lg: "h-12 px-6 text-base gap-2.5",
 };
 
-function Button({
-  children,
-  variant = "primary",
-  size = "md",
-  fullWidth = false,
-  disabled = false,
-  loading = false,
-  leftIcon,
-  rightIcon,
-  className,
-  type = "button",
-  onClick,
-}) {
+/**
+ * Wrapped in forwardRef so consumers (e.g. ConfirmDialog) can obtain a
+ * real ref to the underlying DOM <button> element — for example, to
+ * programmatically focus it. Button always renders a single <button>
+ * element (no polymorphic "as"/link rendering exists in the current
+ * implementation), so the ref is forwarded directly with no branching.
+ * Every existing prop, variant, size, and behavior is unchanged; this is
+ * purely additive.
+ */
+const Button = forwardRef(function Button(
+  {
+    children,
+    variant = "primary",
+    size = "md",
+    fullWidth = false,
+    disabled = false,
+    loading = false,
+    leftIcon,
+    rightIcon,
+    className,
+    type = "button",
+    onClick,
+  },
+  ref,
+) {
   const isDisabled = disabled || loading;
 
   return (
     <button
+      ref={ref}
       type={type}
       onClick={onClick}
       disabled={isDisabled}
@@ -54,6 +68,8 @@ function Button({
       )}
     </button>
   );
-}
+});
+
+Button.displayName = "Button";
 
 export default Button;

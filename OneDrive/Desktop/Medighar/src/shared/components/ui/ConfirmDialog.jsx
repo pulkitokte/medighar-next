@@ -69,10 +69,7 @@ function ConfirmDialog({
      * Returns the dialog's focusable elements in DOM order. Uses a
      * general focusable-element selector (not tied to a fixed count or
      * to button class names) and excludes disabled controls, so this
-     * stays correct if the dialog's contents ever change. Queried live
-     * from the actual rendered DOM rather than held via refs, since the
-     * shared Button component isn't wrapped in forwardRef and can't
-     * accept one without modifying it — which is out of scope here.
+     * stays correct if the dialog's contents ever change.
      * @returns {HTMLElement[]}
      */
     function getFocusableElements() {
@@ -85,8 +82,8 @@ function ConfirmDialog({
     // Prefer focusing the non-destructive Cancel button rather than the
     // dialog container, so a keyboard/screen-reader user's first action
     // is never the destructive Confirm control. Falls back to the
-    // container (matching the prior behavior) if no focusable button is
-    // found for any reason.
+    // container if the Cancel control is genuinely unavailable (e.g.
+    // disabled) for any reason.
     if (cancelButtonRef.current && !cancelButtonRef.current.disabled) {
       cancelButtonRef.current.focus();
     } else {
