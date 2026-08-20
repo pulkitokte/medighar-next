@@ -50,6 +50,7 @@ function MemberForm({
   onSubmit,
   onCancel,
   bloodGroupLocked,
+  genderLocked,
   emergencyContactLocked,
 }) {
   return (
@@ -136,7 +137,10 @@ function MemberForm({
           <select
             value={values.gender}
             onChange={(event) => onChange("gender", event.target.value)}
-            className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:border-blue-400 focus:outline-none"
+            disabled={genderLocked}
+            className={`h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:border-blue-400 focus:outline-none ${
+              genderLocked ? "cursor-not-allowed bg-slate-50 text-slate-400" : ""
+            }`}
           >
             <option value="">Select gender</option>
             {GENDER_OPTIONS.map((gender) => (
@@ -145,6 +149,12 @@ function MemberForm({
               </option>
             ))}
           </select>
+          {genderLocked && (
+            <span className="text-xs text-slate-500">
+              Managed by this member&rsquo;s Medical Profile. Use the
+              &ldquo;Medical Profile&rdquo; button on their card to change it.
+            </span>
+          )}
         </label>
 
         <label className="flex flex-col gap-1.5 text-sm">
@@ -275,6 +285,7 @@ function FamilyProfilesPage() {
   const [showForm, setShowForm] = useState(false);
   const [pendingDelete, setPendingDelete] = useState(null);
   const [bloodGroupLocked, setBloodGroupLocked] = useState(false);
+  const [genderLocked, setGenderLocked] = useState(false);
   const [emergencyContactLocked, setEmergencyContactLocked] = useState(false);
 
   const updateField = (field, value) => {
@@ -294,6 +305,7 @@ function FamilyProfilesPage() {
     });
     setErrors({});
     setBloodGroupLocked(Boolean(member.bloodGroupManagedByMedicalProfile));
+    setGenderLocked(Boolean(member.genderManagedByMedicalProfile));
     setEmergencyContactLocked(
       Boolean(member.emergencyContactManagedByMedicalProfile),
     );
@@ -305,6 +317,7 @@ function FamilyProfilesPage() {
     setValues(EMPTY_VALUES);
     setErrors({});
     setBloodGroupLocked(false);
+    setGenderLocked(false);
     setEmergencyContactLocked(false);
     setShowForm(false);
   };
@@ -397,6 +410,7 @@ function FamilyProfilesPage() {
             onSubmit={handleSubmit}
             onCancel={resetForm}
             bloodGroupLocked={bloodGroupLocked}
+            genderLocked={genderLocked}
             emergencyContactLocked={emergencyContactLocked}
           />
         )}

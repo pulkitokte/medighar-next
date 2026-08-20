@@ -101,6 +101,32 @@ function resolveEmergencyContact(memberId, fallbackEmergencyContact) {
   };
 }
 
+/**
+ * Resolves the authoritative gender for a member id, using the same
+ * precedence rule as resolveBloodGroup()/resolveEmergencyContact(): a
+ * Medical Profile's gender takes precedence when present and non-empty,
+ * otherwise the family record's own stored gender is used. Pure
+ * read-layer resolution; writes nothing to either store.
+ * @param {string} memberId
+ * @param {string} fallbackGender
+ * @returns {{ gender: string, genderManagedByMedicalProfile: boolean }}
+ */
+function resolveGender(memberId, fallbackGender) {
+  const profile = getProfile(memberId);
+
+  if (profile && isFilled(profile.gender)) {
+    return {
+      gender: profile.gender,
+      genderManagedByMedicalProfile: true,
+    };
+  }
+
+  return {
+    gender: fallbackGender || "",
+    genderManagedByMedicalProfile: false,
+  };
+}
+
 function buildMeMember() {
   const profile = getProfile(ME_MEMBER_ID);
 
@@ -117,6 +143,8 @@ function buildMeMember() {
     // via updateMember/MemberForm.
     bloodGroupManagedByMedicalProfile: true,
     gender: profile?.gender || "",
+    // Same reasoning as bloodGroupManagedByMedicalProfile above.
+    genderManagedByMedicalProfile: true,
     emergencyContact: composeEmergencyContact(profile),
     // Same reasoning as bloodGroupManagedByMedicalProfile above.
     emergencyContactManagedByMedicalProfile: true,
@@ -126,10 +154,9 @@ function buildMeMember() {
 }
 
 /**
- * Overlays the resolved (Medical-Profile-aware) blood group and
+ * Overlays the resolved (Medical-Profile-aware) blood group, gender, and
  * emergency contact onto a raw stored family member record, without
- * mutating or persisting anything. Every other field on the record —
- * including gender, which is intentionally NOT part of this resolution —
+ * mutating or persisting anything. Every other field on the record
  * passes through unchanged.
  * @param {object} member
  * @returns {object}
@@ -139,6 +166,10 @@ function resolveMember(member) {
     member.id,
     member.bloodGroup,
   );
+  const { gender, genderManagedByMedicalProfile } = resolveGender(
+    member.id,
+    member.gender,
+  );
   const { emergencyContact, emergencyContactManagedByMedicalProfile } =
     resolveEmergencyContact(member.id, member.emergencyContact);
 
@@ -146,6 +177,8 @@ function resolveMember(member) {
     ...member,
     bloodGroup,
     bloodGroupManagedByMedicalProfile,
+    gender,
+    genderManagedByMedicalProfile,
     emergencyContact,
     emergencyContactManagedByMedicalProfile,
   };
@@ -206,13 +239,13 @@ export function createMember(values) {
  * updatedAt on every edit so the Health Timeline can surface a
  * "Family Member Updated" event without any additional storage.
  *
- * Note: this still writes whatever bloodGroup/emergencyContact values
- * are submitted into the raw family-member record, exactly as before.
- * Those writes are harmless even for a member whose fields are Medical-
- * Profile-managed, since resolveMember() always overrides them on read —
- * but the UI layer (FamilyProfilesPage) additionally disables both
- * fields for such members so this case should not normally occur via
- * the form.
+ * Note: this still writes whatever bloodGroup/gender/emergencyContact
+ * values are submitted into the raw family-member record, exactly as
+ * before. Those writes are harmless even for a member whose fields are
+ * Medical-Profile-managed, since resolveMember() always overrides them
+ * on read — but the UI layer (FamilyProfilesPage) additionally disables
+ * all three fields for such members so this case should not normally
+ * occur via the form.
  * @param {string} id
  * @param {object} values
  * @returns {{ success: boolean, errors?: Record<string, string>, member?: object }}
