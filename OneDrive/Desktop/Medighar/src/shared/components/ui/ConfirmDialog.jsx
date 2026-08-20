@@ -2,6 +2,15 @@ import { useEffect, useRef } from "react";
 import { AlertTriangle } from "lucide-react";
 import Button from "@/shared/components/ui/Button.jsx";
 
+const FOCUSABLE_SELECTOR = [
+  "a[href]",
+  "button:not([disabled])",
+  "input:not([disabled])",
+  "select:not([disabled])",
+  "textarea:not([disabled])",
+  '[tabindex]:not([tabindex="-1"])',
+].join(",");
+
 /**
  * Reusable confirmation dialog for destructive actions (cancel, delete).
  * Shared by every page that needs a confirm step before an irreversible
@@ -30,6 +39,7 @@ function ConfirmDialog({
   onCancel,
 }) {
   const dialogRef = useRef(null);
+  const cancelButtonRef = useRef(null);
 
   // The element that had focus immediately before the dialog opened —
   // normally the button that triggered it. Captured before focus moves
@@ -55,19 +65,32 @@ function ConfirmDialog({
     // Capture BEFORE moving focus into the dialog, per the required order.
     previousFocusRef.current = document.activeElement;
 
-    dialogRef.current?.focus();
-
     /**
-     * Returns the dialog's focusable buttons (Cancel, then Confirm) in
-     * DOM order. Queried live from the actual rendered elements rather
-     * than held via refs, since the shared Button component isn't
-     * wrapped in forwardRef and can't accept one without modifying it —
-     * which is out of scope for this fix.
-     * @returns {HTMLButtonElement[]}
+     * Returns the dialog's focusable elements in DOM order. Uses a
+     * general focusable-element selector (not tied to a fixed count or
+     * to button class names) and excludes disabled controls, so this
+     * stays correct if the dialog's contents ever change. Queried live
+     * from the actual rendered DOM rather than held via refs, since the
+     * shared Button component isn't wrapped in forwardRef and can't
+     * accept one without modifying it — which is out of scope here.
+     * @returns {HTMLElement[]}
      */
     function getFocusableElements() {
       if (!dialogRef.current) return [];
-      return Array.from(dialogRef.current.querySelectorAll("button"));
+      return Array.from(
+        dialogRef.current.querySelectorAll(FOCUSABLE_SELECTOR),
+      );
+    }
+
+    // Prefer focusing the non-destructive Cancel button rather than the
+    // dialog container, so a keyboard/screen-reader user's first action
+    // is never the destructive Confirm control. Falls back to the
+    // container (matching the prior behavior) if no focusable button is
+    // found for any reason.
+    if (cancelButtonRef.current && !cancelButtonRef.current.disabled) {
+      cancelButtonRef.current.focus();
+    } else {
+      dialogRef.current?.focus();
     }
 
     function handleKeyDown(event) {
@@ -188,7 +211,12 @@ function ConfirmDialog({
         </div>
 
         <div className="mt-6 flex flex-wrap justify-end gap-3">
-          <Button variant="outline" size="sm" onClick={onCancel}>
+          <Button
+            ref={cancelButtonRef}
+            variant="outline"
+            size="sm"
+            onClick={onCancel}
+          >
             {cancelLabel}
           </Button>
           <Button
