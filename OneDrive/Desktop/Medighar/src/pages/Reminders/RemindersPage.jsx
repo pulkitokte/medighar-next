@@ -451,6 +451,12 @@ function RemindersPage() {
       : `the reminder for ${pendingDelete.appointment?.doctor?.name ?? "your appointment"}`
     : "";
 
+  const pendingDeleteWarning = pendingDelete
+    ? pendingDelete.type === "medicine"
+      ? "This will also remove it from your Health Timeline history, and from your Health Passport's Current Medicines list."
+      : "This will also remove it from your Health Timeline history."
+    : "";
+
   return (
     <Section paddingY="py-16 sm:py-20">
       <Container className="flex flex-col gap-10">
@@ -537,6 +543,7 @@ function RemindersPage() {
           open={pendingDelete !== null}
           title="Delete this reminder?"
           message={`This will permanently delete ${pendingDeleteLabel}. This cannot be undone.`}
+          warning={pendingDeleteWarning}
           confirmLabel="Delete Reminder"
           onConfirm={handleConfirmDelete}
           onCancel={() => setPendingDelete(null)}
