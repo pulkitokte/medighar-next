@@ -167,6 +167,12 @@ function HealthReportsPage() {
               </span>
             )}
           </div>
+
+          <p className="text-xs text-slate-500">
+            &ldquo;Print / Export PDF&rdquo; uses your browser&rsquo;s
+            print-to-PDF option, since no dedicated PDF engine is bundled
+            with this app yet.
+          </p>
         </div>
 
         <div
