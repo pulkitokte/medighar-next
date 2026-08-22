@@ -39,7 +39,7 @@ function PharmaciesPage() {
       <Container className="flex flex-col gap-10">
         <PageHeading
           title="Find a Pharmacy"
-          subtitle="Discover trusted, verified pharmacies near you for quick and convenient access to medicines."
+          subtitle="Discover trusted, verified pharmacies for quick and convenient access to medicines."
           center
         />
 
