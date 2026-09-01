@@ -220,6 +220,18 @@ function MedicineReminderFields({ values, errors, onChange, members }) {
 function AppointmentReminderFields({ values, errors, onChange, members }) {
   const { upcoming } = useAppointments();
 
+  // Only show appointments belonging to the currently selected family
+  // member. Normalized with the same `?? "me"` convention used
+  // throughout the app, so an appointment with no memberId (implicitly
+  // "me") correctly matches when "me" is selected. This closes the
+  // member/appointment mismatch confirmed in the reminder ↔ appointment
+  // consistency audit — pairing this with useReminderForm.js's reset of
+  // appointmentId on member change so a stale selection can never
+  // survive a member switch either.
+  const memberAppointments = upcoming.filter(
+    (appointment) => (appointment.memberId ?? "me") === values.memberId,
+  );
+
   return (
     <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
       <MemberSelect
@@ -241,7 +253,7 @@ function AppointmentReminderFields({ values, errors, onChange, members }) {
           className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:border-blue-400 focus:outline-none"
         >
           <option value="">Select an upcoming appointment</option>
-          {upcoming.map((appointment) => (
+          {memberAppointments.map((appointment) => (
             <option key={appointment.id} value={appointment.id}>
               {appointment.doctor?.name ?? "Doctor"} —{" "}
               {new Date(appointment.date).toLocaleDateString("en-IN", {
@@ -254,9 +266,10 @@ function AppointmentReminderFields({ values, errors, onChange, members }) {
           ))}
         </select>
         <FieldError id="appointmentId-error" message={errors.appointmentId} />
-        {upcoming.length === 0 && (
+        {memberAppointments.length === 0 && (
           <p className="mt-1 text-xs text-slate-500">
-            You have no upcoming appointments to set a reminder for.
+            This family member has no upcoming appointments to set a reminder
+            for.
           </p>
         )}
       </label>

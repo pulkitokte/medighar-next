@@ -3,6 +3,7 @@ import {
   setReminders,
   subscribeToReminders,
 } from "@/services/reminders/reminders.repository.js";
+import { getAllAppointments } from "@/services/appointments/appointments.service.js";
 
 export { subscribeToReminders };
 
@@ -76,11 +77,40 @@ export function createMedicineReminder(values) {
   return { success: true, reminder: record };
 }
 
+/**
+ * Validates the appointment-reminder form. In addition to presence
+ * checks, cross-references the selected appointment's actual owner
+ * against the selected family member: appointment.memberId is
+ * normalized with the same `?? "me"` convention used throughout the
+ * app (see family.service.js, RemindersPage.jsx's dependent-record
+ * counting, etc.), and a mismatch is rejected with a clear error rather
+ * than silently persisted. This is defense-in-depth alongside the
+ * member-filtered appointment dropdown in RemindersPage.jsx — it
+ * ensures no path (including any future UI change) can create a
+ * reminder whose memberId and appointment owner disagree.
+ * @param {{ memberId?: string, appointmentId?: string, leadTime?: string }} values
+ * @returns {{ errors: Record<string, string>, isValid: boolean }}
+ */
 export function validateAppointmentReminderForm(values = {}) {
   const errors = {};
 
-  if (!values.appointmentId)
+  if (!values.appointmentId) {
     errors.appointmentId = "Please select an appointment.";
+  } else {
+    const appointment = getAllAppointments().find(
+      (candidate) => candidate.id === values.appointmentId,
+    );
+    const selectedMemberId = values.memberId || "me";
+    const appointmentMemberId = appointment
+      ? (appointment.memberId ?? "me")
+      : null;
+
+    if (appointment && appointmentMemberId !== selectedMemberId) {
+      errors.appointmentId =
+        "This appointment does not belong to the selected family member.";
+    }
+  }
+
   if (!values.leadTime) errors.leadTime = "Please select when to be reminded.";
 
   return { errors, isValid: Object.keys(errors).length === 0 };
