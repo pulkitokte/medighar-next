@@ -52,6 +52,7 @@ function MemberForm({
   bloodGroupLocked,
   genderLocked,
   emergencyContactLocked,
+  ageLocked,
 }) {
   return (
     <form
@@ -103,8 +104,18 @@ function MemberForm({
             type="number"
             value={values.age}
             onChange={(event) => onChange("age", event.target.value)}
-            className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 focus:border-blue-400 focus:outline-none"
+            disabled={ageLocked}
+            className={`h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 focus:border-blue-400 focus:outline-none ${
+              ageLocked ? "cursor-not-allowed bg-slate-50 text-slate-400" : ""
+            }`}
           />
+          {ageLocked && (
+            <span className="text-xs text-slate-500">
+              Calculated from this member&rsquo;s Medical Profile date of
+              birth. Use the &ldquo;Medical Profile&rdquo; button on their
+              card to change it.
+            </span>
+          )}
         </label>
 
         <label className="flex flex-col gap-1.5 text-sm">
@@ -287,6 +298,7 @@ function FamilyProfilesPage() {
   const [bloodGroupLocked, setBloodGroupLocked] = useState(false);
   const [genderLocked, setGenderLocked] = useState(false);
   const [emergencyContactLocked, setEmergencyContactLocked] = useState(false);
+  const [ageLocked, setAgeLocked] = useState(false);
 
   const updateField = (field, value) => {
     setValues((previous) => ({ ...previous, [field]: value }));
@@ -309,6 +321,7 @@ function FamilyProfilesPage() {
     setEmergencyContactLocked(
       Boolean(member.emergencyContactManagedByMedicalProfile),
     );
+    setAgeLocked(Boolean(member.ageManagedByMedicalProfile));
     setShowForm(true);
   };
 
@@ -319,6 +332,7 @@ function FamilyProfilesPage() {
     setBloodGroupLocked(false);
     setGenderLocked(false);
     setEmergencyContactLocked(false);
+    setAgeLocked(false);
     setShowForm(false);
   };
 
@@ -412,6 +426,7 @@ function FamilyProfilesPage() {
             bloodGroupLocked={bloodGroupLocked}
             genderLocked={genderLocked}
             emergencyContactLocked={emergencyContactLocked}
+            ageLocked={ageLocked}
           />
         )}
 

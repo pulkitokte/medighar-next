@@ -44,6 +44,31 @@ function composeEmergencyContact(profile) {
 }
 
 /**
+ * Computes a whole-number age in years from a date-of-birth string,
+ * accounting for whether the birthday has occurred yet this year.
+ * Returns null for missing/invalid input rather than throwing, so
+ * callers can safely fall back.
+ * @param {string} dob
+ * @returns {number|null}
+ */
+function calculateAge(dob) {
+  if (!isFilled(dob)) return null;
+
+  const birthDate = new Date(dob);
+  if (Number.isNaN(birthDate.getTime())) return null;
+
+  const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+    age -= 1;
+  }
+
+  return age >= 0 ? age : null;
+}
+
+/**
  * Resolves the authoritative blood group for a member id: if a Medical
  * Profile exists for that id and has a non-empty bloodGroup, that value
  * takes precedence — mirroring the derivation already used for "me" in
@@ -76,11 +101,7 @@ function resolveBloodGroup(memberId, fallbackBloodGroup) {
  * the same precedence rule as resolveBloodGroup(): a Medical Profile's
  * emergencyContactName/emergencyContactNumber take precedence when
  * present, otherwise the family record's own free-text emergencyContact
- * string is used. Authoritative-ness is keyed off emergencyContactName
- * specifically, since medicalProfile.service.js's validateProfile
- * requires both emergencyContactName and emergencyContactNumber to save
- * a profile in the first place — a saved profile is never missing one
- * while having the other. Pure read-layer resolution; writes nothing.
+ * string is used. Pure read-layer resolution; writes nothing.
  * @param {string} memberId
  * @param {string} fallbackEmergencyContact
  * @returns {{ emergencyContact: string, emergencyContactManagedByMedicalProfile: boolean }}
@@ -127,26 +148,57 @@ function resolveGender(memberId, fallbackGender) {
   };
 }
 
+/**
+ * Resolves the authoritative age for a member id, using the same
+ * precedence rule as the other resolved fields: if a Medical Profile
+ * exists and has a valid date of birth, the age is computed from that
+ * and takes precedence over the family record's own manually-entered
+ * age number. Otherwise falls back to the family-stored age. This
+ * closes a previously confirmed gap: "me" had no age derivation at all
+ * (age was hardcoded to null in buildMeMember()) even though Medical
+ * Profile has always captured a date of birth. Pure read-layer
+ * resolution; never writes to either store.
+ * @param {string} memberId
+ * @param {number|null} fallbackAge
+ * @returns {{ age: number|null, ageManagedByMedicalProfile: boolean }}
+ */
+function resolveAge(memberId, fallbackAge) {
+  const profile = getProfile(memberId);
+
+  if (profile && isFilled(profile.dob)) {
+    const computed = calculateAge(profile.dob);
+    if (computed !== null) {
+      return { age: computed, ageManagedByMedicalProfile: true };
+    }
+  }
+
+  return {
+    age: fallbackAge ?? null,
+    ageManagedByMedicalProfile: false,
+  };
+}
+
 function buildMeMember() {
   const profile = getProfile(ME_MEMBER_ID);
+  const { age, ageManagedByMedicalProfile } = resolveAge(ME_MEMBER_ID, null);
 
   return {
     id: ME_MEMBER_ID,
     fullName: profile?.fullName || "Me",
     relationship: "Self",
-    age: null,
+    age,
+    // "me" has no independent family-store record at all — every one of
+    // these fields has always come exclusively from the Medical Profile
+    // module when available, so each is always considered
+    // Medical-Profile-managed for "me". In practice this never reaches
+    // an editable form, since "me" is never editable via
+    // updateMember/MemberForm.
+    ageManagedByMedicalProfile,
     bloodGroup: profile?.bloodGroup || "",
-    // "me" has no independent family-store record at all — its blood
-    // group has always come exclusively from the Medical Profile module,
-    // so it is always considered Medical-Profile-managed. In practice
-    // this never reaches an editable form, since "me" is never editable
-    // via updateMember/MemberForm.
     bloodGroupManagedByMedicalProfile: true,
     gender: profile?.gender || "",
-    // Same reasoning as bloodGroupManagedByMedicalProfile above.
     genderManagedByMedicalProfile: true,
     emergencyContact: composeEmergencyContact(profile),
-    // Same reasoning as bloodGroupManagedByMedicalProfile above.
     emergencyContactManagedByMedicalProfile: true,
     notes: "",
     isSelf: true,
@@ -154,10 +206,10 @@ function buildMeMember() {
 }
 
 /**
- * Overlays the resolved (Medical-Profile-aware) blood group, gender, and
- * emergency contact onto a raw stored family member record, without
- * mutating or persisting anything. Every other field on the record
- * passes through unchanged.
+ * Overlays the resolved (Medical-Profile-aware) blood group, gender,
+ * emergency contact, and age onto a raw stored family member record,
+ * without mutating or persisting anything. Every other field on the
+ * record passes through unchanged.
  * @param {object} member
  * @returns {object}
  */
@@ -172,6 +224,10 @@ function resolveMember(member) {
   );
   const { emergencyContact, emergencyContactManagedByMedicalProfile } =
     resolveEmergencyContact(member.id, member.emergencyContact);
+  const { age, ageManagedByMedicalProfile } = resolveAge(
+    member.id,
+    member.age,
+  );
 
   return {
     ...member,
@@ -181,6 +237,8 @@ function resolveMember(member) {
     genderManagedByMedicalProfile,
     emergencyContact,
     emergencyContactManagedByMedicalProfile,
+    age,
+    ageManagedByMedicalProfile,
   };
 }
 
@@ -239,12 +297,12 @@ export function createMember(values) {
  * updatedAt on every edit so the Health Timeline can surface a
  * "Family Member Updated" event without any additional storage.
  *
- * Note: this still writes whatever bloodGroup/gender/emergencyContact
+ * Note: this still writes whatever age/bloodGroup/gender/emergencyContact
  * values are submitted into the raw family-member record, exactly as
  * before. Those writes are harmless even for a member whose fields are
  * Medical-Profile-managed, since resolveMember() always overrides them
  * on read — but the UI layer (FamilyProfilesPage) additionally disables
- * all three fields for such members so this case should not normally
+ * all such fields for such members so this case should not normally
  * occur via the form.
  * @param {string} id
  * @param {object} values
