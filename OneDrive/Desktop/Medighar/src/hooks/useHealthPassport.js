@@ -1,4 +1,10 @@
-import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import { useSearchParams } from "react-router-dom";
 import { useAppointments } from "@/hooks/useAppointments.js";
 import { useReminders } from "@/hooks/useReminders.js";
@@ -91,6 +97,16 @@ export function useHealthPassport() {
 
   const [emergencyMode, setEmergencyMode] = useState(false);
   const [hasGenerated, setHasGenerated] = useState(false);
+
+  // "Passport generated." is a per-member confirmation that a specific
+  // member's passport was explicitly generated via generatePassport().
+  // Without this reset, switching the viewed member (via the "Viewing
+  // Passport For" dropdown) left the confirmation visible for a member
+  // it was never actually generated for — a stale-state defect in the
+  // same family as the reminder/appointment member-consistency fix.
+  useEffect(() => {
+    setHasGenerated(false);
+  }, [memberId]);
 
   const memberLabel = useMemo(
     () => members.find((member) => member.id === memberId)?.fullName ?? "Me",
