@@ -1,4 +1,10 @@
-import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import { useAppointments } from "@/hooks/useAppointments.js";
 import { useReminders } from "@/hooks/useReminders.js";
 import { useMedicalRecords } from "@/hooks/useMedicalRecords.js";
@@ -69,6 +75,17 @@ export function useHealthReports() {
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
   const [hasGenerated, setHasGenerated] = useState(false);
+
+  // "Report generated — ready to print or export" is a confirmation tied
+  // to one specific report configuration (type + member + date range).
+  // Without this reset, changing any of those inputs after generating
+  // left the confirmation — and the enabled Print/Export PDF button —
+  // visibly attached to a configuration that was never actually
+  // generated/logged. Same stale-state defect class as the Health
+  // Passport hasGenerated fix, just with more contributing inputs here.
+  useEffect(() => {
+    setHasGenerated(false);
+  }, [reportType, memberFilter, dateFrom, dateTo]);
 
   const reportPreview = useMemo(
     () =>
