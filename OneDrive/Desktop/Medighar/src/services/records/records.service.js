@@ -84,6 +84,18 @@ export function createRecord(values) {
   return { success: true, record };
 }
 
+/**
+ * Validates and updates an existing medical record. Now stamps
+ * updatedAt on every edit, mirroring the identical pattern already used
+ * by family.service.js's updateMember(). This lets notification.service.js
+ * distinguish an edited record's notification from its original
+ * "record added" notification — without it, an edit's new content would
+ * silently inherit whatever read/dismissed state the original
+ * notification already had.
+ * @param {string} id
+ * @param {object} values
+ * @returns {{ success: boolean, errors?: Record<string, string>, record?: object }}
+ */
 export function updateRecord(id, values) {
   const { errors, isValid } = validateRecordForm(values);
 
@@ -106,6 +118,7 @@ export function updateRecord(id, values) {
       date: values.date,
       notes: values.notes?.trim() ?? "",
       attachment: buildAttachment(values),
+      updatedAt: Date.now(),
     };
 
     return updated;

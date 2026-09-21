@@ -252,6 +252,21 @@ export function buildReminderNotifications(reminders = [], now, todayKey) {
   return notifications;
 }
 
+/**
+ * Builds "record added" notifications. The id includes updatedAt when
+ * present (falling back to createdAt for records that have never been
+ * edited, which preserves the exact same id — and therefore the same
+ * read/dismissed state — for unedited records). This mirrors the
+ * compound id pattern already used by buildFamilyNotifications'
+ * "family-updated" and buildProfileNotifications' "profile-updated":
+ * without it, editing a record's title/type/doctor would change what
+ * the notification displays while leaving a stale read/dismissed flag
+ * attached, since records.service.js's updateRecord now stamps
+ * updatedAt specifically so this id can detect the change.
+ * @param {Array<object>} records
+ * @param {Date} now
+ * @returns {Array<object>}
+ */
 export function buildRecordNotifications(records = [], now) {
   const nowMs = now.getTime();
 
@@ -262,7 +277,7 @@ export function buildRecordNotifications(records = [], now) {
     )
     .map((record) =>
       buildNotification({
-        id: `record-added-${record.id}`,
+        id: `record-added-${record.id}-${record.updatedAt ?? record.createdAt}`,
         type: "record-added",
         title: `Medical record added: ${record.title}`,
         description: `${record.type} · ${record.doctorName}`,
