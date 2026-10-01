@@ -38,10 +38,21 @@ export function useDashboard() {
     completed: completedReminders,
     disabled: disabledReminders,
   } = useReminders();
-  const { recentRecords, totalCount: recordsCount } = useMedicalRecords();
+  const {
+    recentRecords,
+    allRecords,
+    totalCount: recordsCount,
+  } = useMedicalRecords();
   const { completion: profileCompletion } = useMedicalProfile();
-  const { members: familyMembers } = useFamilyProfiles();
+  const { members } = useFamilyProfiles();
   const { recentNotifications, stats: notificationStats } = useNotifications();
+
+  // `members` includes the user's own "Me" entry. The Dashboard's family
+  // count, setup checklist and Family list are about other people.
+  const familyMembers = useMemo(
+    () => members.filter((member) => !member.isSelf),
+    [members],
+  );
 
   const recentSnapshot = useSyncExternalStore(
     subscribeToRecent,
@@ -79,16 +90,19 @@ export function useDashboard() {
     [upcomingReminders, completedReminders, disabledReminders],
   );
 
+  // Records are passed in full: recentRecords is sorted by the record's own
+  // date, while timeline events are ordered by createdAt, so a truncated
+  // list could omit a record that was just added.
   const timeline = useMemo(
     () =>
       buildActivityTimeline({
         appointments: allAppointments,
         reminders: allReminders,
-        records: recentRecords,
+        records: allRecords,
         recentEntries,
         reviews: reviewsFlat,
       }),
-    [allAppointments, allReminders, recentRecords, recentEntries, reviewsFlat],
+    [allAppointments, allReminders, allRecords, recentEntries, reviewsFlat],
   );
 
   const overview = {
