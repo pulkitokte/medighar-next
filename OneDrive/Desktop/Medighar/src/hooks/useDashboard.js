@@ -63,9 +63,16 @@ export function useDashboard() {
     () => JSON.parse(recentSnapshot),
     [recentSnapshot],
   );
-  const recentEntries = useMemo(
-    () => resolveRecentEntries(recentEntriesRaw, RECENT_PREVIEW_LIMIT),
+  // Resolve the full history once. Entries whose entity no longer exists
+  // are dropped here (the stored history itself is left untouched), so the
+  // count below matches what the Recent page renders.
+  const resolvedRecentEntries = useMemo(
+    () => resolveRecentEntries(recentEntriesRaw, Infinity),
     [recentEntriesRaw],
+  );
+  const recentEntries = useMemo(
+    () => resolvedRecentEntries.slice(0, RECENT_PREVIEW_LIMIT),
+    [resolvedRecentEntries],
   );
 
   const reviewsSnapshot = useSyncExternalStore(
@@ -107,7 +114,7 @@ export function useDashboard() {
 
   const overview = {
     savedCount: saved.totalCount,
-    recentCount: recentEntriesRaw.length,
+    recentCount: resolvedRecentEntries.length,
     upcomingAppointmentsCount: upcomingAppointments.length,
     activeRemindersCount: upcomingReminders.length,
     recordsCount,
