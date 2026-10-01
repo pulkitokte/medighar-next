@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { Activity, Stethoscope, ListChecks } from "lucide-react";
 import { cn } from "@/shared/lib/cn.js";
 import Button from "@/shared/components/ui/Button.jsx";
+import SaveButton from "@/shared/components/ui/SaveButton.jsx";
 
 const SEVERITY_STYLES = {
   Mild: "bg-emerald-50 text-emerald-700",
@@ -21,12 +22,18 @@ function DiseaseCard({ disease, className }) {
   return (
     <div
       className={cn(
-        "card-surface card-surface-hover transition-premium flex h-full flex-col gap-4 border border-slate-100 bg-white p-6",
+        "card-surface card-surface-hover transition-premium relative flex h-full flex-col gap-4 border border-slate-100 bg-white p-6",
         "hover:-translate-y-1 hover:border-amber-200 hover:shadow-[0_20px_40px_-16px_rgba(15,23,42,0.14)]",
         className,
       )}
     >
-      <div className="flex items-start gap-4">
+      <SaveButton
+        type="disease"
+        id={disease.id}
+        className="absolute right-5 top-5"
+      />
+
+      <div className="flex items-start gap-4 pr-10">
         <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-100 to-orange-50">
           <Activity className="h-5.5 w-5.5 text-amber-700" aria-hidden="true" />
         </span>
@@ -50,7 +57,9 @@ function DiseaseCard({ disease, className }) {
         </span>
       </div>
 
-      <p className="text-sm leading-relaxed text-slate-600">{disease.overview}</p>
+      <p className="text-sm leading-relaxed text-slate-600">
+        {disease.overview}
+      </p>
 
       <div className="flex flex-wrap gap-2 border-t border-slate-100 pt-4">
         <span className="inline-flex items-center gap-1.5 rounded-full bg-stone-50 px-2.5 py-1 text-xs font-medium text-stone-600">
@@ -66,7 +75,9 @@ function DiseaseCard({ disease, className }) {
         <span
           className={cn(
             "inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium",
-            disease.contagious ? "bg-amber-50 text-amber-700" : "bg-stone-50 text-stone-600",
+            disease.contagious
+              ? "bg-amber-50 text-amber-700"
+              : "bg-stone-50 text-stone-600",
           )}
         >
           {disease.contagious ? "Contagious" : "Not Contagious"}
