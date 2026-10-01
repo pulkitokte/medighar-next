@@ -7,6 +7,8 @@ import { useBookmarks } from "@/hooks/useBookmarks.js";
  * passing its bookmark type ("doctor", "medicine", "disease", "pharmacy")
  * and the entity's id. Stops click propagation so it can be placed inside
  * clickable/navigable cards without triggering navigation.
+ * The accessible name is constant; the saved state is conveyed by
+ * aria-pressed so screen readers do not hear a contradictory name/state.
  * @param {{ type: "doctor"|"medicine"|"disease"|"pharmacy", id: string, className?: string }} props
  */
 function SaveButton({ type, id, className }) {
@@ -24,7 +26,7 @@ function SaveButton({ type, id, className }) {
       type="button"
       onClick={handleClick}
       aria-pressed={saved}
-      aria-label={saved ? "Remove from saved" : "Save for later"}
+      aria-label="Save for later"
       className={cn(
         "flex h-9 w-9 shrink-0 items-center justify-center rounded-full border shadow-sm transition-colors",
         saved

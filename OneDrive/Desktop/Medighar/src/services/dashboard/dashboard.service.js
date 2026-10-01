@@ -217,7 +217,7 @@ const SETUP_CHECKLIST_DEFINITIONS = [
   },
   {
     key: "saved",
-    label: "Save a Doctor or Medicine",
+    label: "Save an Item for Later",
     description: "Bookmark items you want to find quickly later.",
     to: "/doctors",
     ctaLabel: "Browse Doctors",
