@@ -13,8 +13,18 @@ import SearchResultItem from "@/shared/components/ui/SearchResultItem.jsx";
 
 const LISTBOX_ID = "global-search-listbox";
 
+const FOCUSABLE_SELECTOR =
+  'a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+const FOCUS_RING =
+  "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500";
+
 function optionId(index) {
   return `global-search-option-${index}`;
+}
+
+function groupHeadingId(category) {
+  return `global-search-group-${category.toLowerCase().replace(/\s+/g, "-")}`;
 }
 
 /**
@@ -30,6 +40,7 @@ function CommandPalette() {
     query,
     setQuery,
     hasQuery,
+    isSearchPending,
     showEmptyResults,
     groups,
     suggestionGroups,
@@ -47,6 +58,13 @@ function CommandPalette() {
   } = useGlobalSearch();
 
   const inputRef = useRef(null);
+  const dialogRef = useRef(null);
+  // True only when the last active-option change came from the keyboard,
+  // so hovering with the mouse never makes the list scroll.
+  const keyboardNavRef = useRef(false);
+
+  const activeId =
+    visibleResults.length > 0 ? optionId(activeIndex) : undefined;
 
   useEffect(() => {
     if (isOpen) {
@@ -66,37 +84,91 @@ function CommandPalette() {
     };
   }, [isOpen]);
 
+  // Keep the keyboard-highlighted option visible inside the scrollable
+  // results container.
+  useEffect(() => {
+    if (!isOpen || !activeId || !keyboardNavRef.current) return;
+
+    keyboardNavRef.current = false;
+    document.getElementById(activeId)?.scrollIntoView({ block: "nearest" });
+  }, [isOpen, activeId]);
+
   if (!isOpen) return null;
+
+  const handleHover = (index) => {
+    keyboardNavRef.current = false;
+    setActiveIndex(index);
+  };
 
   const handleInputKeyDown = (event) => {
     if (event.key === "ArrowDown") {
       event.preventDefault();
+      keyboardNavRef.current = true;
       moveActiveIndex(1);
     } else if (event.key === "ArrowUp") {
       event.preventDefault();
+      keyboardNavRef.current = true;
       moveActiveIndex(-1);
     } else if (event.key === "Home") {
       event.preventDefault();
+      keyboardNavRef.current = true;
       setActiveIndexToStart();
     } else if (event.key === "End") {
       event.preventDefault();
+      keyboardNavRef.current = true;
       setActiveIndexToEnd();
     } else if (event.key === "Enter") {
       event.preventDefault();
+      // The displayed results lag the typed text by the debounce delay.
+      // Ignore Enter until they catch up so it never selects a result
+      // belonging to an older query.
+      if (isSearchPending) return;
       selectResult(visibleResults[activeIndex]);
     } else if (event.key === "Escape") {
       event.preventDefault();
       close();
-    } else if (event.key === "Tab") {
-      // Minimal focus trap: the palette has only one focusable element
-      // (this input), so keep focus here rather than letting Tab (or
-      // Shift+Tab) escape to the page behind the overlay.
-      event.preventDefault();
     }
   };
 
-  const activeId =
-    visibleResults.length > 0 ? optionId(activeIndex) : undefined;
+  // Keeps Tab / Shift+Tab inside the dialog by wrapping between its first
+  // and last focusable controls (input, close button, Clear, recent chips).
+  const handleDialogKeyDown = (event) => {
+    if (event.key !== "Tab") return;
+
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+
+    const focusable = Array.from(dialog.querySelectorAll(FOCUSABLE_SELECTOR));
+    if (focusable.length === 0) {
+      event.preventDefault();
+      return;
+    }
+
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    const active = document.activeElement;
+
+    if (event.shiftKey) {
+      if (active === first || active === dialog) {
+        event.preventDefault();
+        last.focus();
+      }
+    } else if (active === last || active === dialog) {
+      event.preventDefault();
+      first.focus();
+    }
+  };
+
+  const handleSelectRecent = (recentQuery) => {
+    selectRecentSearch(recentQuery);
+    inputRef.current?.focus();
+  };
+
+  const handleClearRecent = () => {
+    clearRecent();
+    inputRef.current?.focus();
+  };
+
   const displayGroups = hasQuery ? groups : suggestionGroups;
 
   const statusMessage = hasQuery
@@ -113,10 +185,13 @@ function CommandPalette() {
       }}
     >
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-label="Global search"
-        className="flex w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl"
+        tabIndex={-1}
+        onKeyDown={handleDialogKeyDown}
+        className="flex w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl focus:outline-none"
       >
         <div className="flex items-center gap-3 border-b border-slate-200 px-4">
           <Search
@@ -144,7 +219,10 @@ function CommandPalette() {
             type="button"
             onClick={close}
             aria-label="Close search"
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+            className={cn(
+              "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600",
+              FOCUS_RING,
+            )}
           >
             <X className="h-4 w-4" aria-hidden="true" />
           </button>
@@ -164,8 +242,11 @@ function CommandPalette() {
                 </span>
                 <button
                   type="button"
-                  onClick={clearRecent}
-                  className="text-xs font-medium text-slate-400 hover:text-slate-600"
+                  onClick={handleClearRecent}
+                  className={cn(
+                    "rounded text-xs font-medium text-slate-400 hover:text-slate-600",
+                    FOCUS_RING,
+                  )}
                 >
                   Clear
                 </button>
@@ -175,8 +256,11 @@ function CommandPalette() {
                   <button
                     key={recentQuery}
                     type="button"
-                    onClick={() => selectRecentSearch(recentQuery)}
-                    className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600 hover:bg-slate-50"
+                    onClick={() => handleSelectRecent(recentQuery)}
+                    className={cn(
+                      "rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600 hover:bg-slate-50",
+                      FOCUS_RING,
+                    )}
                   >
                     {recentQuery}
                   </button>
@@ -220,7 +304,7 @@ function CommandPalette() {
                       id={optionId(index)}
                       isActive={index === activeIndex}
                       onSelect={selectResult}
-                      onHover={() => setActiveIndex(index)}
+                      onHover={() => handleHover(index)}
                     />
                   ))}
                 </ul>
@@ -234,11 +318,18 @@ function CommandPalette() {
               className="flex flex-col gap-4"
             >
               {Object.entries(displayGroups).map(([category, results]) => (
-                <li key={category}>
-                  <p className="mb-1 px-1 text-xs font-medium uppercase tracking-wide text-slate-400">
+                <li key={category} role="presentation">
+                  <p
+                    id={groupHeadingId(category)}
+                    className="mb-1 px-1 text-xs font-medium uppercase tracking-wide text-slate-400"
+                  >
                     {category}
                   </p>
-                  <ul role="presentation" className="flex flex-col gap-0.5">
+                  <ul
+                    role="group"
+                    aria-labelledby={groupHeadingId(category)}
+                    className="flex flex-col gap-0.5"
+                  >
                     {results.map((result) => {
                       const flatIndex = visibleResults.indexOf(result);
                       return (
@@ -249,7 +340,7 @@ function CommandPalette() {
                           id={optionId(flatIndex)}
                           isActive={flatIndex === activeIndex}
                           onSelect={selectResult}
-                          onHover={() => setActiveIndex(flatIndex)}
+                          onHover={() => handleHover(flatIndex)}
                         />
                       );
                     })}

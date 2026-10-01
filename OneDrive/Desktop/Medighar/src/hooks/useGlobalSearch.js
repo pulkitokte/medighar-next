@@ -60,6 +60,11 @@ export function useGlobalSearch() {
   const { recentSearches, clearRecent } = useRecentSearchQueries();
   const debouncedQuery = useDebouncedValue(query, DEBOUNCE_MS);
 
+  // True while the text in the input has not yet been reflected in the
+  // displayed results (the debounce window). Selecting during this window
+  // would act on results for an older query.
+  const isSearchPending = query.trim() !== debouncedQuery.trim();
+
   const { groups, flat } = useMemo(
     () => filterSearchResults(searchIndex, debouncedQuery, boostedIds),
     [searchIndex, debouncedQuery, boostedIds],
@@ -93,10 +98,11 @@ export function useGlobalSearch() {
       : flat
     : suggestionsFlat;
 
-  // Reset active index whenever the visible result set changes.
+  // Reset active index whenever the visible result set changes (including
+  // when the query changes but the result count happens to stay the same).
   useEffect(() => {
     setActiveIndex(0);
-  }, [visibleResults.length, isOpen]);
+  }, [visibleResults.length, debouncedQuery, isOpen]);
 
   /**
    * Restores focus to whatever was focused before the palette opened, if
@@ -225,6 +231,7 @@ export function useGlobalSearch() {
     query,
     setQuery,
     hasQuery,
+    isSearchPending,
     showEmptyResults,
     groups,
     suggestionGroups,
