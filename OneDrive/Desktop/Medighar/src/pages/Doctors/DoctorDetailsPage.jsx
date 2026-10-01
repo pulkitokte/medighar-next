@@ -148,6 +148,17 @@ function DoctorDetailsPage() {
   const [formValues, setFormValues] = useState(INITIAL_REVIEW_FORM);
   const [formErrors, setFormErrors] = useState({});
 
+  // The route element is reused when only :doctorId changes (e.g. picking
+  // another doctor from the Command Palette), so reset the review form
+  // whenever the displayed doctor changes. Otherwise a draft written for
+  // one doctor could be submitted against another.
+  const [formDoctorId, setFormDoctorId] = useState(doctor?.id);
+  if (doctor?.id !== formDoctorId) {
+    setFormDoctorId(doctor?.id);
+    setFormValues(INITIAL_REVIEW_FORM);
+    setFormErrors({});
+  }
+
   const updateField = (field, value) => {
     setFormValues((previous) => ({ ...previous, [field]: value }));
   };
@@ -177,6 +188,10 @@ function DoctorDetailsPage() {
   }
 
   if (!doctor) return null;
+
+  // Same rule as DoctorCard: review-derived average once reviews exist,
+  // otherwise the seeded rating.
+  const displayedRating = stats.total > 0 ? stats.average : doctor.rating;
 
   return (
     <Section
@@ -281,7 +296,7 @@ function DoctorDetailsPage() {
             <InfoCard
               icon={Star}
               label="Rating"
-              value={`${doctor.rating.toFixed(1)} / 5.0`}
+              value={`${displayedRating.toFixed(1)} / 5.0`}
             />
             <InfoCard
               icon={IndianRupee}

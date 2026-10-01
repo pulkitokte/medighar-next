@@ -195,4 +195,3 @@ export function useHealthPassport() {
     sharePassport,
   };
 }
-useHealthReports.js
