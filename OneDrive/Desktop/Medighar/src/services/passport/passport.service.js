@@ -55,7 +55,9 @@ export function computeAge(dob) {
 /**
  * Reuses the already-enriched reminder objects from the Reminders module
  * (each carrying a resolved `medicine`) rather than performing a separate
- * medicine lookup.
+ * medicine lookup. Only reminders whose derived status is "upcoming" are
+ * current: that excludes disabled reminders and courses whose end date has
+ * already passed ("completed").
  * @param {Array<object>} reminders
  * @returns {Array<object>}
  */
@@ -64,7 +66,7 @@ export function buildCurrentMedicines(reminders = []) {
     .filter(
       (reminder) =>
         reminder.type === "medicine" &&
-        reminder.status !== "disabled" &&
+        reminder.status === "upcoming" &&
         reminder.medicine,
     )
     .map((reminder) => ({
