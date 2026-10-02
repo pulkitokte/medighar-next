@@ -104,14 +104,22 @@ const TYPE_META = {
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-function isWithinFutureDays(timestamp, now, days) {
-  const diff = timestamp - now;
-  return diff >= 0 && diff <= days * DAY_MS;
-}
-
 function isWithinPastDays(timestamp, now, days) {
   const diff = now - timestamp;
   return diff >= 0 && diff <= days * DAY_MS;
+}
+
+/**
+ * Resolves a date-only "YYYY-MM-DD" value (or a Date/timestamp) to the
+ * timestamp of local midnight on that calendar day, reusing toDateKey so
+ * the same local-date interpretation is shared with the rest of the app.
+ * Returns NaN for unusable input, which fails every window comparison.
+ * @param {string|number|Date} value
+ * @returns {number}
+ */
+function toLocalMidnightMs(value) {
+  const [year, month, day] = toDateKey(value).split("-").map(Number);
+  return new Date(year, month - 1, day).getTime();
 }
 
 function buildNotification({
@@ -144,20 +152,29 @@ function buildNotification({
   };
 }
 
+/**
+ * Appointment dates are date-only calendar days, so the windows are
+ * measured in whole local days (today = 0) rather than against the
+ * current instant. This keeps an appointment's notification visible for
+ * the whole of its day, consistent with deriveAppointmentStatus, which
+ * also treats the date as a calendar day.
+ */
 export function buildAppointmentNotifications(appointments = [], now) {
-  const nowMs = now.getTime();
+  const todayMs = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+  ).getTime();
   const notifications = [];
 
   appointments.forEach((appointment) => {
     const doctorName = appointment.doctor?.name ?? "a doctor";
     const memberName = appointment.member?.fullName ?? "Me";
-    const appointmentMs = new Date(appointment.date).getTime();
+    const appointmentMs = toLocalMidnightMs(appointment.date);
+    const daysUntil = Math.round((appointmentMs - todayMs) / DAY_MS);
 
-    if (
-      appointment.status === "upcoming" &&
-      isWithinFutureDays(appointmentMs, nowMs, 7)
-    ) {
-      const isSoon = isWithinFutureDays(appointmentMs, nowMs, 1);
+    if (appointment.status === "upcoming" && daysUntil >= 0 && daysUntil <= 7) {
+      const isSoon = daysUntil <= 1;
 
       notifications.push(
         buildNotification({
@@ -176,7 +193,8 @@ export function buildAppointmentNotifications(appointments = [], now) {
 
     if (
       appointment.status === "completed" &&
-      isWithinPastDays(appointmentMs, nowMs, 7)
+      daysUntil <= 0 &&
+      daysUntil >= -7
     ) {
       notifications.push(
         buildNotification({
@@ -626,8 +644,23 @@ export function groupNotificationsByRecency(notifications, now) {
   return groups;
 }
 
+function formatAbsoluteDate(timestamp) {
+  return new Date(timestamp).toLocaleDateString("en-IN", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
+
 export function formatRelativeTime(timestamp, now = Date.now()) {
-  const diffMinutes = Math.round((now - timestamp) / 60000);
+  const diffMs = now - timestamp;
+
+  // A timestamp clearly in the future (e.g. an upcoming appointment) is
+  // not "just now": show its calendar date. A few seconds of clock skew
+  // still falls through to "Just now" below.
+  if (diffMs < -60000) return formatAbsoluteDate(timestamp);
+
+  const diffMinutes = Math.round(diffMs / 60000);
 
   if (diffMinutes < 1) return "Just now";
   if (diffMinutes < 60)
@@ -640,11 +673,7 @@ export function formatRelativeTime(timestamp, now = Date.now()) {
   const diffDays = Math.round(diffHours / 24);
   if (diffDays < 7) return `${diffDays} day${diffDays === 1 ? "" : "s"} ago`;
 
-  return new Date(timestamp).toLocaleDateString("en-IN", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
+  return formatAbsoluteDate(timestamp);
 }
 
 export function buildActivityFeed(notifications, timelineSources, limit = 30) {
