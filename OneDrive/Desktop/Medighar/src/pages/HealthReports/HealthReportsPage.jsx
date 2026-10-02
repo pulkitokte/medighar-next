@@ -134,6 +134,7 @@ function HealthReportsPage() {
               <div className="flex items-center gap-2">
                 <input
                   type="date"
+                  aria-label="Date from"
                   value={dateFrom}
                   onChange={(event) => setDateFrom(event.target.value)}
                   className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 focus:border-blue-400 focus:outline-none"
@@ -141,6 +142,7 @@ function HealthReportsPage() {
                 <span className="text-slate-400">to</span>
                 <input
                   type="date"
+                  aria-label="Date to"
                   value={dateTo}
                   onChange={(event) => setDateTo(event.target.value)}
                   className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 focus:border-blue-400 focus:outline-none"
@@ -150,6 +152,15 @@ function HealthReportsPage() {
           </div>
 
           <p className="text-sm text-slate-500">{meta.description}</p>
+
+          {/* Always-mounted live region so generation is announced to
+              assistive technology; the visible message below is hidden
+              from it to avoid a duplicate announcement. */}
+          <p role="status" className="sr-only">
+            {hasGenerated
+              ? "Report generated. Print and export are now available."
+              : ""}
+          </p>
 
           <div className="flex flex-wrap gap-3">
             <Button onClick={generateReport}>Generate Report</Button>
@@ -162,7 +173,10 @@ function HealthReportsPage() {
               Print / Export PDF
             </Button>
             {hasGenerated && (
-              <span className="flex items-center text-xs text-green-600">
+              <span
+                aria-hidden="true"
+                className="flex items-center text-xs text-green-600"
+              >
                 Report generated — ready to print or export.
               </span>
             )}
@@ -170,8 +184,8 @@ function HealthReportsPage() {
 
           <p className="text-xs text-slate-500">
             &ldquo;Print / Export PDF&rdquo; uses your browser&rsquo;s
-            print-to-PDF option, since no dedicated PDF engine is bundled
-            with this app yet.
+            print-to-PDF option, since no dedicated PDF engine is bundled with
+            this app yet.
           </p>
         </div>
 
