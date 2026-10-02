@@ -1,4 +1,5 @@
 import { filterByMember } from "@/services/timeline/timeline.service.js";
+import { toDateKey } from "@/services/calendar/calendar.service.js";
 import {
   getReportLog,
   addReportLogEntry,
@@ -65,11 +66,19 @@ export const REPORT_TYPE_META = {
   },
 };
 
+/**
+ * Normalizes a value to a "YYYY-MM-DD" day key. Date-only strings are
+ * used as-is. Numeric timestamps are read as LOCAL calendar days (via the
+ * shared toDateKey), matching how the date-only values and the date-range
+ * inputs are interpreted; a UTC conversion would shift early-morning local
+ * times onto the previous day.
+ */
 function toDayKey(value) {
   if (!value) return "";
-  return typeof value === "number"
-    ? new Date(value).toISOString().slice(0, 10)
-    : String(value).slice(0, 10);
+  if (typeof value === "number") {
+    return Number.isFinite(value) ? toDateKey(value) : "";
+  }
+  return String(value).slice(0, 10);
 }
 
 function isWithinDateRange(value, from, to) {
