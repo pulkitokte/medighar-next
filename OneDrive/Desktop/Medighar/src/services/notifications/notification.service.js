@@ -361,28 +361,49 @@ export function buildFamilyNotifications(members = [], now) {
   return notifications;
 }
 
-function daysUntilNextBirthday(dob, today) {
+/**
+ * Resolves the next occurrence of a date-only "YYYY-MM-DD" birthday
+ * relative to the current local calendar day. "Today" is normalized to
+ * local midnight so that a birthday falling on today yields 0 days at any
+ * time of day (comparing against a full timestamp would roll it to next
+ * year, or round tomorrow's birthday down to "today"). The birth year is
+ * ignored. Returns the whole-day distance and the calendar year of the
+ * occurrence, or null for an unusable value.
+ * Note: a Feb 29 birthday in a non-leap year resolves to Mar 1 (native Date
+ * overflow); that existing behavior is intentionally unchanged.
+ * @param {string} dob
+ * @param {Date} now
+ * @returns {{ daysUntil: number, year: number } | null}
+ */
+function getNextBirthday(dob, now) {
   const [, month, day] = dob.split("-").map(Number);
-  if (!month || !day) return Infinity;
+  if (!month || !day) return null;
+
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
   let candidate = new Date(today.getFullYear(), month - 1, day);
   if (candidate < today) {
     candidate = new Date(today.getFullYear() + 1, month - 1, day);
   }
 
-  return Math.round((candidate.getTime() - today.getTime()) / DAY_MS);
+  return {
+    daysUntil: Math.round((candidate.getTime() - today.getTime()) / DAY_MS),
+    year: candidate.getFullYear(),
+  };
 }
 
 export function buildBirthdayNotifications(memberProfiles = [], now) {
-  const year = now.getFullYear();
-
   return memberProfiles
     .filter((entry) => entry.profile?.dob)
     .map((entry) => {
-      const daysUntil = daysUntilNextBirthday(entry.profile.dob, now);
-      if (daysUntil > 30) return null;
+      const next = getNextBirthday(entry.profile.dob, now);
+      if (!next || next.daysUntil > 30) return null;
+
+      const { daysUntil, year } = next;
 
       return buildNotification({
+        // Identified by the birthday's own year, not the year it is viewed
+        // in, so one upcoming birthday keeps a single id across Jan 1.
         id: `birthday-${entry.id}-${year}`,
         type: "birthday-upcoming",
         title: `${entry.fullName}'s birthday is coming up`,
