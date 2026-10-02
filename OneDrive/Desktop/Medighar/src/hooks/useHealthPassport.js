@@ -121,14 +121,14 @@ export function useHealthPassport() {
   );
 
   const generatePassport = useCallback(() => {
-    logPassportAction(PASSPORT_ACTIONS.GENERATED, memberLabel);
+    logPassportAction(PASSPORT_ACTIONS.GENERATED, memberLabel, memberId);
     setHasGenerated(true);
-  }, [memberLabel]);
+  }, [memberLabel, memberId]);
 
   const printPassportAction = useCallback(() => {
-    logPassportAction(PASSPORT_ACTIONS.PRINTED, memberLabel);
+    logPassportAction(PASSPORT_ACTIONS.PRINTED, memberLabel, memberId);
     printPassport();
-  }, [memberLabel]);
+  }, [memberLabel, memberId]);
 
   const buildEmergencySummaryText = useCallback(() => {
     const {

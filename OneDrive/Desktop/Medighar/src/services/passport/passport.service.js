@@ -202,16 +202,20 @@ export function buildPassportData({
  * Logs a passport action ("generated" or "printed"). The only new
  * persisted data this feature introduces — passport content is never
  * stored here, only enough metadata to power the Timeline's and
- * Notification Center's dynamic activity.
+ * Notification Center's dynamic activity. The real member id is stored
+ * alongside the display label so timeline events can be matched to the
+ * correct member; entries logged before this field existed simply lack it.
  * @param {string} action
  * @param {string} memberLabel
+ * @param {string} [memberId]
  * @returns {object} the created log entry
  */
-export function logPassportAction(action, memberLabel) {
+export function logPassportAction(action, memberLabel, memberId) {
   const entry = {
     id: `passport-log-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     action,
     memberLabel: memberLabel || "Me",
+    memberId: memberId || undefined,
     generatedAt: Date.now(),
   };
 

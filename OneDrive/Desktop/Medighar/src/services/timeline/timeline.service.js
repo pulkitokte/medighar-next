@@ -343,6 +343,8 @@ export function buildReportEvents(reportLogs = []) {
  * dependency one-directional (passport.service.js never imports this
  * file either — both remain independent, composed only at the hook
  * layer).
+ * The member id comes from the log's stored memberId; entries logged
+ * before that field existed fall back to the previous label-derived value.
  * @param {Array<object>} passportLogs
  * @returns {Array<object>}
  */
@@ -354,7 +356,9 @@ export function buildPassportEvents(passportLogs = []) {
         log.action === "printed"
           ? EVENT_TYPES.PASSPORT_PRINTED
           : EVENT_TYPES.PASSPORT_GENERATED,
-      memberId: log.memberLabel ? log.memberLabel.toLowerCase() : "me",
+      memberId:
+        log.memberId ??
+        (log.memberLabel ? log.memberLabel.toLowerCase() : "me"),
       memberName: log.memberLabel || "Me",
       title:
         log.action === "printed"
