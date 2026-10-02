@@ -183,7 +183,7 @@ function HealthInsightsPage() {
             />
             <StatCard
               icon={Bell}
-              label="Active Medicine Reminders"
+              label="Active Reminders"
               value={insights.reminders.active}
             />
             <StatCard

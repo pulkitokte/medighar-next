@@ -15,6 +15,7 @@ import {
   subscribeToReviews,
 } from "@/services/reviews/reviews.service.js";
 import { getDoctorById } from "@/services/doctors/doctors.service.js";
+import { resolveRecentEntries } from "@/services/dashboard/dashboard.service.js";
 import {
   buildHealthInsights,
   computeFamilyStats,
@@ -39,6 +40,13 @@ export function useHealthInsights() {
   const recentEntries = useMemo(
     () => JSON.parse(recentSnapshot),
     [recentSnapshot],
+  );
+
+  // Count only entries whose entity still resolves, so this matches the
+  // Recent page and the Dashboard. The stored history itself is untouched.
+  const resolvedRecentCount = useMemo(
+    () => resolveRecentEntries(recentEntries, Infinity).length,
+    [recentEntries],
   );
 
   const reviewsSnapshot = useSyncExternalStore(
@@ -81,7 +89,7 @@ export function useHealthInsights() {
         },
         records: allRecords,
         activity: {
-          recentCount: recentEntries.length,
+          recentCount: resolvedRecentCount,
           reviewCount: reviewsFlat.length,
         },
         savedCount: saved.totalCount,
@@ -101,7 +109,7 @@ export function useHealthInsights() {
       reminders.completed,
       reminders.disabled,
       allRecords,
-      recentEntries,
+      resolvedRecentCount,
       reviewsFlat,
       saved.totalCount,
       allAppointments,
