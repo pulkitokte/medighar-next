@@ -66,6 +66,11 @@ function RecordForm({
   onCancel,
   members,
 }) {
+  // A record whose member was later deleted still carries that member's
+  // id. Without a matching option the select would display the first
+  // member ("Me") while the form actually holds the removed member's id.
+  const memberIsKnown = members.some((member) => member.id === values.memberId);
+
   return (
     <form
       onSubmit={onSubmit}
@@ -83,6 +88,11 @@ function RecordForm({
             onChange={(event) => onChange("memberId", event.target.value)}
             className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:border-blue-400 focus:outline-none"
           >
+            {!memberIsKnown && (
+              <option value={values.memberId} disabled>
+                Removed member
+              </option>
+            )}
             {members.map((member) => (
               <option key={member.id} value={member.id}>
                 {member.fullName}
