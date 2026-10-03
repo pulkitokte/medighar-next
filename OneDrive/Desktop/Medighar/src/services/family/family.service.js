@@ -61,7 +61,10 @@ function calculateAge(dob) {
   let age = today.getFullYear() - birthDate.getFullYear();
   const monthDiff = today.getMonth() - birthDate.getMonth();
 
-  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+  if (
+    monthDiff < 0 ||
+    (monthDiff === 0 && today.getDate() < birthDate.getDate())
+  ) {
     age -= 1;
   }
 
@@ -224,10 +227,7 @@ function resolveMember(member) {
   );
   const { emergencyContact, emergencyContactManagedByMedicalProfile } =
     resolveEmergencyContact(member.id, member.emergencyContact);
-  const { age, ageManagedByMedicalProfile } = resolveAge(
-    member.id,
-    member.age,
-  );
+  const { age, ageManagedByMedicalProfile } = resolveAge(member.id, member.age);
 
   return {
     ...member,
@@ -297,13 +297,12 @@ export function createMember(values) {
  * updatedAt on every edit so the Health Timeline can surface a
  * "Family Member Updated" event without any additional storage.
  *
- * Note: this still writes whatever age/bloodGroup/gender/emergencyContact
- * values are submitted into the raw family-member record, exactly as
- * before. Those writes are harmless even for a member whose fields are
- * Medical-Profile-managed, since resolveMember() always overrides them
- * on read — but the UI layer (FamilyProfilesPage) additionally disables
- * all such fields for such members so this case should not normally
- * occur via the form.
+ * Fields currently managed by the member's Medical Profile (age, blood
+ * group, gender, emergency contact) keep the family record's existing
+ * stored value. The edit form shows the resolved profile value for those
+ * fields, so writing the submitted value would freeze a copy of profile
+ * data into the family record that would then resurface as the fallback
+ * if the profile were later deleted or reset.
  * @param {string} id
  * @param {object} values
  * @returns {{ success: boolean, errors?: Record<string, string>, member?: object }}
@@ -329,14 +328,36 @@ export function updateMember(id, values) {
   const next = getMembers().map((member) => {
     if (member.id !== id) return member;
 
+    const ageManaged = resolveAge(id, member.age).ageManagedByMedicalProfile;
+    const bloodGroupManaged = resolveBloodGroup(
+      id,
+      member.bloodGroup,
+    ).bloodGroupManagedByMedicalProfile;
+    const genderManaged = resolveGender(
+      id,
+      member.gender,
+    ).genderManagedByMedicalProfile;
+    const emergencyContactManaged = resolveEmergencyContact(
+      id,
+      member.emergencyContact,
+    ).emergencyContactManagedByMedicalProfile;
+
     updated = {
       ...member,
       fullName: values.fullName.trim(),
       relationship: values.relationship,
-      age: values.age ? Number(values.age) : null,
-      bloodGroup: values.bloodGroup || "",
-      gender: values.gender || "",
-      emergencyContact: values.emergencyContact?.trim() ?? "",
+      age: ageManaged
+        ? (member.age ?? null)
+        : values.age
+          ? Number(values.age)
+          : null,
+      bloodGroup: bloodGroupManaged
+        ? (member.bloodGroup ?? "")
+        : values.bloodGroup || "",
+      gender: genderManaged ? (member.gender ?? "") : values.gender || "",
+      emergencyContact: emergencyContactManaged
+        ? (member.emergencyContact ?? "")
+        : (values.emergencyContact?.trim() ?? ""),
       notes: values.notes?.trim() ?? "",
       updatedAt: Date.now(),
     };
