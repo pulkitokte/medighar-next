@@ -125,6 +125,13 @@ function HealthPassportPage() {
           {statusMessage}
         </p>
 
+        {/* Always-mounted live region so generation is announced to
+            assistive technology; the visible message below is hidden from
+            it to avoid a duplicate announcement. */}
+        <p role="status" className="sr-only">
+          {hasGenerated ? "Passport generated." : ""}
+        </p>
+
         <div className="mx-auto flex w-full max-w-4xl flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-6 print:hidden">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <label className="flex flex-col gap-1.5 text-sm">
@@ -204,7 +211,10 @@ function HealthPassportPage() {
               Open Medical Profile
             </Button>
             {hasGenerated && (
-              <span className="flex items-center text-xs text-green-600">
+              <span
+                aria-hidden="true"
+                className="flex items-center text-xs text-green-600"
+              >
                 Passport generated.
               </span>
             )}
