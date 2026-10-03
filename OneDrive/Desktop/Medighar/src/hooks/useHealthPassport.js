@@ -35,7 +35,14 @@ const EMPTY_PROFILE_SNAPSHOT = "null";
 export function useHealthPassport() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { members } = useFamilyProfiles();
-  const memberId = searchParams.get("member") || "me";
+
+  // The URL may carry an id that no longer exists (e.g. a deleted member
+  // reached via Back or a bookmark). Only a real member id is used;
+  // anything else falls back to "me", which is always in `members`.
+  const requestedMemberId = searchParams.get("member") || "me";
+  const memberId = members.some((member) => member.id === requestedMemberId)
+    ? requestedMemberId
+    : "me";
 
   const profileSnapshot = useSyncExternalStore(
     subscribeToProfile,
