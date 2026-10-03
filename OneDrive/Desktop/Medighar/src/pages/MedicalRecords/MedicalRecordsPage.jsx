@@ -346,6 +346,7 @@ function MedicalRecordsPage() {
     values,
     errors,
     isEditing,
+    editingId,
     updateField,
     startEdit,
     resetForm,
@@ -371,7 +372,9 @@ function MedicalRecordsPage() {
   const handleConfirmDelete = () => {
     if (pendingDelete) {
       remove(pendingDelete.id);
-      if (isEditing) {
+      // Only discard the open form when it is editing the record that was
+      // just deleted; deleting a different record must not lose the edit.
+      if (editingId === pendingDelete.id) {
         resetForm();
         setShowForm(false);
       }

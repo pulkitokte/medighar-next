@@ -77,6 +77,7 @@ export function useRecordForm({ onSuccess } = {}) {
     values,
     errors,
     isEditing: editingId !== null,
+    editingId,
     updateField,
     startEdit,
     resetForm,
