@@ -256,7 +256,16 @@ function MedicalIdCard({ profile, completion }) {
 function MedicalProfilePage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { members } = useFamilyProfiles();
-  const selectedMemberId = searchParams.get("member") || "me";
+
+  // The URL may carry an id that no longer exists (e.g. a deleted member
+  // reached via Back or a bookmark). Only a real member id is used;
+  // anything else falls back to "me", which is always in `members`.
+  const requestedMemberId = searchParams.get("member") || "me";
+  const selectedMemberId = members.some(
+    (member) => member.id === requestedMemberId,
+  )
+    ? requestedMemberId
+    : "me";
 
   const { profile, completion, save, remove, reset } =
     useMedicalProfile(selectedMemberId);
