@@ -21,8 +21,9 @@ const SIZE_CLASSES = {
  * programmatically focus it. Button always renders a single <button>
  * element (no polymorphic "as"/link rendering exists in the current
  * implementation), so the ref is forwarded directly with no branching.
- * Every existing prop, variant, size, and behavior is unchanged; this is
- * purely additive.
+ * Any additional props (aria-label, aria-pressed, id, title, etc.) are
+ * forwarded to the native button so accessibility attributes are not
+ * silently dropped.
  */
 const Button = forwardRef(function Button(
   {
@@ -37,6 +38,7 @@ const Button = forwardRef(function Button(
     className,
     type = "button",
     onClick,
+    ...rest
   },
   ref,
 ) {
@@ -44,6 +46,7 @@ const Button = forwardRef(function Button(
 
   return (
     <button
+      {...rest}
       ref={ref}
       type={type}
       onClick={onClick}
