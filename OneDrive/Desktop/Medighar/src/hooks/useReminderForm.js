@@ -45,6 +45,8 @@ export function useReminderForm() {
    * a member switch — the appointment dropdown is filtered by member in
    * RemindersPage.jsx, so a previously valid selection can become
    * invalid the moment memberId changes, and must not be submittable.
+   * Any error that referred to that cleared selection is dropped too, so
+   * a stale message is not left next to an empty field.
    */
   const updateAppointmentField = useCallback((field, value) => {
     setAppointmentValues((previous) => {
@@ -53,6 +55,15 @@ export function useReminderForm() {
       }
       return { ...previous, [field]: value };
     });
+
+    if (field === "memberId") {
+      setErrors((previous) => {
+        if (!previous.appointmentId) return previous;
+        const next = { ...previous };
+        delete next.appointmentId;
+        return next;
+      });
+    }
   }, []);
 
   const handleSubmit = useCallback(
