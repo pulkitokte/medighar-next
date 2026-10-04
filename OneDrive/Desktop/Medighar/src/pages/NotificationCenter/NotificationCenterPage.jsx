@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Bell,
@@ -54,7 +54,12 @@ function RelativeTime({ timestamp }) {
   );
 }
 
-function NotificationCard({ notification, onMarkRead, onDismiss }) {
+function NotificationCard({
+  notification,
+  onMarkRead,
+  onDismiss,
+  registerDismissButton,
+}) {
   const navigate = useNavigate();
   const Icon = notification.icon;
   const priorityMeta = PRIORITY_META[notification.priority];
@@ -126,6 +131,7 @@ function NotificationCard({ notification, onMarkRead, onDismiss }) {
             </Button>
           )}
           <Button
+            ref={(node) => registerDismissButton(notification.id, node)}
             variant="ghost"
             size="sm"
             onClick={() => onDismiss(notification.id)}
@@ -200,11 +206,53 @@ function NotificationCenterPage() {
   const [activeTab, setActiveTab] = useState("notifications");
   const [statusMessage, setStatusMessage] = useState("");
 
+  // Focus management for Dismiss. dismissButtonRefs maps each rendered
+  // notification id to its Dismiss button; pendingFocusRef records where
+  // focus should land once a dismissed (focused) notification is gone.
+  const dismissButtonRefs = useRef(new Map());
+  const pendingFocusRef = useRef(null);
+  const panelRef = useRef(null);
+
+  const registerDismissButton = (id, node) => {
+    if (node) {
+      dismissButtonRefs.current.set(id, node);
+    } else {
+      dismissButtonRefs.current.delete(id);
+    }
+  };
+
+  // Ids of the notification cards currently rendered, in DOM order.
+  const getVisibleIds = () =>
+    RECENCY_GROUPS.flatMap((group) => groupedNotifications[group] ?? []).map(
+      (notification) => notification.id,
+    );
+
   useEffect(() => {
     if (!statusMessage) return undefined;
     const timeout = setTimeout(() => setStatusMessage(""), 2500);
     return () => clearTimeout(timeout);
   }, [statusMessage]);
+
+  // After the list re-renders without the dismissed notification, move
+  // focus to the recorded target (next card, else previous card, else the
+  // notifications panel). Does nothing until the dismissed id is gone.
+  useEffect(() => {
+    const pending = pendingFocusRef.current;
+    if (!pending) return;
+
+    const visibleIds = RECENCY_GROUPS.flatMap(
+      (group) => groupedNotifications[group] ?? [],
+    ).map((notification) => notification.id);
+    if (visibleIds.includes(pending.dismissedId)) return;
+
+    pendingFocusRef.current = null;
+
+    const target = pending.targetId
+      ? dismissButtonRefs.current.get(pending.targetId)
+      : null;
+
+    (target ?? panelRef.current)?.focus();
+  }, [groupedNotifications]);
 
   const handleMarkRead = (id) => {
     markRead(id);
@@ -212,6 +260,18 @@ function NotificationCenterPage() {
   };
 
   const handleDismiss = (id) => {
+    const dismissButton = dismissButtonRefs.current.get(id);
+
+    // Only manage focus when the dismissed notification's own Dismiss
+    // button currently has it; otherwise leave focus where it is.
+    if (dismissButton && document.activeElement === dismissButton) {
+      const visibleIds = getVisibleIds();
+      const index = visibleIds.indexOf(id);
+      const targetId = visibleIds[index + 1] ?? visibleIds[index - 1] ?? null;
+
+      pendingFocusRef.current = { dismissedId: id, targetId };
+    }
+
     dismiss(id);
     setStatusMessage("Notification dismissed.");
   };
@@ -321,10 +381,12 @@ function NotificationCenterPage() {
 
         {activeTab === "notifications" ? (
           <div
+            ref={panelRef}
+            tabIndex={-1}
             id="panel-notifications"
             role="tabpanel"
             aria-labelledby="tab-notifications"
-            className="flex flex-col gap-8"
+            className="flex flex-col gap-8 outline-none"
           >
             <div className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5 sm:flex-row sm:flex-wrap sm:items-end sm:gap-6">
               <div className="flex flex-1 flex-col gap-1.5 text-sm">
@@ -405,6 +467,7 @@ function NotificationCenterPage() {
                             notification={notification}
                             onMarkRead={handleMarkRead}
                             onDismiss={handleDismiss}
+                            registerDismissButton={registerDismissButton}
                           />
                         ))}
                       </ol>
