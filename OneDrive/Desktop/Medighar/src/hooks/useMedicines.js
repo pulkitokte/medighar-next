@@ -3,6 +3,8 @@ import { useSearchParams } from "react-router-dom";
 import { useQuery } from "@/hooks/useQuery.js";
 import { getMedicines } from "@/services/medicines/medicines.service.js";
 import { parsePageParam, withUpdatedParams } from "@/shared/lib/queryParams.js";
+import { MEDICINE_CATEGORIES } from "@/data/medicines/categories.js";
+import { MEDICINES } from "@/data/medicines/medicines.js";
 
 const DEFAULT_FILTERS = {
   category: "All",
@@ -12,10 +14,34 @@ const DEFAULT_FILTERS = {
 
 const PAGE_SIZE = 6;
 
+const VALID_CATEGORIES = new Set(["All", ...MEDICINE_CATEGORIES]);
+const VALID_DOSAGE_FORMS = new Set([
+  "All",
+  ...MEDICINES.map((medicine) => medicine.dosageForm),
+]);
+const VALID_SORTS = new Set(["newest", "name-asc", "name-desc", "category"]);
+
+/**
+ * Returns the URL value only when it is one of the known options;
+ * otherwise the default, so a stale or hand-edited link can't leave a
+ * filter or sort control in a state that matches no option.
+ */
+function pickKnown(value, validValues, fallback) {
+  return value && validValues.has(value) ? value : fallback;
+}
+
 function readFilters(searchParams) {
   return {
-    category: searchParams.get("category") || DEFAULT_FILTERS.category,
-    dosageForm: searchParams.get("dosage") || DEFAULT_FILTERS.dosageForm,
+    category: pickKnown(
+      searchParams.get("category"),
+      VALID_CATEGORIES,
+      DEFAULT_FILTERS.category,
+    ),
+    dosageForm: pickKnown(
+      searchParams.get("dosage"),
+      VALID_DOSAGE_FORMS,
+      DEFAULT_FILTERS.dosageForm,
+    ),
     prescriptionOnly: searchParams.get("prescription") === "true",
   };
 }
@@ -46,7 +72,7 @@ export function useMedicines() {
 
   const searchQuery = searchParams.get("search") || "";
   const filters = useMemo(() => readFilters(searchParams), [searchParams]);
-  const sortBy = searchParams.get("sort") || "newest";
+  const sortBy = pickKnown(searchParams.get("sort"), VALID_SORTS, "newest");
   const currentPage = parsePageParam(searchParams);
 
   const updateParams = useCallback(
