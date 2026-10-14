@@ -212,9 +212,9 @@ function DiseaseDetailsPage() {
 
           <RelationSection
             icon={Store}
-            title="Nearby Pharmacies"
+            title="Recommended Pharmacies"
             items={recommendedPharmacies}
-            emptyMessage="No nearby pharmacies found."
+            emptyMessage="No related pharmacies found."
             viewAllHref="/pharmacy"
             renderGrid={(pharmacies) => <PharmacyGrid pharmacies={pharmacies} />}
           />

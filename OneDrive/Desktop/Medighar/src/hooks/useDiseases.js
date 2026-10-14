@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { useQuery } from "@/hooks/useQuery.js";
 import { getDiseases } from "@/services/diseases/diseases.service.js";
 import { parsePageParam, withUpdatedParams } from "@/shared/lib/queryParams.js";
+import { DISEASE_CATEGORIES } from "@/data/diseases/categories.js";
 
 const DEFAULT_FILTERS = {
   category: "All",
@@ -12,10 +13,47 @@ const DEFAULT_FILTERS = {
 
 const PAGE_SIZE = 6;
 
+/**
+ * Returns the plain value of each option, whether the option list holds
+ * primitives or { value, label } objects (the two shapes FilterSelect
+ * accepts).
+ */
+function optionValues(options) {
+  return options.map((option) =>
+    option && typeof option === "object" && "value" in option
+      ? option.value
+      : option,
+  );
+}
+
+// Same source DiseaseFilters renders for the Category control.
+const VALID_CATEGORIES = new Set(["All", ...optionValues(DISEASE_CATEGORIES)]);
+// Mirrors DiseaseFilters' SEVERITY_OPTIONS.
+const VALID_SEVERITIES = new Set(["All", "Mild", "Moderate", "Severe"]);
+// Mirrors DiseaseSort and the comparators in diseases.service.js.
+const VALID_SORTS = new Set(["newest", "name-asc", "name-desc", "severity"]);
+
+/**
+ * Returns the URL value only when it is a known option; otherwise the
+ * default, so a stale or hand-edited link can't leave a control on a value
+ * that matches no option.
+ */
+function pickKnown(value, validValues, fallback) {
+  return value && validValues.has(value) ? value : fallback;
+}
+
 function readFilters(searchParams) {
   return {
-    category: searchParams.get("category") || DEFAULT_FILTERS.category,
-    severity: searchParams.get("severity") || DEFAULT_FILTERS.severity,
+    category: pickKnown(
+      searchParams.get("category"),
+      VALID_CATEGORIES,
+      DEFAULT_FILTERS.category,
+    ),
+    severity: pickKnown(
+      searchParams.get("severity"),
+      VALID_SEVERITIES,
+      DEFAULT_FILTERS.severity,
+    ),
     contagiousOnly: searchParams.get("contagious") === "true",
   };
 }
@@ -46,7 +84,7 @@ export function useDiseases() {
 
   const searchQuery = searchParams.get("search") || "";
   const filters = useMemo(() => readFilters(searchParams), [searchParams]);
-  const sortBy = searchParams.get("sort") || "newest";
+  const sortBy = pickKnown(searchParams.get("sort"), VALID_SORTS, "newest");
   const currentPage = parsePageParam(searchParams);
 
   const updateParams = useCallback(
