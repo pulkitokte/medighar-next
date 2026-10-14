@@ -29,7 +29,7 @@ import DiseaseGrid from "@/features/diseases/components/DiseaseGrid.jsx";
 import PharmacyAvailabilityCard from "@/features/pharmacy/components/PharmacyAvailabilityCard.jsx";
 
 const AVAILABILITY_SORT_OPTIONS = [
-  { key: "nearest", label: "Nearest" },
+  { key: "nearest", label: "Shortest Distance" },
   { key: "highest-stock", label: "Highest Stock" },
 ];
 
@@ -42,7 +42,10 @@ function AmberListSection({ icon: Icon, title, items }) {
       </div>
       <ul className="flex flex-col gap-2">
         {items.map((item) => (
-          <li key={item} className="text-sm leading-relaxed text-slate-700 sm:text-base">
+          <li
+            key={item}
+            className="text-sm leading-relaxed text-slate-700 sm:text-base"
+          >
             {item}
           </li>
         ))}
@@ -70,11 +73,17 @@ function MedicineDetailsPage() {
   if (!medicine) return null;
 
   const scrollToAvailability = () => {
-    availabilityRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    availabilityRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
   };
 
   return (
-    <Section paddingY="py-14 sm:py-20" className="bg-gradient-to-b from-lime-50/50 via-white to-white">
+    <Section
+      paddingY="py-14 sm:py-20"
+      className="bg-gradient-to-b from-lime-50/50 via-white to-white"
+    >
       <Container className="flex flex-col gap-12">
         <Breadcrumb
           items={[
@@ -110,7 +119,9 @@ function MedicineDetailsPage() {
                   )}
                 >
                   <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
-                  {medicine.prescriptionRequired ? "Prescription Required" : "Available Without Prescription"}
+                  {medicine.prescriptionRequired
+                    ? "Prescription Required"
+                    : "Available Without Prescription"}
                 </span>
               </div>
 
@@ -122,11 +133,17 @@ function MedicineDetailsPage() {
 
               <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-sm text-slate-500 sm:justify-start">
                 <span className="flex items-center gap-1.5">
-                  <Layers className="h-4 w-4 text-slate-400" aria-hidden="true" />
+                  <Layers
+                    className="h-4 w-4 text-slate-400"
+                    aria-hidden="true"
+                  />
                   {medicine.dosageForm} · {medicine.strength}
                 </span>
                 <span className="flex items-center gap-1.5">
-                  <Building2 className="h-4 w-4 text-slate-400" aria-hidden="true" />
+                  <Building2
+                    className="h-4 w-4 text-slate-400"
+                    aria-hidden="true"
+                  />
                   {medicine.manufacturer}
                 </span>
                 <span className="flex items-center gap-1.5">
@@ -135,7 +152,10 @@ function MedicineDetailsPage() {
               </div>
 
               <div className="flex flex-wrap items-center justify-center gap-4 pt-2 sm:justify-start">
-                <Button onClick={scrollToAvailability} className="rounded-full bg-lime-600 hover:bg-lime-700">
+                <Button
+                  onClick={scrollToAvailability}
+                  className="rounded-full bg-lime-600 hover:bg-lime-700"
+                >
                   <Store className="h-4 w-4" aria-hidden="true" />
                   View Available Pharmacies
                 </Button>
@@ -146,16 +166,32 @@ function MedicineDetailsPage() {
 
         {/* Medicine Identity */}
         <section className="flex flex-col gap-4">
-          <h2 className="text-base font-semibold text-slate-900">Medicine Information</h2>
+          <h2 className="text-base font-semibold text-slate-900">
+            Medicine Information
+          </h2>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <InfoCard icon={Tag} label="Category" value={medicine.category} />
-            <InfoCard icon={Layers} label="Dosage Form" value={medicine.dosageForm} />
-            <InfoCard icon={Beaker} label="Strength" value={medicine.strength} />
-            <InfoCard icon={Building2} label="Manufacturer" value={medicine.manufacturer} />
+            <InfoCard
+              icon={Layers}
+              label="Dosage Form"
+              value={medicine.dosageForm}
+            />
+            <InfoCard
+              icon={Beaker}
+              label="Strength"
+              value={medicine.strength}
+            />
+            <InfoCard
+              icon={Building2}
+              label="Manufacturer"
+              value={medicine.manufacturer}
+            />
             <InfoCard
               icon={ShieldCheck}
               label="Prescription"
-              value={medicine.prescriptionRequired ? "Required" : "Not Required"}
+              value={
+                medicine.prescriptionRequired ? "Required" : "Not Required"
+              }
             />
             <InfoCard icon={Archive} label="Storage" value={medicine.storage} />
           </div>
@@ -165,8 +201,16 @@ function MedicineDetailsPage() {
 
         <ListSection icon={ListChecks} title="Uses" items={medicine.uses} />
 
-        <AmberListSection icon={AlertTriangle} title="Side Effects" items={medicine.sideEffects} />
-        <AmberListSection icon={ShieldAlert} title="Precautions" items={medicine.precautions} />
+        <AmberListSection
+          icon={AlertTriangle}
+          title="Side Effects"
+          items={medicine.sideEffects}
+        />
+        <AmberListSection
+          icon={ShieldAlert}
+          title="Precautions"
+          items={medicine.precautions}
+        />
 
         <RelationSection
           icon={Activity}
@@ -178,7 +222,10 @@ function MedicineDetailsPage() {
         />
 
         {/* Available At Pharmacies */}
-        <section ref={availabilityRef} className="flex flex-col gap-4 scroll-mt-24">
+        <section
+          ref={availabilityRef}
+          className="flex flex-col gap-4 scroll-mt-24"
+        >
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 className="flex items-center gap-2 text-lg font-semibold text-slate-900">
               <Store className="h-5 w-5 text-lime-600" aria-hidden="true" />
@@ -220,6 +267,10 @@ function MedicineDetailsPage() {
               ))}
             </div>
           </div>
+
+          <p className="text-xs text-slate-500">
+            Stock levels and distances are sample data for demonstration.
+          </p>
 
           {entries.length === 0 ? (
             <EmptyRelationship message="No pharmacies match the current filter." />

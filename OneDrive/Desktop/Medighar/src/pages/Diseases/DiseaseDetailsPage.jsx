@@ -63,14 +63,22 @@ const TONE_ICON = {
 
 function SemanticListSection({ icon: Icon, title, items, tone = "slate" }) {
   return (
-    <div className={cn("card-surface flex flex-col gap-3 border p-6", TONE_SURFACES[tone])}>
+    <div
+      className={cn(
+        "card-surface flex flex-col gap-3 border p-6",
+        TONE_SURFACES[tone],
+      )}
+    >
       <div className="flex items-center gap-2">
         <Icon className={cn("h-5 w-5", TONE_ICON[tone])} aria-hidden="true" />
         <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
       </div>
       <ul className="flex flex-col gap-2">
         {items.map((item) => (
-          <li key={item} className="text-sm leading-relaxed text-slate-700 sm:text-base">
+          <li
+            key={item}
+            className="text-sm leading-relaxed text-slate-700 sm:text-base"
+          >
             {item}
           </li>
         ))}
@@ -102,7 +110,10 @@ function DiseaseDetailsPage() {
   if (!disease) return null;
 
   return (
-    <Section paddingY="py-14 sm:py-20" className="bg-gradient-to-b from-amber-50/40 via-white to-white">
+    <Section
+      paddingY="py-14 sm:py-20"
+      className="bg-gradient-to-b from-amber-50/40 via-white to-white"
+    >
       <Container className="flex flex-col gap-12">
         <Breadcrumb
           items={[
@@ -121,7 +132,10 @@ function DiseaseDetailsPage() {
 
           <div className="relative flex flex-col items-center gap-6 text-center sm:flex-row sm:items-start sm:text-left">
             <span className="flex h-24 w-24 shrink-0 items-center justify-center rounded-3xl bg-gradient-to-br from-amber-100 to-orange-50 shadow-sm">
-              <Activity className="h-10 w-10 text-amber-700" aria-hidden="true" />
+              <Activity
+                className="h-10 w-10 text-amber-700"
+                aria-hidden="true"
+              />
             </span>
 
             <div className="flex flex-1 flex-col items-center gap-3 sm:items-start">
@@ -129,7 +143,12 @@ function DiseaseDetailsPage() {
                 <h1 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">
                   {disease.name}
                 </h1>
-                <span className={cn("inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium", SEVERITY_CLASSES[disease.severity])}>
+                <span
+                  className={cn(
+                    "inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium",
+                    SEVERITY_CLASSES[disease.severity],
+                  )}
+                >
                   {disease.severity}
                 </span>
               </div>
@@ -144,11 +163,17 @@ function DiseaseDetailsPage() {
 
               <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 pt-1 text-sm text-slate-500 sm:justify-start">
                 <span className="flex items-center gap-1.5">
-                  <Stethoscope className="h-4 w-4 text-slate-400" aria-hidden="true" />
+                  <Stethoscope
+                    className="h-4 w-4 text-slate-400"
+                    aria-hidden="true"
+                  />
                   {disease.specialty}
                 </span>
                 <span className="flex items-center gap-1.5">
-                  <Biohazard className="h-4 w-4 text-slate-400" aria-hidden="true" />
+                  <Biohazard
+                    className="h-4 w-4 text-slate-400"
+                    aria-hidden="true"
+                  />
                   {disease.contagious ? "Contagious" : "Not Contagious"}
                 </span>
               </div>
@@ -158,39 +183,85 @@ function DiseaseDetailsPage() {
 
         {/* Quick Facts */}
         <section className="flex flex-col gap-4">
-          <h2 className="text-base font-semibold text-slate-900">At a Glance</h2>
+          <h2 className="text-base font-semibold text-slate-900">
+            At a Glance
+          </h2>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <InfoCard icon={Tag} label="Category" value={disease.category} />
-            <InfoCard icon={Stethoscope} label="Specialty" value={disease.specialty} />
+            <InfoCard
+              icon={Stethoscope}
+              label="Specialty"
+              value={disease.specialty}
+            />
             <InfoCard icon={Gauge} label="Severity" value={disease.severity} />
-            <InfoCard icon={Biohazard} label="Contagious" value={disease.contagious ? "Yes" : "No"} />
+            <InfoCard
+              icon={Biohazard}
+              label="Contagious"
+              value={disease.contagious ? "Yes" : "No"}
+            />
           </div>
         </section>
 
         {/* Symptoms */}
-        <SemanticListSection icon={ListChecks} title="Symptoms" items={disease.symptoms} tone="sand" />
+        <SemanticListSection
+          icon={ListChecks}
+          title="Symptoms"
+          items={disease.symptoms}
+          tone="sand"
+        />
 
         {/* Causes + Risk Factors, paired on desktop */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <SemanticListSection icon={AlertCircle} title="Causes" items={disease.causes} tone="slate" />
-          <SemanticListSection icon={ShieldAlert} title="Risk Factors" items={disease.riskFactors} tone="amber" />
+          <SemanticListSection
+            icon={AlertCircle}
+            title="Causes"
+            items={disease.causes}
+            tone="slate"
+          />
+          <SemanticListSection
+            icon={ShieldAlert}
+            title="Risk Factors"
+            items={disease.riskFactors}
+            tone="amber"
+          />
         </div>
 
         {/* Diagnosis */}
-        <SemanticListSection icon={DiagnosisIcon} title="Diagnosis" items={disease.diagnosis} tone="slate" />
+        <SemanticListSection
+          icon={DiagnosisIcon}
+          title="Diagnosis"
+          items={disease.diagnosis}
+          tone="slate"
+        />
 
         {/* Treatment Summary */}
-        <TextSection icon={ClipboardList} title="Treatment Summary" content={disease.treatmentSummary} />
+        <TextSection
+          icon={ClipboardList}
+          title="Treatment Summary"
+          content={disease.treatmentSummary}
+        />
 
         {/* Complications + Prevention, paired on desktop, semantically distinct */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <SemanticListSection icon={AlertCircle} title="Complications" items={disease.complications} tone="rose" />
-          <SemanticListSection icon={ShieldCheck} title="Prevention" items={disease.prevention} tone="emerald" />
+          <SemanticListSection
+            icon={AlertCircle}
+            title="Complications"
+            items={disease.complications}
+            tone="rose"
+          />
+          <SemanticListSection
+            icon={ShieldCheck}
+            title="Prevention"
+            items={disease.prevention}
+            tone="emerald"
+          />
         </div>
 
         {/* Healthcare Relationships */}
         <div className="flex flex-col gap-10">
-          <h2 className="text-base font-semibold text-slate-900">Related Healthcare Information</h2>
+          <h2 className="text-base font-semibold text-slate-900">
+            Related Healthcare Information
+          </h2>
 
           <RelationSection
             icon={Pill}
@@ -216,7 +287,9 @@ function DiseaseDetailsPage() {
             items={recommendedPharmacies}
             emptyMessage="No related pharmacies found."
             viewAllHref="/pharmacy"
-            renderGrid={(pharmacies) => <PharmacyGrid pharmacies={pharmacies} />}
+            renderGrid={(pharmacies) => (
+              <PharmacyGrid pharmacies={pharmacies} />
+            )}
           />
 
           <RelationSection

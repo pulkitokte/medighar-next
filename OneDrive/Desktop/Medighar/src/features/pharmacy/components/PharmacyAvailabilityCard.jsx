@@ -50,7 +50,7 @@ function PharmacyAvailabilityCard({
             className="h-4 w-4 shrink-0 text-slate-400"
             aria-hidden="true"
           />
-          {distanceKm} km away
+          Sample distance: {distanceKm} km
         </div>
         <div className="flex items-center gap-1.5">
           <Clock
