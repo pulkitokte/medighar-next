@@ -42,6 +42,6 @@ export const SEARCH_CATEGORIES = [
     key: "pharmacy",
     label: "Pharmacies",
     icon: Store,
-    placeholder: "Search pharmacies near you...",
+    placeholder: "Search pharmacies by name or city...",
   },
 ];
