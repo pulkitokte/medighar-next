@@ -3,6 +3,8 @@ import { useSearchParams } from "react-router-dom";
 import { useQuery } from "@/hooks/useQuery.js";
 import { getPharmacies } from "@/services/pharmacy/pharmacy.service.js";
 import { parsePageParam, withUpdatedParams } from "@/shared/lib/queryParams.js";
+import { PHARMACY_TYPES } from "@/data/pharmacy/services.js";
+import { PHARMACIES } from "@/data/pharmacy/pharmacies.js";
 
 const DEFAULT_FILTERS = {
   type: "All",
@@ -12,10 +14,55 @@ const DEFAULT_FILTERS = {
 
 const PAGE_SIZE = 6;
 
+/**
+ * Returns the plain value of each option, whether the option list holds
+ * primitives or { value, label } objects (the two shapes FilterSelect
+ * accepts).
+ */
+function optionValues(options) {
+  return options.map((option) =>
+    option && typeof option === "object" && "value" in option
+      ? option.value
+      : option,
+  );
+}
+
+// Same sources PharmacyFilters renders, so the URL can't hold a value the
+// controls don't offer.
+const VALID_TYPES = new Set(["All", ...optionValues(PHARMACY_TYPES)]);
+const VALID_CITIES = new Set([
+  "All",
+  ...PHARMACIES.map((pharmacy) => pharmacy.city),
+]);
+// Mirrors PharmacySort and the comparators in pharmacy.service.js.
+const VALID_SORTS = new Set([
+  "newest",
+  "highest-rated",
+  "name-asc",
+  "name-desc",
+]);
+
+/**
+ * Returns the URL value only when it is a known option; otherwise the
+ * default, so a stale or hand-edited link can't leave a control on a value
+ * that matches no option.
+ */
+function pickKnown(value, validValues, fallback) {
+  return value && validValues.has(value) ? value : fallback;
+}
+
 function readFilters(searchParams) {
   return {
-    type: searchParams.get("type") || DEFAULT_FILTERS.type,
-    city: searchParams.get("city") || DEFAULT_FILTERS.city,
+    type: pickKnown(
+      searchParams.get("type"),
+      VALID_TYPES,
+      DEFAULT_FILTERS.type,
+    ),
+    city: pickKnown(
+      searchParams.get("city"),
+      VALID_CITIES,
+      DEFAULT_FILTERS.city,
+    ),
     homeDeliveryOnly: searchParams.get("delivery") === "true",
   };
 }
@@ -46,7 +93,7 @@ export function usePharmacies() {
 
   const searchQuery = searchParams.get("search") || "";
   const filters = useMemo(() => readFilters(searchParams), [searchParams]);
-  const sortBy = searchParams.get("sort") || "newest";
+  const sortBy = pickKnown(searchParams.get("sort"), VALID_SORTS, "newest");
   const currentPage = parsePageParam(searchParams);
 
   const updateParams = useCallback(
