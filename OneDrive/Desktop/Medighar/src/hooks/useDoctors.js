@@ -3,6 +3,8 @@ import { useSearchParams } from "react-router-dom";
 import { useQuery } from "@/hooks/useQuery.js";
 import { getDoctors } from "@/services/doctors/doctors.service.js";
 import { parsePageParam, withUpdatedParams } from "@/shared/lib/queryParams.js";
+import { SPECIALTIES } from "@/data/doctors/specialties.js";
+import { DOCTORS } from "@/data/doctors/doctors.js";
 
 const DEFAULT_FILTERS = {
   specialty: "All",
@@ -14,12 +16,67 @@ const DEFAULT_FILTERS = {
 
 const PAGE_SIZE = 6;
 
+/**
+ * Returns the plain value of each option, whether the option list holds
+ * primitives or { value, label } objects (the two shapes FilterSelect
+ * accepts).
+ */
+function optionValues(options) {
+  return options.map((option) =>
+    option && typeof option === "object" && "value" in option
+      ? option.value
+      : option,
+  );
+}
+
+// Specialty and location come from the same sources DoctorFilters renders.
+const VALID_SPECIALTIES = new Set(["All", ...optionValues(SPECIALTIES)]);
+const VALID_LOCATIONS = new Set([
+  "All",
+  ...DOCTORS.map((doctor) => doctor.city),
+]);
+// Mirrors DoctorFilters' EXPERIENCE_OPTIONS / GENDER_OPTIONS and the
+// experience buckets in doctors.service.js.
+const VALID_EXPERIENCE = new Set(["All", "0-5 yrs", "5-10 yrs", "10+ yrs"]);
+const VALID_GENDERS = new Set(["All", "Male", "Female"]);
+const VALID_SORTS = new Set([
+  "newest",
+  "highest-rated",
+  "most-experienced",
+  "lowest-fee",
+]);
+
+/**
+ * Returns the URL value only when it is a known option; otherwise the
+ * default, so a stale or hand-edited link can't leave a control on a value
+ * that matches no option (or silently bypass a filter).
+ */
+function pickKnown(value, validValues, fallback) {
+  return value && validValues.has(value) ? value : fallback;
+}
+
 function readFilters(searchParams) {
   return {
-    specialty: searchParams.get("specialty") || DEFAULT_FILTERS.specialty,
-    experience: searchParams.get("experience") || DEFAULT_FILTERS.experience,
-    location: searchParams.get("location") || DEFAULT_FILTERS.location,
-    gender: searchParams.get("gender") || DEFAULT_FILTERS.gender,
+    specialty: pickKnown(
+      searchParams.get("specialty"),
+      VALID_SPECIALTIES,
+      DEFAULT_FILTERS.specialty,
+    ),
+    experience: pickKnown(
+      searchParams.get("experience"),
+      VALID_EXPERIENCE,
+      DEFAULT_FILTERS.experience,
+    ),
+    location: pickKnown(
+      searchParams.get("location"),
+      VALID_LOCATIONS,
+      DEFAULT_FILTERS.location,
+    ),
+    gender: pickKnown(
+      searchParams.get("gender"),
+      VALID_GENDERS,
+      DEFAULT_FILTERS.gender,
+    ),
     verifiedOnly: searchParams.get("verified") === "true",
   };
 }
@@ -50,7 +107,7 @@ export function useDoctors() {
 
   const searchQuery = searchParams.get("search") || "";
   const filters = useMemo(() => readFilters(searchParams), [searchParams]);
-  const sortBy = searchParams.get("sort") || "newest";
+  const sortBy = pickKnown(searchParams.get("sort"), VALID_SORTS, "newest");
   const currentPage = parsePageParam(searchParams);
 
   const updateParams = useCallback(

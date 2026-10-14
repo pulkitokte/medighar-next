@@ -14,7 +14,20 @@ const DEFAULT_FILTERS = {
 
 const PAGE_SIZE = 6;
 
-const VALID_CATEGORIES = new Set(["All", ...MEDICINE_CATEGORIES]);
+/**
+ * Returns the plain value of each option, whether the option list holds
+ * primitives or { value, label } objects (the two shapes FilterSelect
+ * accepts).
+ */
+function optionValues(options) {
+  return options.map((option) =>
+    option && typeof option === "object" && "value" in option
+      ? option.value
+      : option,
+  );
+}
+
+const VALID_CATEGORIES = new Set(["All", ...optionValues(MEDICINE_CATEGORIES)]);
 const VALID_DOSAGE_FORMS = new Set([
   "All",
   ...MEDICINES.map((medicine) => medicine.dosageForm),
