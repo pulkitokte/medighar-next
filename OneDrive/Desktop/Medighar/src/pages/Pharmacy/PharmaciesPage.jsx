@@ -78,7 +78,7 @@ function PharmaciesPage() {
             <EmptyState
               icon={Store}
               title="No pharmacies found."
-              description="Try adjusting your filters to find a pharmacy near you."
+              description="Try adjusting your filters to find the pharmacy you're looking for."
             />
           ) : (
             <PharmacyGrid pharmacies={paginatedPharmacies} />
