@@ -192,6 +192,10 @@ function PharmacyDetailsPage() {
             Available Medicines
           </h2>
 
+          <p className="text-xs text-slate-500">
+            Stock levels are sample data for demonstration.
+          </p>
+
           {entries.length === 0 ? (
             <EmptyRelationship message="No medicine availability listed for this pharmacy." />
           ) : (
