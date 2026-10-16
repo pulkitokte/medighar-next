@@ -1,5 +1,8 @@
 import { Routes, Route } from "react-router-dom";
 import MainLayout from "@/layouts/MainLayout.jsx";
+import WelcomePage from "@/pages/Welcome/WelcomePage.jsx";
+import RoleSelectionPage from "@/pages/RoleSelection/RoleSelectionPage.jsx";
+import PortalPlaceholderPage from "@/pages/PortalPlaceholder/PortalPlaceholderPage.jsx";
 import HomePage from "@/pages/Home/HomePage.jsx";
 import SearchPage from "@/pages/Search/SearchPage.jsx";
 import DoctorsPage from "@/pages/Doctors/DoctorsPage.jsx";
@@ -32,8 +35,23 @@ import NotFoundPage from "@/pages/NotFound/NotFoundPage.jsx";
 function AppRoutes() {
   return (
     <Routes>
+      {/* Entry experience: welcome, role selection and portal placeholders.
+          Rendered outside MainLayout (no patient header/footer). */}
+      <Route path="/" element={<WelcomePage />} />
+      <Route path="/roles" element={<RoleSelectionPage />} />
+      <Route
+        path="/doctor-portal"
+        element={<PortalPlaceholderPage role="doctor" />}
+      />
+      <Route
+        path="/pharmacy-portal"
+        element={<PortalPlaceholderPage role="pharmacy" />}
+      />
+
+      {/* Existing patient application. The former home page now lives at
+          /home; every other route is unchanged. */}
       <Route element={<MainLayout />}>
-        <Route path="/" element={<HomePage />} />
+        <Route path="/home" element={<HomePage />} />
         <Route path="/search" element={<SearchPage />} />
         <Route path="/doctors" element={<DoctorsPage />} />
         <Route path="/doctors/:doctorId" element={<DoctorDetailsPage />} />

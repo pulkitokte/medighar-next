@@ -32,7 +32,7 @@ import Button from "@/shared/components/ui/Button.jsx";
 import { useFeatureDiscovery } from "@/hooks/useFeatureDiscovery.js";
 
 const PRIMARY_LINKS = [
-  { label: "Home", to: "/", icon: Home },
+  { label: "Home", to: "/home", icon: Home },
   { label: "Doctors", to: "/doctors", icon: Stethoscope },
   { label: "Medicines", to: "/medicines", icon: Pill },
   { label: "Diseases", to: "/diseases", icon: Activity },
@@ -259,7 +259,7 @@ function Navbar() {
   return (
     <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/80 backdrop-blur-md">
       <div className="mx-auto flex h-16 w-full max-w-[1280px] items-center gap-4 px-4 sm:px-6 lg:px-8">
-        <NavLink to="/" className="flex shrink-0 items-center">
+        <NavLink to="/home" className="flex shrink-0 items-center">
           <Logo size="sm" showText />
         </NavLink>
 
