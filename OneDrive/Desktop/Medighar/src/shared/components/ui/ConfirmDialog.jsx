@@ -62,6 +62,11 @@ function ConfirmDialog({
   useEffect(() => {
     if (!open) return undefined;
 
+    // Capture the dialog element once, so cleanup compares against the
+    // same node this effect ran for rather than whatever the ref points
+    // to by then.
+    const dialogElement = dialogRef.current;
+
     // Capture BEFORE moving focus into the dialog, per the required order.
     previousFocusRef.current = document.activeElement;
 
@@ -73,10 +78,8 @@ function ConfirmDialog({
      * @returns {HTMLElement[]}
      */
     function getFocusableElements() {
-      if (!dialogRef.current) return [];
-      return Array.from(
-        dialogRef.current.querySelectorAll(FOCUSABLE_SELECTOR),
-      );
+      if (!dialogElement) return [];
+      return Array.from(dialogElement.querySelectorAll(FOCUSABLE_SELECTOR));
     }
 
     // Prefer focusing the non-destructive Cancel button rather than the
@@ -87,7 +90,7 @@ function ConfirmDialog({
     if (cancelButtonRef.current && !cancelButtonRef.current.disabled) {
       cancelButtonRef.current.focus();
     } else {
-      dialogRef.current?.focus();
+      dialogElement?.focus();
     }
 
     function handleKeyDown(event) {
@@ -144,7 +147,7 @@ function ConfirmDialog({
       const target = previousFocusRef.current;
       if (
         target instanceof HTMLElement &&
-        target !== dialogRef.current &&
+        target !== dialogElement &&
         document.contains(target)
       ) {
         target.focus();

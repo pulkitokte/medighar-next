@@ -1,10 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-  useSyncExternalStore,
-} from "react";
+import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
 import { useAppointments } from "@/hooks/useAppointments.js";
 import { useReminders } from "@/hooks/useReminders.js";
 import { useMedicalRecords } from "@/hooks/useMedicalRecords.js";
@@ -74,18 +68,23 @@ export function useHealthReports() {
   const [memberFilter, setMemberFilter] = useState("all");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
-  const [hasGenerated, setHasGenerated] = useState(false);
 
   // "Report generated — ready to print or export" is a confirmation tied
   // to one specific report configuration (type + member + date range).
-  // Without this reset, changing any of those inputs after generating
-  // left the confirmation — and the enabled Print/Export PDF button —
-  // visibly attached to a configuration that was never actually
-  // generated/logged. Same stale-state defect class as the Health
-  // Passport hasGenerated fix, just with more contributing inputs here.
-  useEffect(() => {
-    setHasGenerated(false);
-  }, [reportType, memberFilter, dateFrom, dateTo]);
+  // Instead of resetting a flag in an effect whenever those inputs
+  // change, the hook remembers WHICH configuration was generated, and
+  // the confirmation is derived: it is only true while the current
+  // configuration is that one. Changing any input therefore can never
+  // leave the confirmation (or the enabled Print/Export PDF button)
+  // attached to a configuration that was never generated/logged.
+  const configKey = JSON.stringify([
+    reportType,
+    memberFilter,
+    dateFrom,
+    dateTo,
+  ]);
+  const [generatedConfigKey, setGeneratedConfigKey] = useState(null);
+  const hasGenerated = generatedConfigKey === configKey;
 
   const reportPreview = useMemo(
     () =>
@@ -134,8 +133,8 @@ export function useHealthReports() {
       memberLabel,
     });
 
-    setHasGenerated(true);
-  }, [reportType, memberFilter, members]);
+    setGeneratedConfigKey(configKey);
+  }, [reportType, memberFilter, members, configKey]);
 
   const exportPdf = useCallback(() => {
     exportReportAsPdf();

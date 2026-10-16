@@ -1,4 +1,3 @@
-import { getDoctorById } from "@/services/doctors/doctors.service.js";
 import {
   getAppointments,
   setAppointments,

@@ -1,10 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-  useSyncExternalStore,
-} from "react";
+import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useAppointments } from "@/hooks/useAppointments.js";
 import { useReminders } from "@/hooks/useReminders.js";
@@ -103,17 +97,16 @@ export function useHealthPassport() {
   const age = useMemo(() => computeAge(profile?.dob), [profile]);
 
   const [emergencyMode, setEmergencyMode] = useState(false);
-  const [hasGenerated, setHasGenerated] = useState(false);
 
   // "Passport generated." is a per-member confirmation that a specific
   // member's passport was explicitly generated via generatePassport().
-  // Without this reset, switching the viewed member (via the "Viewing
-  // Passport For" dropdown) left the confirmation visible for a member
-  // it was never actually generated for — a stale-state defect in the
-  // same family as the reminder/appointment member-consistency fix.
-  useEffect(() => {
-    setHasGenerated(false);
-  }, [memberId]);
+  // Instead of resetting a flag in an effect when the viewed member
+  // changes, the hook remembers WHICH member it was generated for, and
+  // the confirmation is derived: it is only true while the currently
+  // viewed member is that member. A confirmation can therefore never
+  // appear for a member it was not generated for.
+  const [generatedForMemberId, setGeneratedForMemberId] = useState(null);
+  const hasGenerated = generatedForMemberId === memberId;
 
   const memberLabel = useMemo(
     () => members.find((member) => member.id === memberId)?.fullName ?? "Me",
@@ -129,7 +122,7 @@ export function useHealthPassport() {
 
   const generatePassport = useCallback(() => {
     logPassportAction(PASSPORT_ACTIONS.GENERATED, memberLabel, memberId);
-    setHasGenerated(true);
+    setGeneratedForMemberId(memberId);
   }, [memberLabel, memberId]);
 
   const printPassportAction = useCallback(() => {

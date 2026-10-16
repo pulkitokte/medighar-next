@@ -98,11 +98,17 @@ export function useGlobalSearch() {
       : flat
     : suggestionsFlat;
 
-  // Reset active index whenever the visible result set changes (including
-  // when the query changes but the result count happens to stay the same).
-  useEffect(() => {
+  // Reset the active index whenever the visible result set changes
+  // (including when the query changes but the result count happens to stay
+  // the same) or the palette opens/closes. This is done while rendering
+  // by comparing against the key the index was last reset for, instead of
+  // in an effect, so a stale index is never painted.
+  const resetKey = `${visibleResults.length}|${debouncedQuery}|${isOpen}`;
+  const [lastResetKey, setLastResetKey] = useState(resetKey);
+  if (lastResetKey !== resetKey) {
+    setLastResetKey(resetKey);
     setActiveIndex(0);
-  }, [visibleResults.length, debouncedQuery, isOpen]);
+  }
 
   /**
    * Restores focus to whatever was focused before the palette opened, if

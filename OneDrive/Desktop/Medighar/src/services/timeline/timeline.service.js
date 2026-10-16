@@ -1,5 +1,4 @@
 import { CalendarClock, Pill, FileText, IdCard, BookUser } from "lucide-react";
-import { groupByField } from "@/shared/lib/repositoryHelpers.js";
 import { safeSearch } from "@/shared/lib/search.js";
 
 export const EVENT_TYPES = {

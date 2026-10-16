@@ -11,7 +11,6 @@ import {
   Pill,
   Activity,
   Store,
-  Star,
   IdCard,
   Users,
   CheckCircle2,

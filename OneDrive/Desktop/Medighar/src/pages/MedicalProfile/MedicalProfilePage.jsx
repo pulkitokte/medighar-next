@@ -1,10 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
   IdCard,
   HeartPulse,
-  Phone,
-  Pill,
   ShieldAlert,
   Printer,
   Trash2,
@@ -253,32 +251,20 @@ function MedicalIdCard({ profile, completion }) {
   );
 }
 
-function MedicalProfilePage() {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const { members } = useFamilyProfiles();
-
-  // The URL may carry an id that no longer exists (e.g. a deleted member
-  // reached via Back or a bookmark). Only a real member id is used;
-  // anything else falls back to "me", which is always in `members`.
-  const requestedMemberId = searchParams.get("member") || "me";
-  const selectedMemberId = members.some(
-    (member) => member.id === requestedMemberId,
-  )
-    ? requestedMemberId
-    : "me";
-
-  const { profile, completion, save, remove, reset } =
-    useMedicalProfile(selectedMemberId);
-
+/**
+ * Owns the form state (values, edit mode, errors) for ONE member's profile.
+ * The page renders it with a `key` built from the member id and the
+ * profile's updatedAt, so whenever the selected member or the saved
+ * profile changes React remounts it and the state below starts again from
+ * the current profile (edit mode on when there is no profile, no errors).
+ * This replaces an effect that reset the same state after every change.
+ */
+function ProfileEditor({ profile, save, remove, reset }) {
   const [isEditing, setIsEditing] = useState(!profile);
-  const [values, setValues] = useState(EMPTY_VALUES);
+  const [values, setValues] = useState(
+    profile ? { ...EMPTY_VALUES, ...profile } : EMPTY_VALUES,
+  );
   const [errors, setErrors] = useState({});
-
-  useEffect(() => {
-    setValues(profile ? { ...EMPTY_VALUES, ...profile } : EMPTY_VALUES);
-    setIsEditing(!profile);
-    setErrors({});
-  }, [profile, selectedMemberId]);
 
   const updateField = (field, value) => {
     setValues((previous) => ({ ...previous, [field]: value }));
@@ -315,6 +301,192 @@ function MedicalProfilePage() {
   const handlePrint = () => {
     if (typeof window !== "undefined") window.print();
   };
+
+  return (
+    <>
+      <div className="mx-auto flex w-full max-w-xl flex-wrap justify-center gap-3 print:hidden">
+        <Button
+          variant="outline"
+          onClick={handlePrint}
+          leftIcon={<Printer className="h-4 w-4" aria-hidden="true" />}
+        >
+          Print Medical ID
+        </Button>
+        <Button
+          variant="outline"
+          onClick={() => setIsEditing((previous) => !previous)}
+          leftIcon={<IdCard className="h-4 w-4" aria-hidden="true" />}
+        >
+          {isEditing ? "Hide Form" : "Edit Profile"}
+        </Button>
+        {profile && (
+          <>
+            <Button
+              variant="outline"
+              onClick={handleReset}
+              leftIcon={<RotateCcw className="h-4 w-4" aria-hidden="true" />}
+            >
+              Reset
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={handleDelete}
+              leftIcon={<Trash2 className="h-4 w-4" aria-hidden="true" />}
+            >
+              Delete Profile
+            </Button>
+          </>
+        )}
+      </div>
+
+      {isEditing && (
+        <form
+          onSubmit={handleSubmit}
+          className="mx-auto flex w-full max-w-3xl flex-col gap-6 rounded-2xl border border-slate-200 bg-white p-6 print:hidden"
+        >
+          <h3 className="flex items-center gap-2 text-base font-semibold text-slate-900">
+            <HeartPulse className="h-4 w-4 text-blue-600" aria-hidden="true" />
+            {profile ? "Edit Medical Profile" : "Create Medical Profile"}
+          </h3>
+
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <TextField
+              label="Full Name"
+              field="fullName"
+              values={values}
+              errors={errors}
+              onChange={updateField}
+            />
+            <TextField
+              label="Date of Birth"
+              field="dob"
+              type="date"
+              values={values}
+              errors={errors}
+              onChange={updateField}
+            />
+            <SelectField
+              label="Blood Group"
+              field="bloodGroup"
+              values={values}
+              errors={errors}
+              onChange={updateField}
+              options={BLOOD_GROUPS}
+            />
+            <TextField
+              label="Height (cm)"
+              field="height"
+              values={values}
+              errors={errors}
+              onChange={updateField}
+            />
+            <TextField
+              label="Weight (kg)"
+              field="weight"
+              values={values}
+              errors={errors}
+              onChange={updateField}
+            />
+            <SelectField
+              label="Gender"
+              field="gender"
+              values={values}
+              errors={errors}
+              onChange={updateField}
+              options={GENDER_OPTIONS}
+            />
+
+            <TextField
+              label="Emergency Contact Name"
+              field="emergencyContactName"
+              values={values}
+              errors={errors}
+              onChange={updateField}
+            />
+            <TextField
+              label="Emergency Contact Number"
+              field="emergencyContactNumber"
+              type="tel"
+              values={values}
+              errors={errors}
+              onChange={updateField}
+            />
+            <TextField
+              label="Primary Doctor"
+              field="primaryDoctor"
+              values={values}
+              errors={errors}
+              onChange={updateField}
+              span
+            />
+
+            <TextAreaField
+              label="Allergies"
+              field="allergies"
+              values={values}
+              onChange={updateField}
+            />
+            <TextAreaField
+              label="Chronic Conditions"
+              field="chronicConditions"
+              values={values}
+              onChange={updateField}
+            />
+            <TextAreaField
+              label="Current Medications"
+              field="currentMedications"
+              values={values}
+              onChange={updateField}
+            />
+
+            <SelectField
+              label="Organ Donor"
+              field="organDonor"
+              values={values}
+              errors={errors}
+              onChange={updateField}
+              options={ORGAN_DONOR_OPTIONS}
+            />
+
+            <TextAreaField
+              label="Notes for Emergency Responders"
+              field="notes"
+              values={values}
+              onChange={updateField}
+            />
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3">
+            <Button type="submit">
+              {profile ? "Save Changes" : "Create Profile"}
+            </Button>
+            <span className="flex items-center gap-1.5 text-xs text-slate-500">
+              <ShieldAlert className="h-3.5 w-3.5" aria-hidden="true" />
+              Full name, blood group, and emergency contact are required.
+            </span>
+          </div>
+        </form>
+      )}
+    </>
+  );
+}
+
+function MedicalProfilePage() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { members } = useFamilyProfiles();
+
+  // The URL may carry an id that no longer exists (e.g. a deleted member
+  // reached via Back or a bookmark). Only a real member id is used;
+  // anything else falls back to "me", which is always in `members`.
+  const requestedMemberId = searchParams.get("member") || "me";
+  const selectedMemberId = members.some(
+    (member) => member.id === requestedMemberId,
+  )
+    ? requestedMemberId
+    : "me";
+
+  const { profile, completion, save, remove, reset } =
+    useMedicalProfile(selectedMemberId);
 
   return (
     <Section paddingY="py-16 sm:py-20">
@@ -359,172 +531,13 @@ function MedicalProfilePage() {
 
         <MedicalIdCard profile={profile} completion={completion} />
 
-        <div className="mx-auto flex w-full max-w-xl flex-wrap justify-center gap-3 print:hidden">
-          <Button
-            variant="outline"
-            onClick={handlePrint}
-            leftIcon={<Printer className="h-4 w-4" aria-hidden="true" />}
-          >
-            Print Medical ID
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => setIsEditing((previous) => !previous)}
-            leftIcon={<IdCard className="h-4 w-4" aria-hidden="true" />}
-          >
-            {isEditing ? "Hide Form" : "Edit Profile"}
-          </Button>
-          {profile && (
-            <>
-              <Button
-                variant="outline"
-                onClick={handleReset}
-                leftIcon={<RotateCcw className="h-4 w-4" aria-hidden="true" />}
-              >
-                Reset
-              </Button>
-              <Button
-                variant="ghost"
-                onClick={handleDelete}
-                leftIcon={<Trash2 className="h-4 w-4" aria-hidden="true" />}
-              >
-                Delete Profile
-              </Button>
-            </>
-          )}
-        </div>
-
-        {isEditing && (
-          <form
-            onSubmit={handleSubmit}
-            className="mx-auto flex w-full max-w-3xl flex-col gap-6 rounded-2xl border border-slate-200 bg-white p-6 print:hidden"
-          >
-            <h3 className="flex items-center gap-2 text-base font-semibold text-slate-900">
-              <HeartPulse
-                className="h-4 w-4 text-blue-600"
-                aria-hidden="true"
-              />
-              {profile ? "Edit Medical Profile" : "Create Medical Profile"}
-            </h3>
-
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-              <TextField
-                label="Full Name"
-                field="fullName"
-                values={values}
-                errors={errors}
-                onChange={updateField}
-              />
-              <TextField
-                label="Date of Birth"
-                field="dob"
-                type="date"
-                values={values}
-                errors={errors}
-                onChange={updateField}
-              />
-              <SelectField
-                label="Blood Group"
-                field="bloodGroup"
-                values={values}
-                errors={errors}
-                onChange={updateField}
-                options={BLOOD_GROUPS}
-              />
-              <TextField
-                label="Height (cm)"
-                field="height"
-                values={values}
-                errors={errors}
-                onChange={updateField}
-              />
-              <TextField
-                label="Weight (kg)"
-                field="weight"
-                values={values}
-                errors={errors}
-                onChange={updateField}
-              />
-              <SelectField
-                label="Gender"
-                field="gender"
-                values={values}
-                errors={errors}
-                onChange={updateField}
-                options={GENDER_OPTIONS}
-              />
-
-              <TextField
-                label="Emergency Contact Name"
-                field="emergencyContactName"
-                values={values}
-                errors={errors}
-                onChange={updateField}
-              />
-              <TextField
-                label="Emergency Contact Number"
-                field="emergencyContactNumber"
-                type="tel"
-                values={values}
-                errors={errors}
-                onChange={updateField}
-              />
-              <TextField
-                label="Primary Doctor"
-                field="primaryDoctor"
-                values={values}
-                errors={errors}
-                onChange={updateField}
-                span
-              />
-
-              <TextAreaField
-                label="Allergies"
-                field="allergies"
-                values={values}
-                onChange={updateField}
-              />
-              <TextAreaField
-                label="Chronic Conditions"
-                field="chronicConditions"
-                values={values}
-                onChange={updateField}
-              />
-              <TextAreaField
-                label="Current Medications"
-                field="currentMedications"
-                values={values}
-                onChange={updateField}
-              />
-
-              <SelectField
-                label="Organ Donor"
-                field="organDonor"
-                values={values}
-                errors={errors}
-                onChange={updateField}
-                options={ORGAN_DONOR_OPTIONS}
-              />
-
-              <TextAreaField
-                label="Notes for Emergency Responders"
-                field="notes"
-                values={values}
-                onChange={updateField}
-              />
-            </div>
-
-            <div className="flex flex-wrap items-center gap-3">
-              <Button type="submit">
-                {profile ? "Save Changes" : "Create Profile"}
-              </Button>
-              <span className="flex items-center gap-1.5 text-xs text-slate-500">
-                <ShieldAlert className="h-3.5 w-3.5" aria-hidden="true" />
-                Full name, blood group, and emergency contact are required.
-              </span>
-            </div>
-          </form>
-        )}
+        <ProfileEditor
+          key={`${selectedMemberId}-${profile?.updatedAt ?? "new"}`}
+          profile={profile}
+          save={save}
+          remove={remove}
+          reset={reset}
+        />
       </Container>
     </Section>
   );
